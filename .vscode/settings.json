@@ -1,0 +1,6 @@
+{
+  "files.readonlyInclude": {
+    "/opt/**": true
+  },
+  "cSpell.words": ["godotenv", "joho", "vkarchevskyi"]
+}
