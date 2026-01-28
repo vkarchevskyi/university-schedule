@@ -2,5 +2,19 @@
   "files.readonlyInclude": {
     "/opt/**": true
   },
-  "cSpell.words": ["godotenv", "joho", "vkarchevskyi"]
+  "cSpell.words": ["godotenv", "joho", "vkarchevskyi"],
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "database": "university",
+      "username": "user",
+      "password": "password",
+      "name": "University Schedule Local",
+      "group": "University Schedule"
+    }
+  ]
 }
