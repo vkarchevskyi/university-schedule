@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: backend-app
+    ports:
+      - "${PORT}:8080"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - PORT=8080
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      - REDIS_URL=redis://redis:${REDIS_PORT}/0
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend-network
+    restart: always
+
+  postgres:
+    image: postgres:18.1
+    container_name: backend-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - backend-network
+    restart: always
+
+  redis:
+    image: redis:8.4
+    container_name: backend-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend-network
+    restart: always
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
