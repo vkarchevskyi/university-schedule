@@ -3,6 +3,8 @@
     "/opt/**": true,
     "*/node_modules/**": true,
     "*/dist/**": true,
+    "*/vendor/**": true,
+    "*/var/**": true,
   },
   "cSpell.words": ["godotenv", "joho", "vkarchevskyi"]
 }
