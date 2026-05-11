@@ -1,0 +1,241 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam ranksep 60
+skinparam nodesep 40
+
+entity admins {
+  * id : bigint <<PK>>
+  --
+  * first_name : varchar
+  * last_name : varchar
+  * email : varchar
+  * password_hash : varchar
+  * created_at : timestamp
+}
+
+entity telegram_subscriptions {
+  * id : bigint <<PK>>
+  --
+  * telegram_chat_id : bigint
+  * entity_type : varchar
+  * entity_id : bigint
+  * created_at : timestamp
+}
+
+entity academic_years {
+  * id : bigint <<PK>>
+  --
+  * name : varchar
+  * starts_at : date
+  * ends_at : date
+}
+
+entity semesters {
+  * id : bigint <<PK>>
+  --
+  * academic_year_id : bigint <<FK>>
+  * number : int
+  * starts_at : date
+  * ends_at : date
+  * first_week_parity : varchar
+}
+
+entity groups {
+  * id : bigint <<PK>>
+  --
+  * name : varchar
+  * speciality : varchar
+  * course : int
+  * student_count : int
+}
+
+entity teachers {
+  * id : bigint <<PK>>
+  --
+  * first_name : varchar
+  * last_name : varchar
+  * department : varchar
+}
+
+entity teacher_unavailability {
+  * id : bigint <<PK>>
+  --
+  * teacher_id : bigint <<FK>>
+  * day_of_week : int
+  * unavailable_from : time
+  * unavailable_to : time
+}
+
+entity subjects {
+  * id : bigint <<PK>>
+  --
+  * name : varchar
+}
+
+entity teacher_subjects {
+  * id : bigint <<PK>>
+  --
+  * teacher_id : bigint <<FK>>
+  * subject_id : bigint <<FK>>
+}
+
+entity teaching_loads {
+  * id : bigint <<PK>>
+  --
+  * semester_id : bigint <<FK>>
+  * group_id : bigint <<FK>>
+  * subject_id : bigint <<FK>>
+  * teacher_id : bigint <<FK>>
+  * lesson_type : tinyint
+  * required_lesson_count : int
+  * created_at : timestamp
+  * updated_at : timestamp
+  deleted_at : timestamp
+}
+
+entity rooms {
+  * id : bigint <<PK>>
+  --
+  * name : varchar
+  * type : varchar
+  * capacity : int
+}
+
+entity time_slots {
+  * id : bigint <<PK>>
+  --
+  * number : int
+  * starts_at : time
+  * ends_at : time
+}
+
+entity schedules {
+  * id : bigint <<PK>>
+  --
+  * semester_id : bigint <<FK>>
+  * status : varchar
+  * valid_from : date
+  * valid_to : date
+  * created_by : bigint <<FK>>
+  * created_at : timestamp
+  published_at : timestamp
+}
+
+entity schedule_entries {
+  * id : bigint <<PK>>
+  --
+  * schedule_id : bigint <<FK>>
+  * subject_id : bigint <<FK>>
+  * teacher_id : bigint <<FK>>
+  * lesson_type : tinyint
+  * room_id : bigint <<FK>>
+  * time_slot_id : bigint <<FK>>
+  * day_of_week : int
+  * week_parity : tinyint
+}
+
+entity schedule_entry_groups {
+  * schedule_entry_id : bigint <<FK>>
+  * group_id : bigint <<FK>>
+}
+
+entity schedule_entry_teaching_loads {
+  * schedule_entry_id : bigint <<FK>>
+  * teaching_load_id : bigint <<FK>>
+}
+
+entity lessons {
+  * id : bigint <<PK>>
+  --
+  schedule_entry_id : bigint <<FK>>
+  * lesson_date : date
+  * subject_id : bigint <<FK>>
+  * teacher_id : bigint <<FK>>
+  * lesson_type : tinyint
+  * room_id : bigint <<FK>>
+  * time_slot_id : bigint <<FK>>
+  * is_cancelled : boolean
+  * is_override : boolean
+}
+
+entity lesson_groups {
+  * lesson_id : bigint <<FK>>
+  * group_id : bigint <<FK>>
+}
+
+entity exams {
+  * id : bigint <<PK>>
+  --
+  * semester_id : bigint <<FK>>
+  * subject_id : bigint <<FK>>
+  * teacher_id : bigint <<FK>>
+  * room_id : bigint <<FK>>
+  * exam_date : date
+  * starts_at : time
+  * created_by : bigint <<FK>>
+}
+
+entity exam_groups {
+  * exam_id : bigint <<FK>>
+  * group_id : bigint <<FK>>
+}
+
+entity action_log {
+  * id : bigint <<PK>>
+  --
+  * admin_id : bigint <<FK>>
+  * action : varchar
+  * entity_type : varchar
+  * entity_id : bigint
+  * created_at : timestamp
+}
+
+admins ||--o{ action_log : "створює"
+admins ||--o{ exams : "створює"
+admins ||--o{ schedules : "створює"
+
+academic_years ||--o{ semesters : "містить"
+
+semesters ||--o{ schedules : "містить"
+semesters ||--o{ exams : "містить"
+semesters ||--o{ teaching_loads : "визначає навантаження"
+
+schedules ||--o{ schedule_entries : "містить"
+
+teachers ||--o{ teacher_unavailability : "має"
+teachers ||--o{ teacher_subjects : "має"
+teachers ||--o{ teaching_loads : "виконує навантаження"
+teachers ||--o{ schedule_entries : "веде"
+teachers ||--o{ lessons : "веде"
+teachers ||--o{ exams : "проводить"
+
+subjects ||--o{ teacher_subjects : "має"
+subjects ||--o{ teaching_loads : "має навантаження"
+subjects ||--o{ schedule_entries : "входить до"
+subjects ||--o{ lessons : "входить до"
+subjects ||--o{ exams : "входить до"
+
+rooms ||--o{ schedule_entries : "використовується"
+rooms ||--o{ lessons : "використовується"
+rooms ||--o{ exams : "використовується"
+
+time_slots ||--o{ schedule_entries : "визначає час"
+time_slots ||--o{ lessons : "визначає час"
+
+schedule_entries ||--o{ schedule_entry_groups : "охоплює групи"
+schedule_entries ||--o{ schedule_entry_teaching_loads : "виконує навантаження"
+schedule_entries ||--o{ lessons : "породжує"
+
+teaching_loads ||--o{ schedule_entry_teaching_loads : "виконується записами"
+
+lessons ||--o{ lesson_groups : "охоплює групи"
+
+groups ||--o{ schedule_entry_groups : "входить до"
+groups ||--o{ lesson_groups : "входить до"
+groups ||--o{ exam_groups : "входить до"
+groups ||--o{ teaching_loads : "має навантаження"
+
+exams ||--o{ exam_groups : "охоплює групи"
+
+@enduml
