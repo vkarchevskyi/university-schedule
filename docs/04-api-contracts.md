@@ -283,6 +283,8 @@ Response:
 
 Validation should include both conflict checks and teaching-load completion checks.
 
+The Go schedule service is the source of truth for full schedule validation. Symfony sends a normalized schedule snapshot to the service and returns the resulting validation resource.
+
 ### GET `/api/admin/schedules/{id}/lesson-cards`
 
 Returns card data for the table-first admin editor. Cards are derived from teaching loads and scheduled entries.
@@ -320,6 +322,8 @@ Response:
 ### POST `/api/admin/schedules/{id}/publish`
 
 Publishes a valid schedule. Must fail if validation fails.
+
+Publishing delegates validation to the Go schedule service. A successful publish changes the schedule status to `published`, sets `publishedAt`, and writes an action-log entry.
 
 ## Generation
 

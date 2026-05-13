@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\Admin;
+use App\Entity\ActionLog;
+use App\Tests\Double\FakeScheduleValidationClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -29,6 +31,7 @@ final class AdminScheduleControllerTest extends WebTestCase
         $schemaTool->createSchema($metadata);
 
         $this->token = $this->login();
+        FakeScheduleValidationClient::resetResult();
     }
 
     public function testScheduleRoutesRequireAuthentication(): void
@@ -145,6 +148,61 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertArrayHasKey('teacherId', $this->objectValue($conflict, 'errors'));
     }
 
+    public function testAdminCanValidateScheduleThroughGoValidationClient(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+        FakeScheduleValidationClient::rejectResult('teacher_conflict', 'Teacher is already assigned at this time.', [1, 2]);
+
+        $result = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/validate', $this->intValue($schedule, 'id')));
+        $conflict = $this->objectAt($this->listValue($result, 'conflicts'), 0);
+
+        self::assertFalse($this->boolValue($result, 'valid'));
+        self::assertSame('teacher_conflict', $this->stringValue($conflict, 'type'));
+        self::assertArrayHasKey('scheduleId', FakeScheduleValidationClient::$payload ?? []);
+    }
+
+    public function testAdminCanPublishValidDraftSchedule(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+
+        $published = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')));
+
+        self::assertSame('published', $this->stringValue($published, 'status'));
+        self::assertNotNull($published['publishedAt'] ?? null);
+
+        $publicSchedule = $this->requestJson('GET', sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-07', $fixtures->groupId), authenticated: false);
+        self::assertCount(1, $this->listValue($publicSchedule, 'items'));
+
+        $logs = $this->entityManager->getRepository(ActionLog::class)->findBy(['action' => 'schedule.published']);
+        self::assertCount(1, $logs);
+    }
+
+    public function testInvalidScheduleCannotBePublished(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+        FakeScheduleValidationClient::rejectResult('teaching_load_missing', 'Teaching load is incomplete.');
+
+        $result = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')), expectedStatus: 422);
+        $conflict = $this->objectAt($this->listValue($result, 'conflicts'), 0);
+
+        self::assertFalse($this->boolValue($result, 'valid'));
+        self::assertSame('teaching_load_missing', $this->stringValue($conflict, 'type'));
+    }
+
+    public function testPublishedScheduleCannotBePublishedAgain(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+
+        $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')));
+        $result = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')), expectedStatus: 422);
+
+        self::assertArrayHasKey('status', $this->objectValue($result, 'errors'));
+    }
+
     /**
      * @param array<string, mixed> $payload
      *
@@ -228,6 +286,30 @@ final class AdminScheduleControllerTest extends WebTestCase
             $this->intValue($timeSlot, 'id'),
             $this->intValue($teachingLoad, 'id'),
         );
+    }
+
+    /** @return array<string, mixed> */
+    private function createDraftScheduleWithEntry(AdminScheduleFixtures $fixtures): array
+    {
+        $schedule = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
+            'teachingLoadIds' => [$fixtures->teachingLoadId],
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'roomId' => $fixtures->roomId,
+            'timeSlotId' => $fixtures->timeSlotId,
+            'dayOfWeek' => 1,
+            'weekParity' => 'both',
+            'groupIds' => [$fixtures->groupId],
+        ], 201);
+
+        return $schedule;
     }
 
     private function login(): string

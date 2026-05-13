@@ -74,7 +74,11 @@ cp .env.example .env.local
 go run .
 ```
 
-The service currently needs implementation around RabbitMQ, PostgreSQL access, and generation logic.
+The service starts an HTTP server on `:8081` by default and exposes schedule validation for the REST API. Override the bind address with `SCHEDULE_SERVICE_ADDRESS`.
+
+The Symfony API calls the service through `SCHEDULE_SERVICE_URL`, which defaults to `http://127.0.0.1:8081` for local development.
+
+The service still needs implementation around RabbitMQ, PostgreSQL access, and generation logic.
 
 ## Environment Variables
 
