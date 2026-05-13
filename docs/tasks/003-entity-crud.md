@@ -1,4 +1,4 @@
-# Task: Reference Data CRUD
+# Task: Entity CRUD
 
 ## Goal
 
@@ -12,7 +12,7 @@ Read before starting:
 - `docs/03-data-model.md`
 - `docs/04-api-contracts.md`
 
-Schedule creation depends on clean reference data.
+Schedule creation depends on clean entities.
 
 ## Scope
 
@@ -36,7 +36,7 @@ Schedule creation depends on clean reference data.
 
 ## Acceptance Criteria
 
-- Admin can manage all reference entities through API endpoints.
+- Admin can manage all academic entities through API endpoints.
 - Admin can define that a group must receive a required number of lectures, labs, seminars, or practical classes for a subject with a teacher during a semester.
 - Invalid data returns useful validation errors.
 - Entities used by schedules cannot be deleted in a way that breaks existing schedule history.
@@ -51,5 +51,5 @@ Schedule creation depends on clean reference data.
 
 ## Implementation Notes
 
-- Prefer DTO/request validation or Symfony forms/validators according to existing project style.
+- Prefer request DTO validation with Symfony Validator and `#[MapRequestPayload]`. Keep entity existence and business rules in services.
 - Be careful with the entity named `Group`, because `group` can be a reserved or awkward term in some contexts.

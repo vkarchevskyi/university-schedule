@@ -33,7 +33,7 @@ class Semester
     #[ORM\Column(name: 'ends_at', type: Types::DATE_IMMUTABLE)]
     private \DateTimeImmutable $endsAt;
 
-    #[ORM\Column(name: 'first_week_parity', type: Types::STRING, enumType: WeekParity::class)]
+    #[ORM\Column(name: 'first_week_parity', type: Types::SMALLINT, enumType: WeekParity::class)]
     private WeekParity $firstWeekParity;
 
     /** @var Collection<int, Schedule> */
@@ -43,6 +43,10 @@ class Semester
     /** @var Collection<int, Exam> */
     #[ORM\OneToMany(targetEntity: Exam::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
     private Collection $exams;
+
+    /** @var Collection<int, TeachingLoad> */
+    #[ORM\OneToMany(targetEntity: TeachingLoad::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
+    private Collection $teachingLoads;
 
     public function __construct(
         AcademicYear $academicYear,
@@ -58,6 +62,7 @@ class Semester
         $this->firstWeekParity = $firstWeekParity;
         $this->schedules = new ArrayCollection();
         $this->exams = new ArrayCollection();
+        $this->teachingLoads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -159,5 +164,11 @@ class Semester
                 $exam->setSemester(null);
             }
         }
+    }
+
+    /** @return Collection<int, TeachingLoad> */
+    public function getTeachingLoads(): Collection
+    {
+        return $this->teachingLoads;
     }
 }

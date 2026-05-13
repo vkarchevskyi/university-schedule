@@ -1,6 +1,6 @@
 # Data Model
 
-The current data model is reflected in `diagram.uml` and the Symfony entities under `rest-api/src/Entity`.
+The source of truth for the database scheme is `docs/db-diagram.uml`. Symfony entities under `rest-api/src/Entity` should be kept aligned with it.
 
 ## Core Entities
 
@@ -369,5 +369,5 @@ Fields:
 - A schedule should not be considered complete if scheduled occurrence counts do not satisfy teaching-load requirements.
 - Published schedules must be valid.
 - Schedule-changing operations should be logged.
-- Reference data used by historical schedules should use soft deletes or archival status instead of destructive deletion.
+- Entity used by historical schedules should use soft deletes or archival status instead of destructive deletion.
 - When changing an existing published schedule, create a new schedule version based on the previous schedule, then archive or close the previous version rather than mutating history destructively.

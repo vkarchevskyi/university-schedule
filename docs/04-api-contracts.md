@@ -7,8 +7,24 @@ This document describes the intended REST API surface. Exact routes may evolve d
 - Request and response bodies use JSON.
 - Admin routes require authentication.
 - Public schedule routes do not require authentication.
-- Validation errors return field-level details where possible.
+- Validation errors return RFC 7807-style JSON with field-level `violations`.
 - Mutation endpoints should be transaction-safe.
+
+Validation error response:
+
+```json
+{
+  "type": "https://university-schedule.local/problems/validation-error",
+  "title": "Validation failed",
+  "status": 422,
+  "violations": [
+    {
+      "propertyPath": "name",
+      "message": "This value should not be blank."
+    }
+  ]
+}
+```
 
 ## Authentication
 
@@ -45,7 +61,7 @@ Authentication uses JWT for the first release.
 
 Returns the current administrator.
 
-## Reference Data
+## Admin Entities
 
 Use conventional CRUD endpoints for:
 

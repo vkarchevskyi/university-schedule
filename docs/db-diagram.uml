@@ -38,7 +38,7 @@ entity semesters {
   * number : int
   * starts_at : date
   * ends_at : date
-  * first_week_parity : varchar
+  * first_week_parity : tinyint
 }
 
 entity groups {

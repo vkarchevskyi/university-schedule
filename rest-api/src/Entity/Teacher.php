@@ -36,6 +36,10 @@ class Teacher
     #[ORM\OneToMany(targetEntity: TeacherSubject::class, mappedBy: 'teacher', cascade: ['persist', 'remove'])]
     private Collection $teacherSubjects;
 
+    /** @var Collection<int, TeachingLoad> */
+    #[ORM\OneToMany(targetEntity: TeachingLoad::class, mappedBy: 'teacher', cascade: ['persist', 'remove'])]
+    private Collection $teachingLoads;
+
     public function __construct(
         string $firstName,
         string $lastName,
@@ -46,6 +50,7 @@ class Teacher
         $this->department = $department;
         $this->unavailabilities = new ArrayCollection();
         $this->teacherSubjects = new ArrayCollection();
+        $this->teachingLoads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -93,5 +98,11 @@ class Teacher
     public function getTeacherSubjects(): Collection
     {
         return $this->teacherSubjects;
+    }
+
+    /** @return Collection<int, TeachingLoad> */
+    public function getTeachingLoads(): Collection
+    {
+        return $this->teachingLoads;
     }
 }

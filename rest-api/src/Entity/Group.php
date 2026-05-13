@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\GroupRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,6 +31,10 @@ class Group
     #[ORM\Column(name: 'student_count', type: Types::INTEGER)]
     private int $studentCount;
 
+    /** @var Collection<int, TeachingLoad> */
+    #[ORM\OneToMany(targetEntity: TeachingLoad::class, mappedBy: 'group', cascade: ['persist', 'remove'])]
+    private Collection $teachingLoads;
+
     public function __construct(
         string $name,
         string $speciality,
@@ -39,6 +45,7 @@ class Group
         $this->speciality = $speciality;
         $this->course = $course;
         $this->studentCount = $studentCount;
+        $this->teachingLoads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,5 +91,11 @@ class Group
     public function setStudentCount(int $studentCount): void
     {
         $this->studentCount = $studentCount;
+    }
+
+    /** @return Collection<int, TeachingLoad> */
+    public function getTeachingLoads(): Collection
+    {
+        return $this->teachingLoads;
     }
 }
