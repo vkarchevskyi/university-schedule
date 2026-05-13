@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\ScheduleEntry;
+
+use App\Entity\Group;
+use App\Entity\Schedule;
+use App\Entity\ScheduleEntry;
+use App\Enum\WeekParity;
+use App\Exception\ApiException;
+
+final readonly class ValidateScheduleEntryConflictService
+{
+    public function validate(Schedule $schedule, ScheduleEntryData $data, ?ScheduleEntry $ignoredEntry = null): void
+    {
+        foreach ($schedule->getEntries() as $entry) {
+            if ($ignoredEntry instanceof ScheduleEntry && $entry === $ignoredEntry) {
+                continue;
+            }
+
+            if ($entry->getDayOfWeek() !== $data->dayOfWeek || $entry->getTimeSlot() !== $data->timeSlot) {
+                continue;
+            }
+
+            if (!$this->weekParityOverlaps($entry->getWeekParity(), $data->weekParity)) {
+                continue;
+            }
+
+            if ($entry->getTeacher() === $data->teacher) {
+                throw ApiException::validation(['teacherId' => 'Teacher is already assigned at this time.']);
+            }
+
+            if ($entry->getRoom() === $data->room) {
+                throw ApiException::validation(['roomId' => 'Room is already assigned at this time.']);
+            }
+
+            if ($this->hasGroupOverlap($entry, $data->groups)) {
+                throw ApiException::validation(['groupIds' => 'Group is already assigned at this time.']);
+            }
+        }
+    }
+
+    private function weekParityOverlaps(WeekParity $left, WeekParity $right): bool
+    {
+        return $left === WeekParity::Both || $right === WeekParity::Both || $left === $right;
+    }
+
+    /** @param list<Group> $groups */
+    private function hasGroupOverlap(ScheduleEntry $entry, array $groups): bool
+    {
+        $groupIds = [];
+
+        foreach ($groups as $group) {
+            $id = $group->getId();
+
+            if ($id !== null) {
+                $groupIds[] = $id;
+            }
+        }
+
+        foreach ($entry->getGroups() as $entryGroup) {
+            $entryGroupId = $entryGroup->getGroup()->getId();
+
+            if ($entryGroupId !== null && in_array($entryGroupId, $groupIds, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

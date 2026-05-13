@@ -199,4 +199,16 @@ class ScheduleEntry
     {
         return $this->teachingLoads;
     }
+
+    public function addTeachingLoad(ScheduleEntryTeachingLoad $teachingLoad): void
+    {
+        if (!$this->teachingLoads->contains($teachingLoad)) {
+            $this->teachingLoads->add($teachingLoad);
+        }
+    }
+
+    public function removeTeachingLoad(ScheduleEntryTeachingLoad $teachingLoad): void
+    {
+        $this->teachingLoads->removeElement($teachingLoad);
+    }
 }
