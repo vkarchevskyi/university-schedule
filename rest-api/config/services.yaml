@@ -10,6 +10,7 @@ parameters:
     schedule_service_url_default: 'http://127.0.0.1:8081'
     rabbitmq_url_default: 'amqp://app:!ChangeMe!@127.0.0.1:5672/app'
     schedule_generation_queue_default: 'schedule_generation'
+    exam_schedule_generation_queue_default: 'exam_schedule_generation'
     exam_consultation_days_before_default: 1
     exam_min_days_between_group_exams_default: 1
 
@@ -30,10 +31,18 @@ services:
     App\Service\ScheduleGeneration\ScheduleGenerationPublisherInterface:
         alias: App\Service\ScheduleGeneration\AmqpScheduleGenerationPublisher
 
+    App\Service\ExamScheduleGeneration\ExamScheduleGenerationPublisherInterface:
+        alias: App\Service\ExamScheduleGeneration\AmqpExamScheduleGenerationPublisher
+
     App\Service\ScheduleGeneration\AmqpScheduleGenerationPublisher:
         arguments:
             $rabbitmqUrl: '%env(default:rabbitmq_url_default:RABBITMQ_URL)%'
             $queueName: '%env(default:schedule_generation_queue_default:SCHEDULE_GENERATION_QUEUE)%'
+
+    App\Service\ExamScheduleGeneration\AmqpExamScheduleGenerationPublisher:
+        arguments:
+            $rabbitmqUrl: '%env(default:rabbitmq_url_default:RABBITMQ_URL)%'
+            $queueName: '%env(default:exam_schedule_generation_queue_default:EXAM_SCHEDULE_GENERATION_QUEUE)%'
 
     App\Service\ExamScheduleValidation\ValidateExamScheduleRulesService:
         arguments:
