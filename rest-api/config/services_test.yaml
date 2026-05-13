@@ -7,8 +7,14 @@ services:
     App\Tests\Double\FakeScheduleGenerationPublisher:
         public: true
 
+    App\Tests\Double\FakeExamScheduleGenerationPublisher:
+        public: true
+
     App\Service\ScheduleValidation\ScheduleValidationClientInterface:
         alias: App\Tests\Double\FakeScheduleValidationClient
 
     App\Service\ScheduleGeneration\ScheduleGenerationPublisherInterface:
         alias: App\Tests\Double\FakeScheduleGenerationPublisher
+
+    App\Service\ExamScheduleGeneration\ExamScheduleGenerationPublisherInterface:
+        alias: App\Tests\Double\FakeExamScheduleGenerationPublisher

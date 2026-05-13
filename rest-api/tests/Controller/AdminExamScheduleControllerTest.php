@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\Admin;
+use App\Tests\Double\FakeExamScheduleGenerationPublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -29,6 +30,7 @@ final class AdminExamScheduleControllerTest extends WebTestCase
         $schemaTool->createSchema($metadata);
 
         $this->token = $this->login();
+        FakeExamScheduleGenerationPublisher::reset();
     }
 
     public function testExamScheduleRoutesRequireAuthentication(): void
@@ -92,6 +94,28 @@ final class AdminExamScheduleControllerTest extends WebTestCase
 
         $this->requestNoContent('DELETE', sprintf('/api/admin/exam-schedules/%d', $this->intValue($schedule, 'id')));
         $this->requestJson('GET', sprintf('/api/admin/exam-schedules/%d', $this->intValue($schedule, 'id')), expectedStatus: 404);
+    }
+
+    public function testAdminCanRequestExamScheduleGenerationAndReadJob(): void
+    {
+        $fixtures = $this->createFixtures();
+
+        $job = $this->requestJson('POST', '/api/admin/exam-schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+
+        self::assertSame($fixtures->semesterId, $this->intValue($job, 'semesterId'));
+        self::assertSame('queued', $this->stringValue($job, 'status'));
+        self::assertNull($job['generatedExamScheduleId']);
+
+        self::assertNotNull(FakeExamScheduleGenerationPublisher::$message);
+        self::assertSame($this->stringValue($job, 'id'), FakeExamScheduleGenerationPublisher::$message['jobId']);
+        self::assertSame($fixtures->semesterId, FakeExamScheduleGenerationPublisher::$message['semesterId']);
+
+        $stored = $this->requestJson('GET', sprintf('/api/admin/exam-schedule-generation-jobs/%s', $this->stringValue($job, 'id')));
+
+        self::assertSame($this->stringValue($job, 'id'), $this->stringValue($stored, 'id'));
+        self::assertSame('queued', $this->stringValue($stored, 'status'));
     }
 
     public function testExamWithoutMatchingConsultationIsRejected(): void

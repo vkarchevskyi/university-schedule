@@ -47,7 +47,7 @@ Default local credentials are development-only and can be overridden with enviro
 - `RABBITMQ_PORT`
 - `RABBITMQ_MANAGEMENT_PORT`
 
-The Symfony API publishes schedule generation jobs to `SCHEDULE_GENERATION_QUEUE` through `RABBITMQ_URL`. The Go schedule service consumes the same queue when both `DATABASE_URL` and `RABBITMQ_URL` are configured.
+The Symfony API publishes schedule generation jobs to `SCHEDULE_GENERATION_QUEUE` and exam schedule generation jobs to `EXAM_SCHEDULE_GENERATION_QUEUE` through `RABBITMQ_URL`. The Go schedule service consumes both queues when `DATABASE_URL` and `RABBITMQ_URL` are configured.
 
 ## Service Apps
 

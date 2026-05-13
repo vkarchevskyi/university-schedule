@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Dto\Admin\ExamScheduleEntryRequestDto;
+use App\Dto\Admin\ExamScheduleGenerationRequestDto;
 use App\Dto\Admin\ExamScheduleQueryDto;
 use App\Dto\Admin\ExamScheduleRequestDto;
 use App\Service\ExamSchedule\CreateExamScheduleService;
@@ -14,6 +15,7 @@ use App\Service\ExamSchedule\ListExamSchedulesService;
 use App\Service\ExamScheduleEntry\CreateExamScheduleEntryService;
 use App\Service\ExamScheduleEntry\DeleteExamScheduleEntryService;
 use App\Service\ExamScheduleEntry\UpdateExamScheduleEntryService;
+use App\Service\ExamScheduleGeneration\CreateExamScheduleGenerationJobService;
 use App\Service\ExamScheduleValidation\ValidateExamScheduleService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +36,12 @@ final class ExamScheduleController extends AbstractAdminController
     public function create(#[MapRequestPayload(acceptFormat: 'json')] ExamScheduleRequestDto $request, CreateExamScheduleService $examSchedules): JsonResponse
     {
         return $this->respond(fn() => $examSchedules->handle($request), Response::HTTP_CREATED);
+    }
+
+    #[Route('/generate', methods: ['POST'])]
+    public function generate(#[MapRequestPayload(acceptFormat: 'json')] ExamScheduleGenerationRequestDto $request, CreateExamScheduleGenerationJobService $jobs): JsonResponse
+    {
+        return $this->respond(fn() => $jobs->handle($request), Response::HTTP_ACCEPTED);
     }
 
     #[Route('/{id}', methods: ['GET'])]
