@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\LessonType;
 use App\Enum\WeekParity;
 use App\Repository\ScheduleEntryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -32,6 +33,9 @@ class ScheduleEntry
     #[ORM\JoinColumn(name: 'teacher_id', referencedColumnName: 'id', nullable: false)]
     private Teacher $teacher;
 
+    #[ORM\Column(name: 'lesson_type', type: Types::SMALLINT, enumType: LessonType::class)]
+    private LessonType $lessonType;
+
     #[ORM\ManyToOne(targetEntity: Room::class)]
     #[ORM\JoinColumn(name: 'room_id', referencedColumnName: 'id', nullable: false)]
     private Room $room;
@@ -43,7 +47,7 @@ class ScheduleEntry
     #[ORM\Column(name: 'day_of_week', type: Types::SMALLINT)]
     private int $dayOfWeek;
 
-    #[ORM\Column(name: 'week_parity', type: Types::STRING, enumType: WeekParity::class)]
+    #[ORM\Column(name: 'week_parity', type: Types::SMALLINT, enumType: WeekParity::class)]
     private WeekParity $weekParity;
 
     /** @var Collection<int, ScheduleEntryGroup> */
@@ -54,10 +58,15 @@ class ScheduleEntry
     #[ORM\OneToMany(targetEntity: Lesson::class, mappedBy: 'scheduleEntry')]
     private Collection $lessons;
 
+    /** @var Collection<int, ScheduleEntryTeachingLoad> */
+    #[ORM\OneToMany(targetEntity: ScheduleEntryTeachingLoad::class, mappedBy: 'scheduleEntry', cascade: ['persist', 'remove'])]
+    private Collection $teachingLoads;
+
     public function __construct(
         Schedule $schedule,
         Subject $subject,
         Teacher $teacher,
+        LessonType $lessonType,
         Room $room,
         TimeSlot $timeSlot,
         int $dayOfWeek,
@@ -66,12 +75,14 @@ class ScheduleEntry
         $this->schedule = $schedule;
         $this->subject = $subject;
         $this->teacher = $teacher;
+        $this->lessonType = $lessonType;
         $this->room = $room;
         $this->timeSlot = $timeSlot;
         $this->dayOfWeek = $dayOfWeek;
         $this->weekParity = $weekParity;
         $this->groups = new ArrayCollection();
         $this->lessons = new ArrayCollection();
+        $this->teachingLoads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -107,6 +118,16 @@ class ScheduleEntry
     public function setTeacher(Teacher $teacher): void
     {
         $this->teacher = $teacher;
+    }
+
+    public function getLessonType(): LessonType
+    {
+        return $this->lessonType;
+    }
+
+    public function setLessonType(LessonType $lessonType): void
+    {
+        $this->lessonType = $lessonType;
     }
 
     public function getRoom(): Room
@@ -171,5 +192,11 @@ class ScheduleEntry
     public function getLessons(): Collection
     {
         return $this->lessons;
+    }
+
+    /** @return Collection<int, ScheduleEntryTeachingLoad> */
+    public function getTeachingLoads(): Collection
+    {
+        return $this->teachingLoads;
     }
 }

@@ -26,10 +26,15 @@ class Subject
     #[ORM\OneToMany(targetEntity: TeacherSubject::class, mappedBy: 'subject', cascade: ['persist', 'remove'])]
     private Collection $teacherSubjects;
 
+    /** @var Collection<int, TeachingLoad> */
+    #[ORM\OneToMany(targetEntity: TeachingLoad::class, mappedBy: 'subject', cascade: ['persist', 'remove'])]
+    private Collection $teachingLoads;
+
     public function __construct(string $name)
     {
         $this->name = $name;
         $this->teacherSubjects = new ArrayCollection();
+        $this->teachingLoads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -51,5 +56,11 @@ class Subject
     public function getTeacherSubjects(): Collection
     {
         return $this->teacherSubjects;
+    }
+
+    /** @return Collection<int, TeachingLoad> */
+    public function getTeachingLoads(): Collection
+    {
+        return $this->teachingLoads;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\LessonType;
 use App\Repository\LessonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -34,6 +35,9 @@ class Lesson
     #[ORM\JoinColumn(name: 'teacher_id', referencedColumnName: 'id', nullable: false)]
     private Teacher $teacher;
 
+    #[ORM\Column(name: 'lesson_type', type: Types::SMALLINT, enumType: LessonType::class)]
+    private LessonType $lessonType;
+
     #[ORM\ManyToOne(targetEntity: Room::class)]
     #[ORM\JoinColumn(name: 'room_id', referencedColumnName: 'id', nullable: false)]
     private Room $room;
@@ -56,6 +60,7 @@ class Lesson
         \DateTimeImmutable $lessonDate,
         Subject $subject,
         Teacher $teacher,
+        LessonType $lessonType,
         Room $room,
         TimeSlot $timeSlot,
         bool $isCancelled,
@@ -65,6 +70,7 @@ class Lesson
         $this->lessonDate = $lessonDate;
         $this->subject = $subject;
         $this->teacher = $teacher;
+        $this->lessonType = $lessonType;
         $this->room = $room;
         $this->timeSlot = $timeSlot;
         $this->isCancelled = $isCancelled;
@@ -116,6 +122,16 @@ class Lesson
     public function setTeacher(Teacher $teacher): void
     {
         $this->teacher = $teacher;
+    }
+
+    public function getLessonType(): LessonType
+    {
+        return $this->lessonType;
+    }
+
+    public function setLessonType(LessonType $lessonType): void
+    {
+        $this->lessonType = $lessonType;
     }
 
     public function getRoom(): Room

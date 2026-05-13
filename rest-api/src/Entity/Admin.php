@@ -9,10 +9,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: AdminRepository::class)]
 #[ORM\Table(name: 'admins')]
-class Admin
+class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -103,6 +105,11 @@ class Admin
         return $this->passwordHash;
     }
 
+    public function getPassword(): string
+    {
+        return $this->passwordHash;
+    }
+
     public function setPasswordHash(string $passwordHash): void
     {
         $this->passwordHash = $passwordHash;
@@ -112,6 +119,19 @@ class Admin
     {
         return $this->createdAt;
     }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    /** @return list<string> */
+    public function getRoles(): array
+    {
+        return ['ROLE_ADMIN'];
+    }
+
+    public function eraseCredentials(): void {}
 
     /** @return Collection<int, Schedule> */
     public function getSchedules(): Collection

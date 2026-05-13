@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-enum WeekParity: string
+enum WeekParity: int
 {
-    case Odd = 'odd';
-    case Even = 'even';
-    case Both = 'both';
+    case Odd = 1;
+    case Even = 2;
+    case Both = 3;
 }
