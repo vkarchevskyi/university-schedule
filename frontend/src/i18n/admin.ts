@@ -1,0 +1,48 @@
+export const adminLabels = {
+  uk: {
+    loginTitle: 'Вхід адміністратора',
+    loginSubtitle: 'Увійдіть, щоб керувати розкладом',
+    email: 'Email',
+    password: 'Пароль',
+    login: 'Увійти',
+    invalidCredentials: 'Невірний email або пароль.',
+    dashboard: 'Панель адміністратора',
+    dashboardIntro: 'Оберіть розділ для керування даними та розкладами.',
+    logout: 'Вийти',
+    signedInAs: 'Увійшли як',
+    nav: {
+      schedules: 'Розклади',
+      groups: 'Групи',
+      teachers: 'Викладачі',
+      subjects: 'Предмети',
+      rooms: 'Аудиторії',
+      timeSlots: 'Пари',
+      generationJobs: 'Генерація',
+      examSchedules: 'Іспити',
+    },
+  },
+  en: {
+    loginTitle: 'Admin Login',
+    loginSubtitle: 'Sign in to manage schedules',
+    email: 'Email',
+    password: 'Password',
+    login: 'Log in',
+    invalidCredentials: 'Invalid email or password.',
+    dashboard: 'Admin Dashboard',
+    dashboardIntro: 'Choose a section to manage data and schedules.',
+    logout: 'Log out',
+    signedInAs: 'Signed in as',
+    nav: {
+      schedules: 'Schedules',
+      groups: 'Groups',
+      teachers: 'Teachers',
+      subjects: 'Subjects',
+      rooms: 'Rooms',
+      timeSlots: 'Time slots',
+      generationJobs: 'Generation',
+      examSchedules: 'Exams',
+    },
+  },
+}
+
+export const adminCopy = adminLabels.uk
