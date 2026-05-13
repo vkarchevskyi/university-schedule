@@ -40,9 +40,9 @@ class Semester
     #[ORM\OneToMany(targetEntity: Schedule::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
     private Collection $schedules;
 
-    /** @var Collection<int, Exam> */
-    #[ORM\OneToMany(targetEntity: Exam::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
-    private Collection $exams;
+    /** @var Collection<int, ExamSchedule> */
+    #[ORM\OneToMany(targetEntity: ExamSchedule::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
+    private Collection $examSchedules;
 
     /** @var Collection<int, TeachingLoad> */
     #[ORM\OneToMany(targetEntity: TeachingLoad::class, mappedBy: 'semester', cascade: ['persist', 'remove'])]
@@ -61,7 +61,7 @@ class Semester
         $this->endsAt = $endsAt;
         $this->firstWeekParity = $firstWeekParity;
         $this->schedules = new ArrayCollection();
-        $this->exams = new ArrayCollection();
+        $this->examSchedules = new ArrayCollection();
         $this->teachingLoads = new ArrayCollection();
     }
 
@@ -143,25 +143,25 @@ class Semester
         }
     }
 
-    /** @return Collection<int, Exam> */
-    public function getExams(): Collection
+    /** @return Collection<int, ExamSchedule> */
+    public function getExamSchedules(): Collection
     {
-        return $this->exams;
+        return $this->examSchedules;
     }
 
-    public function addExam(Exam $exam): void
+    public function addExamSchedule(ExamSchedule $examSchedule): void
     {
-        if (!$this->exams->contains($exam)) {
-            $this->exams->add($exam);
-            $exam->setSemester($this);
+        if (!$this->examSchedules->contains($examSchedule)) {
+            $this->examSchedules->add($examSchedule);
+            $examSchedule->setSemester($this);
         }
     }
 
-    public function removeExam(Exam $exam): void
+    public function removeExamSchedule(ExamSchedule $examSchedule): void
     {
-        if ($this->exams->removeElement($exam)) {
-            if ($exam->getSemester() === $this) {
-                $exam->setSemester(null);
+        if ($this->examSchedules->removeElement($examSchedule)) {
+            if ($examSchedule->getSemester() === $this) {
+                $examSchedule->setSemester(null);
             }
         }
     }

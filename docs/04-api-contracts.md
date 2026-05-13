@@ -388,43 +388,82 @@ Generation job statuses are `queued`, `running`, `completed`, and `failed`. Gene
 
 ## Exam Scheduling
 
-### POST `/api/admin/exams`
+### POST `/api/admin/exam-schedules`
 
-Creates an exam.
+Creates a draft exam schedule.
 
 Request:
 
 ```json
 {
-  "semesterId": 1,
+  "semesterId": 1
+}
+```
+
+### GET `/api/admin/exam-schedules`
+
+Lists active exam schedules.
+
+Query parameters:
+
+- `semesterId` optional
+
+### GET `/api/admin/exam-schedules/{id}`
+
+Returns an exam schedule with active entries.
+
+### DELETE `/api/admin/exam-schedules/{id}`
+
+Soft-deletes an exam schedule and its active entries.
+
+### POST `/api/admin/exam-schedules/{id}/entries`
+
+Creates an exam schedule entry.
+
+Request:
+
+```json
+{
+  "type": "exam",
   "subjectId": 4,
   "teacherId": 7,
   "roomId": 3,
   "groupIds": [1],
-  "examDate": "2026-12-21",
-  "startsAt": "09:00"
+  "entryDate": "2026-12-21",
+  "startsAt": "09:00:00"
 }
 ```
 
-### GET `/api/admin/exams`
+`type` is `consultation` or `exam`.
 
-Lists exams for a semester.
+### PATCH `/api/admin/exam-schedules/{id}/entries/{entryId}`
 
-Query parameters:
+Updates an exam schedule entry.
 
-- `semesterId`
-- `groupId` optional
-- `teacherId` optional
+### DELETE `/api/admin/exam-schedules/{id}/entries/{entryId}`
 
-### PATCH `/api/admin/exams/{id}`
+Soft-deletes an exam schedule entry.
 
-Updates an exam.
+### POST `/api/admin/exam-schedules/{id}/validate`
 
-### DELETE `/api/admin/exams/{id}`
+Validates an exam schedule.
 
-Deletes or cancels an exam according to the selected history policy.
+Response:
 
-### POST `/api/admin/exams/generate`
+```json
+{
+  "valid": false,
+  "conflicts": [
+    {
+      "type": "consultation_missing",
+      "message": "Exam requires a matching consultation 1 day(s) before the exam.",
+      "entryIds": [12]
+    }
+  ]
+}
+```
+
+### POST `/api/admin/exam-schedules/generate`
 
 Starts automatic exam schedule generation for a semester.
 

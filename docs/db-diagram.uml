@@ -180,20 +180,32 @@ entity lesson_groups {
   * group_id : bigint <<FK>>
 }
 
-entity exams {
+entity exam_schedules {
   * id : bigint <<PK>>
   --
   * semester_id : bigint <<FK>>
+  * status : tinyint
+  * created_by : bigint <<FK>>
+  * created_at : timestamp
+  published_at : timestamp
+  deleted_at : timestamp
+}
+
+entity exam_schedule_entries {
+  * id : bigint <<PK>>
+  --
+  * exam_schedule_id : bigint <<FK>>
+  * type : tinyint
   * subject_id : bigint <<FK>>
   * teacher_id : bigint <<FK>>
   * room_id : bigint <<FK>>
-  * exam_date : date
+  * entry_date : date
   * starts_at : time
-  * created_by : bigint <<FK>>
+  deleted_at : timestamp
 }
 
-entity exam_groups {
-  * exam_id : bigint <<FK>>
+entity exam_schedule_entry_groups {
+  * exam_schedule_entry_id : bigint <<FK>>
   * group_id : bigint <<FK>>
 }
 
@@ -208,14 +220,14 @@ entity action_log {
 }
 
 admins ||--o{ action_log : "створює"
-admins ||--o{ exams : "створює"
+admins ||--o{ exam_schedules : "створює"
 admins ||--o{ schedules : "створює"
 admins ||--o{ schedule_generation_jobs : "запускає"
 
 academic_years ||--o{ semesters : "містить"
 
 semesters ||--o{ schedules : "містить"
-semesters ||--o{ exams : "містить"
+semesters ||--o{ exam_schedules : "містить"
 semesters ||--o{ teaching_loads : "визначає навантаження"
 semesters ||--o{ schedule_generation_jobs : "має задачі генерації"
 
@@ -227,17 +239,17 @@ teachers ||--o{ teacher_subjects : "має"
 teachers ||--o{ teaching_loads : "виконує навантаження"
 teachers ||--o{ schedule_entries : "веде"
 teachers ||--o{ lessons : "веде"
-teachers ||--o{ exams : "проводить"
+teachers ||--o{ exam_schedule_entries : "проводить"
 
 subjects ||--o{ teacher_subjects : "має"
 subjects ||--o{ teaching_loads : "має навантаження"
 subjects ||--o{ schedule_entries : "входить до"
 subjects ||--o{ lessons : "входить до"
-subjects ||--o{ exams : "входить до"
+subjects ||--o{ exam_schedule_entries : "входить до"
 
 rooms ||--o{ schedule_entries : "використовується"
 rooms ||--o{ lessons : "використовується"
-rooms ||--o{ exams : "використовується"
+rooms ||--o{ exam_schedule_entries : "використовується"
 
 time_slots ||--o{ schedule_entries : "визначає час"
 time_slots ||--o{ lessons : "визначає час"
@@ -252,9 +264,10 @@ lessons ||--o{ lesson_groups : "охоплює групи"
 
 groups ||--o{ schedule_entry_groups : "входить до"
 groups ||--o{ lesson_groups : "входить до"
-groups ||--o{ exam_groups : "входить до"
+groups ||--o{ exam_schedule_entry_groups : "входить до"
 groups ||--o{ teaching_loads : "має навантаження"
 
-exams ||--o{ exam_groups : "охоплює групи"
+exam_schedules ||--o{ exam_schedule_entries : "містить"
+exam_schedule_entries ||--o{ exam_schedule_entry_groups : "охоплює групи"
 
 @enduml

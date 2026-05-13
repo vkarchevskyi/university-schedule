@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\ExamRepository;
+use App\Enum\ExamScheduleEntryType;
+use App\Repository\ExamScheduleEntryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ExamRepository::class)]
-#[ORM\Table(name: 'exams')]
-class Exam
+#[ORM\Entity(repositoryClass: ExamScheduleEntryRepository::class)]
+#[ORM\Table(name: 'exam_schedule_entries')]
+class ExamScheduleEntry
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Semester::class, inversedBy: 'exams')]
-    #[ORM\JoinColumn(name: 'semester_id', referencedColumnName: 'id', nullable: false)]
-    private ?Semester $semester;
+    #[ORM\ManyToOne(targetEntity: ExamSchedule::class, inversedBy: 'entries')]
+    #[ORM\JoinColumn(name: 'exam_schedule_id', referencedColumnName: 'id', nullable: false)]
+    private ?ExamSchedule $examSchedule;
+
+    #[ORM\Column(type: Types::SMALLINT, enumType: ExamScheduleEntryType::class)]
+    private ExamScheduleEntryType $type;
 
     #[ORM\ManyToOne(targetEntity: Subject::class)]
     #[ORM\JoinColumn(name: 'subject_id', referencedColumnName: 'id', nullable: false)]
@@ -35,36 +39,37 @@ class Exam
     #[ORM\JoinColumn(name: 'room_id', referencedColumnName: 'id', nullable: false)]
     private Room $room;
 
-    #[ORM\Column(name: 'exam_date', type: Types::DATE_IMMUTABLE)]
-    private \DateTimeImmutable $examDate;
+    #[ORM\Column(name: 'entry_date', type: Types::DATE_IMMUTABLE)]
+    private \DateTimeImmutable $entryDate;
 
     #[ORM\Column(name: 'starts_at', type: Types::TIME_IMMUTABLE)]
     private \DateTimeImmutable $startsAt;
 
-    #[ORM\ManyToOne(targetEntity: Admin::class, inversedBy: 'exams')]
-    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
-    private Admin $createdBy;
+    #[ORM\Column(name: 'deleted_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $deletedAt;
 
-    /** @var Collection<int, ExamGroup> */
-    #[ORM\OneToMany(targetEntity: ExamGroup::class, mappedBy: 'exam', cascade: ['persist', 'remove'])]
+    /** @var Collection<int, ExamScheduleEntryGroup> */
+    #[ORM\OneToMany(targetEntity: ExamScheduleEntryGroup::class, mappedBy: 'examScheduleEntry', cascade: ['persist', 'remove'])]
     private Collection $groups;
 
     public function __construct(
-        Semester $semester,
+        ExamSchedule $examSchedule,
+        ExamScheduleEntryType $type,
         Subject $subject,
         Teacher $teacher,
         Room $room,
-        \DateTimeImmutable $examDate,
+        \DateTimeImmutable $entryDate,
         \DateTimeImmutable $startsAt,
-        Admin $createdBy,
+        ?\DateTimeImmutable $deletedAt = null,
     ) {
-        $this->semester = $semester;
+        $this->examSchedule = $examSchedule;
+        $this->type = $type;
         $this->subject = $subject;
         $this->teacher = $teacher;
         $this->room = $room;
-        $this->examDate = $examDate;
+        $this->entryDate = $entryDate;
         $this->startsAt = $startsAt;
-        $this->createdBy = $createdBy;
+        $this->deletedAt = $deletedAt;
         $this->groups = new ArrayCollection();
     }
 
@@ -73,14 +78,24 @@ class Exam
         return $this->id;
     }
 
-    public function getSemester(): ?Semester
+    public function getExamSchedule(): ?ExamSchedule
     {
-        return $this->semester;
+        return $this->examSchedule;
     }
 
-    public function setSemester(?Semester $semester): void
+    public function setExamSchedule(?ExamSchedule $examSchedule): void
     {
-        $this->semester = $semester;
+        $this->examSchedule = $examSchedule;
+    }
+
+    public function getType(): ExamScheduleEntryType
+    {
+        return $this->type;
+    }
+
+    public function setType(ExamScheduleEntryType $type): void
+    {
+        $this->type = $type;
     }
 
     public function getSubject(): Subject
@@ -113,14 +128,14 @@ class Exam
         $this->room = $room;
     }
 
-    public function getExamDate(): \DateTimeImmutable
+    public function getEntryDate(): \DateTimeImmutable
     {
-        return $this->examDate;
+        return $this->entryDate;
     }
 
-    public function setExamDate(\DateTimeImmutable $examDate): void
+    public function setEntryDate(\DateTimeImmutable $entryDate): void
     {
-        $this->examDate = $examDate;
+        $this->entryDate = $entryDate;
     }
 
     public function getStartsAt(): \DateTimeImmutable
@@ -133,31 +148,36 @@ class Exam
         $this->startsAt = $startsAt;
     }
 
-    public function getCreatedBy(): Admin
+    public function getDeletedAt(): ?\DateTimeImmutable
     {
-        return $this->createdBy;
+        return $this->deletedAt;
     }
 
-    public function setCreatedBy(Admin $createdBy): void
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): void
     {
-        $this->createdBy = $createdBy;
+        $this->deletedAt = $deletedAt;
     }
 
-    /** @return Collection<int, ExamGroup> */
+    /** @return Collection<int, ExamScheduleEntryGroup> */
     public function getGroups(): Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(ExamGroup $group): void
+    public function addGroup(ExamScheduleEntryGroup $group): void
     {
         if (!$this->groups->contains($group)) {
             $this->groups->add($group);
         }
     }
 
-    public function removeGroup(ExamGroup $group): void
+    public function removeGroup(ExamScheduleEntryGroup $group): void
     {
         $this->groups->removeElement($group);
+    }
+
+    public function clearGroups(): void
+    {
+        $this->groups->clear();
     }
 }
