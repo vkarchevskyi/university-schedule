@@ -9,9 +9,11 @@ use App\Dto\Admin\ScheduleRequestDto;
 use App\Service\LessonCard\ListLessonCardsService;
 use App\Service\Schedule\CreateScheduleService;
 use App\Service\Schedule\GetScheduleService;
+use App\Service\Schedule\PublishScheduleService;
 use App\Service\ScheduleEntry\CreateScheduleEntryService;
 use App\Service\ScheduleEntry\DeleteScheduleEntryService;
 use App\Service\ScheduleEntry\UpdateScheduleEntryService;
+use App\Service\ScheduleValidation\ValidateScheduleService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -54,5 +56,17 @@ final class ScheduleController extends AbstractAdminController
     public function lessonCards(int $id, ListLessonCardsService $lessonCards): JsonResponse
     {
         return $this->respond(fn() => $lessonCards->list($id));
+    }
+
+    #[Route('/{id}/validate', methods: ['POST'])]
+    public function validate(int $id, ValidateScheduleService $schedules): JsonResponse
+    {
+        return $this->respond(fn() => $schedules->handle($id));
+    }
+
+    #[Route('/{id}/publish', methods: ['POST'])]
+    public function publish(int $id, PublishScheduleService $schedules): JsonResponse
+    {
+        return $this->respond(fn() => $schedules->handle($id));
     }
 }
