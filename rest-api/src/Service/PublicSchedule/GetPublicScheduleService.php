@@ -189,16 +189,36 @@ final readonly class GetPublicScheduleService
         return null;
     }
 
-    /** @param Collection<int, ScheduleEntryGroup> $groups @return list<ScheduleGroupResource> */
+    /**
+     * @param Collection<int, ScheduleEntryGroup> $groups
+     *
+     * @return list<ScheduleGroupResource>
+     */
     private function entryGroups(Collection $groups): array
     {
-        return array_values($groups->map(fn(ScheduleEntryGroup $group): ScheduleGroupResource => $this->group($group->getGroup()))->toArray());
+        $resources = [];
+
+        foreach ($groups as $group) {
+            $resources[] = $this->group($group->getGroup());
+        }
+
+        return $resources;
     }
 
-    /** @param Collection<int, LessonGroup> $groups @return list<ScheduleGroupResource> */
+    /**
+     * @param Collection<int, LessonGroup> $groups
+     *
+     * @return list<ScheduleGroupResource>
+     */
     private function lessonGroups(Collection $groups): array
     {
-        return array_values($groups->map(fn(LessonGroup $group): ScheduleGroupResource => $this->group($group->getGroup()))->toArray());
+        $resources = [];
+
+        foreach ($groups as $group) {
+            $resources[] = $this->group($group->getGroup());
+        }
+
+        return $resources;
     }
 
     private function group(StudentGroup $group): ScheduleGroupResource

@@ -17,12 +17,12 @@ final readonly class ListPublicGroupsService
     {
         $groups = $this->entityManager->getRepository(StudentGroup::class)->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
 
-        return new ResourceCollection(array_map(fn(StudentGroup $group): GroupResource => new GroupResource(
+        return new ResourceCollection(array_values(array_map(fn(StudentGroup $group): GroupResource => new GroupResource(
             $group->getId(),
             $group->getName(),
             $group->getSpeciality(),
             $group->getCourse(),
             $group->getStudentCount(),
-        ), $groups));
+        ), $groups)));
     }
 }

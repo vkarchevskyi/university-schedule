@@ -17,11 +17,11 @@ final readonly class ListPublicTeachersService
     {
         $teachers = $this->entityManager->getRepository(Teacher::class)->findBy([], ['lastName' => 'ASC', 'firstName' => 'ASC', 'id' => 'ASC']);
 
-        return new ResourceCollection(array_map(fn(Teacher $teacher): TeacherResource => new TeacherResource(
+        return new ResourceCollection(array_values(array_map(fn(Teacher $teacher): TeacherResource => new TeacherResource(
             $teacher->getId(),
             $teacher->getFirstName(),
             $teacher->getLastName(),
             $teacher->getDepartment(),
-        ), $teachers));
+        ), $teachers)));
     }
 }

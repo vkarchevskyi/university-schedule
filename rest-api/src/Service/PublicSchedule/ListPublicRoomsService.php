@@ -17,11 +17,11 @@ final readonly class ListPublicRoomsService
     {
         $rooms = $this->entityManager->getRepository(Room::class)->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
 
-        return new ResourceCollection(array_map(fn(Room $room): RoomResource => new RoomResource(
+        return new ResourceCollection(array_values(array_map(fn(Room $room): RoomResource => new RoomResource(
             $room->getId(),
             $room->getName(),
             $room->getType(),
             $room->getCapacity(),
-        ), $rooms));
+        ), $rooms)));
     }
 }
