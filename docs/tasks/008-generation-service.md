@@ -19,6 +19,7 @@ Generation is asynchronous because it can be computationally expensive.
 - Add generation job endpoint in Symfony.
 - Publish generation requests to RabbitMQ.
 - Implement RabbitMQ consumer in Go.
+- Persist generation job status and result metadata.
 - Load required data and teaching-load requirements for the selected semester.
 - Produce a candidate schedule using CSP for feasible construction and Tabu search for optimization.
 - Write generated entries directly to PostgreSQL as a draft or generated schedule.

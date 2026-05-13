@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/generation"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
 
@@ -26,6 +27,7 @@ func main() {
 			}
 		}()
 	}
+	startGenerationWorker(validator)
 
 	router.Get("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusNoContent)
@@ -66,6 +68,37 @@ func validationStore() (*validation.PostgresStore, error) {
 	}
 
 	return validation.NewPostgresStore(databaseURL)
+}
+
+func startGenerationWorker(validator validation.Validator) {
+	databaseURL := os.Getenv("DATABASE_URL")
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+	if databaseURL == "" || rabbitmqURL == "" {
+		return
+	}
+
+	queueName := os.Getenv("SCHEDULE_GENERATION_QUEUE")
+	if queueName == "" {
+		queueName = "schedule_generation"
+	}
+
+	store, err := generation.NewPostgresStore(databaseURL)
+	if err != nil {
+		log.Printf("schedule generation worker disabled: %v", err)
+		return
+	}
+
+	worker := generation.NewWorker(store, generation.NewGenerator(validator), queueName)
+	go func() {
+		defer func() {
+			if err := store.Close(); err != nil {
+				log.Printf("close generation database: %v", err)
+			}
+		}()
+		if err := worker.Start(context.Background(), rabbitmqURL); err != nil {
+			log.Printf("schedule generation worker stopped: %v", err)
+		}
+	}()
 }
 
 func requestSchedule(request *http.Request, payload validation.ScheduleValidationRequest, store *validation.PostgresStore) (validation.Schedule, bool) {

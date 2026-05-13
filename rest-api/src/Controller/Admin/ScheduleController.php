@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Dto\Admin\ScheduleEntryRequestDto;
+use App\Dto\Admin\ScheduleGenerationRequestDto;
 use App\Dto\Admin\ScheduleRequestDto;
 use App\Service\LessonCard\ListLessonCardsService;
 use App\Service\Schedule\CreateScheduleService;
 use App\Service\Schedule\GetScheduleService;
 use App\Service\Schedule\PublishScheduleService;
+use App\Service\ScheduleGeneration\CreateScheduleGenerationJobService;
 use App\Service\ScheduleEntry\CreateScheduleEntryService;
 use App\Service\ScheduleEntry\DeleteScheduleEntryService;
 use App\Service\ScheduleEntry\UpdateScheduleEntryService;
@@ -26,6 +28,12 @@ final class ScheduleController extends AbstractAdminController
     public function create(#[MapRequestPayload(acceptFormat: 'json')] ScheduleRequestDto $request, CreateScheduleService $schedules): JsonResponse
     {
         return $this->respond(fn() => $schedules->handle($request), Response::HTTP_CREATED);
+    }
+
+    #[Route('/generate', methods: ['POST'])]
+    public function generate(#[MapRequestPayload(acceptFormat: 'json')] ScheduleGenerationRequestDto $request, CreateScheduleGenerationJobService $jobs): JsonResponse
+    {
+        return $this->respond(fn() => $jobs->handle($request), Response::HTTP_ACCEPTED);
     }
 
     #[Route('/{id}', methods: ['GET'])]

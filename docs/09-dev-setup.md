@@ -78,7 +78,7 @@ The service starts an HTTP server on `:8081` by default and exposes schedule val
 
 The Symfony API calls the service through `SCHEDULE_SERVICE_URL`, which defaults to `http://127.0.0.1:8081` for local development.
 
-The service still needs implementation around RabbitMQ, PostgreSQL access, and generation logic.
+When `DATABASE_URL` and `RABBITMQ_URL` are configured, the same Go process also consumes `SCHEDULE_GENERATION_QUEUE` and writes generated draft schedules directly to PostgreSQL.
 
 ## Environment Variables
 

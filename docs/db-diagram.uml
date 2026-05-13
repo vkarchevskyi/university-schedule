@@ -122,6 +122,22 @@ entity schedules {
   published_at : timestamp
 }
 
+entity schedule_generation_jobs {
+  * id : varchar <<PK>>
+  --
+  * semester_id : bigint <<FK>>
+  * requested_by : bigint <<FK>>
+  * status : varchar
+  generated_schedule_id : bigint <<FK>>
+  quality_score : int
+  quality_status : varchar
+  error_message : text
+  diagnostics : json
+  * created_at : timestamp
+  started_at : timestamp
+  finished_at : timestamp
+}
+
 entity schedule_entries {
   * id : bigint <<PK>>
   --
@@ -194,14 +210,17 @@ entity action_log {
 admins ||--o{ action_log : "створює"
 admins ||--o{ exams : "створює"
 admins ||--o{ schedules : "створює"
+admins ||--o{ schedule_generation_jobs : "запускає"
 
 academic_years ||--o{ semesters : "містить"
 
 semesters ||--o{ schedules : "містить"
 semesters ||--o{ exams : "містить"
 semesters ||--o{ teaching_loads : "визначає навантаження"
+semesters ||--o{ schedule_generation_jobs : "має задачі генерації"
 
 schedules ||--o{ schedule_entries : "містить"
+schedules ||--o{ schedule_generation_jobs : "створюється задачею"
 
 teachers ||--o{ teacher_unavailability : "має"
 teachers ||--o{ teacher_subjects : "має"

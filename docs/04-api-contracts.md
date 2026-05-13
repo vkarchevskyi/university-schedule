@@ -343,14 +343,48 @@ Response:
 
 ```json
 {
-  "jobId": "uuid",
-  "status": "queued"
+  "id": "uuid",
+  "semesterId": 1,
+  "requestedBy": 1,
+  "status": "queued",
+  "generatedScheduleId": null,
+  "qualityScore": null,
+  "qualityStatus": null,
+  "errorMessage": null,
+  "diagnostics": null,
+  "createdAt": "2026-05-13T12:00:00+00:00",
+  "startedAt": null,
+  "finishedAt": null
 }
 ```
 
 ### GET `/api/admin/generation-jobs/{jobId}`
 
 Returns generation status and generated draft information when available.
+
+Response:
+
+```json
+{
+  "id": "uuid",
+  "semesterId": 1,
+  "requestedBy": 1,
+  "status": "completed",
+  "generatedScheduleId": 12,
+  "qualityScore": 92,
+  "qualityStatus": "acceptable",
+  "errorMessage": null,
+  "diagnostics": {
+    "generatedEntryCount": 24,
+    "minimumQualityScore": 80
+  },
+  "createdAt": "2026-05-13T12:00:00+00:00",
+  "startedAt": "2026-05-13T12:00:01+00:00",
+  "finishedAt": "2026-05-13T12:00:03+00:00"
+}
+```
+
+Generation job statuses are `queued`, `running`, `completed`, and `failed`. Generated schedules are saved as reviewable drafts and are not published automatically.
 
 ## Exam Scheduling
 
