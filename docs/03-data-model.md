@@ -319,29 +319,60 @@ Fields:
 
 ## Exam Entities
 
-### Exam
+### ExamSchedule
 
-Represents an exam in an exam session.
+Represents a draft or published exam-session schedule for one semester.
 
 Fields:
 
 - id
 - semester
-- subject
-- teacher
-- room
-- examDate
-- startsAt
+- status
 - createdBy
+- createdAt
+- publishedAt
+- deletedAt
 
-### ExamGroup
+Relationships:
 
-Join table between exams and groups.
+- has many entries
+
+### ExamScheduleEntry
+
+Represents either a consultation or an exam record inside an exam schedule.
 
 Fields:
 
-- exam
+- id
+- examSchedule
+- type: consultation or exam
+- subject
+- teacher
+- room
+- entryDate
+- startsAt
+- deletedAt
+
+Relationships:
+
+- has one or more groups through `ExamScheduleEntryGroup`
+
+### ExamScheduleEntryGroup
+
+Join table between exam schedule entries and groups.
+
+Fields:
+
+- examScheduleEntry
 - group
+
+Rules:
+
+- exam schedules and entries use soft deletes
+- exam entries require a matching consultation entry before the exam
+- consultation offset is configurable and defaults to one day before the exam
+- minimum days between exams for the same group is configurable
+- teacher, group, room, capacity, and teacher-subject conflicts are validated before saving entries
 
 ## Audit Entity
 

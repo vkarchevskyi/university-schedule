@@ -17,12 +17,16 @@ Exam scheduling is required for the first shipped version.
 
 ## Scope
 
-- Add admin API endpoints for exam CRUD.
-- Support semester, subject, teacher, room, date, start time, and one or more groups.
+- Add admin API endpoints for exam schedule CRUD.
+- Support exam schedule entries with type `consultation` or `exam`.
+- Support subject, teacher, room, date, start time, and one or more groups on entries.
+- Soft-delete exam schedules and entries.
 - Validate teacher, group, and room conflicts for exams.
 - Validate room capacity.
 - Validate teacher-subject compatibility.
 - Validate minimum interval between exams for the same group.
+- Validate that every exam has a matching consultation entry before it.
+- Make consultation offset and minimum interval configurable.
 - Add automatic exam generation using the same job/worker architecture where practical.
 - Add table-first admin UI for exam management.
 - Add public or admin exam viewing if needed for the shipped demo.
@@ -43,8 +47,9 @@ Exam scheduling is required for the first shipped version.
 
 ## Suggested Files Or Areas
 
-- `rest-api/src/Entity/Exam.php`
-- `rest-api/src/Entity/ExamGroup.php`
+- `rest-api/src/Entity/ExamSchedule.php`
+- `rest-api/src/Entity/ExamScheduleEntry.php`
+- `rest-api/src/Entity/ExamScheduleEntryGroup.php`
 - `rest-api/src/Controller`
 - `rest-api/src/Service`
 - `services/schedule`
@@ -55,4 +60,3 @@ Exam scheduling is required for the first shipped version.
 - Backend tests cover manual exam validation.
 - Generation tests or fixtures cover minimum interval constraints.
 - Frontend build passes.
-
