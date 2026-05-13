@@ -467,14 +467,60 @@ Response:
 
 Starts automatic exam schedule generation for a semester.
 
+Request:
+
+```json
+{
+  "semesterId": 1
+}
+```
+
 Response:
 
 ```json
 {
-  "jobId": "uuid",
-  "status": "queued"
+  "id": "uuid",
+  "semesterId": 1,
+  "requestedBy": 1,
+  "status": "queued",
+  "generatedExamScheduleId": null,
+  "qualityScore": null,
+  "qualityStatus": null,
+  "errorMessage": null,
+  "diagnostics": null,
+  "createdAt": "2026-05-13T12:00:00+00:00",
+  "startedAt": null,
+  "finishedAt": null
 }
 ```
+
+### GET `/api/admin/exam-schedule-generation-jobs/{jobId}`
+
+Returns automatic exam generation status and generated draft information when available.
+
+Response:
+
+```json
+{
+  "id": "uuid",
+  "semesterId": 1,
+  "requestedBy": 1,
+  "status": "completed",
+  "generatedExamScheduleId": 14,
+  "qualityScore": 100,
+  "qualityStatus": "acceptable",
+  "errorMessage": null,
+  "diagnostics": {
+    "generatedEntryCount": 18,
+    "minimumQualityScore": 80
+  },
+  "createdAt": "2026-05-13T12:00:00+00:00",
+  "startedAt": "2026-05-13T12:00:01+00:00",
+  "finishedAt": "2026-05-13T12:00:03+00:00"
+}
+```
+
+Exam generation job statuses are `queued`, `running`, `completed`, and `failed`. Generated exam schedules are saved as reviewable drafts and are not published automatically.
 
 ## Telegram Webhook
 

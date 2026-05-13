@@ -138,6 +138,22 @@ entity schedule_generation_jobs {
   finished_at : timestamp
 }
 
+entity exam_schedule_generation_jobs {
+  * id : varchar <<PK>>
+  --
+  * semester_id : bigint <<FK>>
+  * requested_by : bigint <<FK>>
+  * status : varchar
+  generated_exam_schedule_id : bigint <<FK>>
+  quality_score : int
+  quality_status : varchar
+  error_message : text
+  diagnostics : json
+  * created_at : timestamp
+  started_at : timestamp
+  finished_at : timestamp
+}
+
 entity schedule_entries {
   * id : bigint <<PK>>
   --
@@ -223,6 +239,7 @@ admins ||--o{ action_log : "створює"
 admins ||--o{ exam_schedules : "створює"
 admins ||--o{ schedules : "створює"
 admins ||--o{ schedule_generation_jobs : "запускає"
+admins ||--o{ exam_schedule_generation_jobs : "запускає"
 
 academic_years ||--o{ semesters : "містить"
 
@@ -230,6 +247,7 @@ semesters ||--o{ schedules : "містить"
 semesters ||--o{ exam_schedules : "містить"
 semesters ||--o{ teaching_loads : "визначає навантаження"
 semesters ||--o{ schedule_generation_jobs : "має задачі генерації"
+semesters ||--o{ exam_schedule_generation_jobs : "має задачі генерації іспитів"
 
 schedules ||--o{ schedule_entries : "містить"
 schedules ||--o{ schedule_generation_jobs : "створюється задачею"
@@ -268,6 +286,7 @@ groups ||--o{ exam_schedule_entry_groups : "входить до"
 groups ||--o{ teaching_loads : "має навантаження"
 
 exam_schedules ||--o{ exam_schedule_entries : "містить"
+exam_schedules ||--o{ exam_schedule_generation_jobs : "створюється задачею"
 exam_schedule_entries ||--o{ exam_schedule_entry_groups : "охоплює групи"
 
 @enduml

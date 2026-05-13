@@ -374,6 +374,31 @@ Rules:
 - minimum days between exams for the same group is configurable
 - teacher, group, room, capacity, and teacher-subject conflicts are validated before saving entries
 
+### ExamScheduleGenerationJob
+
+Tracks asynchronous automatic exam schedule generation.
+
+Fields:
+
+- id
+- semester
+- requestedBy
+- status: queued, running, completed, or failed
+- generatedExamSchedule
+- qualityScore
+- qualityStatus
+- errorMessage
+- diagnostics
+- createdAt
+- startedAt
+- finishedAt
+
+Rules:
+
+- Go service consumes jobs from the exam schedule generation queue
+- generated exam schedules are stored as drafts
+- one demand is derived from each distinct semester, group, subject, and teacher teaching-load combination
+
 ## Audit Entity
 
 ### ActionLog
