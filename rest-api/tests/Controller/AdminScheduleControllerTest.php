@@ -6,6 +6,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\Admin;
 use App\Entity\ActionLog;
+use App\Tests\Double\FakeScheduleGenerationPublisher;
 use App\Tests\Double\FakeScheduleValidationClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -32,6 +33,7 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         $this->token = $this->login();
         FakeScheduleValidationClient::resetResult();
+        FakeScheduleGenerationPublisher::reset();
     }
 
     public function testScheduleRoutesRequireAuthentication(): void
@@ -201,6 +203,25 @@ final class AdminScheduleControllerTest extends WebTestCase
         $result = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')), expectedStatus: 422);
 
         self::assertArrayHasKey('status', $this->objectValue($result, 'errors'));
+    }
+
+    public function testAdminCanStartScheduleGenerationJob(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+
+        $job = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+
+        self::assertSame('queued', $this->stringValue($job, 'status'));
+        self::assertSame($fixtures->semesterId, $this->intValue($job, 'semesterId'));
+        self::assertNull($job['generatedScheduleId'] ?? null);
+        self::assertNotNull(FakeScheduleGenerationPublisher::$message);
+        self::assertSame($this->stringValue($job, 'id'), FakeScheduleGenerationPublisher::$message['jobId']);
+        self::assertSame($fixtures->semesterId, FakeScheduleGenerationPublisher::$message['semesterId']);
+
+        $storedJob = $this->requestJson('GET', sprintf('/api/admin/generation-jobs/%s', $this->stringValue($job, 'id')));
+        self::assertSame($this->stringValue($job, 'id'), $this->stringValue($storedJob, 'id'));
     }
 
     /**

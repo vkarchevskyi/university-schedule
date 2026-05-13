@@ -8,6 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     schedule_service_url_default: 'http://127.0.0.1:8081'
+    rabbitmq_url_default: 'amqp://app:!ChangeMe!@127.0.0.1:5672/app'
+    schedule_generation_queue_default: 'schedule_generation'
 
 services:
     # default configuration for services in *this* file
@@ -22,6 +24,14 @@ services:
 
     App\Service\ScheduleValidation\ScheduleValidationClientInterface:
         alias: App\Service\ScheduleValidation\HttpScheduleValidationClient
+
+    App\Service\ScheduleGeneration\ScheduleGenerationPublisherInterface:
+        alias: App\Service\ScheduleGeneration\AmqpScheduleGenerationPublisher
+
+    App\Service\ScheduleGeneration\AmqpScheduleGenerationPublisher:
+        arguments:
+            $rabbitmqUrl: '%env(default:rabbitmq_url_default:RABBITMQ_URL)%'
+            $queueName: '%env(default:schedule_generation_queue_default:SCHEDULE_GENERATION_QUEUE)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
