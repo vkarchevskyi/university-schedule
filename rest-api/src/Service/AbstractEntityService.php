@@ -14,13 +14,25 @@ abstract class AbstractEntityService
 {
     public function __construct(protected readonly EntityManagerInterface $entityManager) {}
 
-    /** @template T of object @param class-string<T> $class @return list<T> */
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return list<T>
+     */
     protected function listEntities(string $class): array
     {
         return $this->entityManager->getRepository($class)->findBy([], ['id' => 'ASC']);
     }
 
-    /** @template T of object @param class-string<T> $class @return T */
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return T
+     */
     protected function getEntity(string $class, int $id): object
     {
         $entity = $this->entityManager->find($class, $id);
@@ -55,7 +67,11 @@ abstract class AbstractEntityService
 
     protected function string(mixed $value): string
     {
-        $value = trim((string) $value);
+        if (!is_string($value)) {
+            throw ApiException::validation(['value' => 'Expected string.']);
+        }
+
+        $value = trim($value);
 
         if ($value === '') {
             throw ApiException::validation(['value' => 'Expected non-empty string.']);
@@ -66,7 +82,9 @@ abstract class AbstractEntityService
 
     protected function positiveInt(mixed $value): int
     {
-        $value = (int) $value;
+        if (!is_int($value)) {
+            throw ApiException::validation(['value' => 'Expected integer.']);
+        }
 
         if ($value < 1) {
             throw ApiException::validation(['value' => 'Expected positive integer.']);
@@ -77,7 +95,9 @@ abstract class AbstractEntityService
 
     protected function nonNegativeInt(mixed $value): int
     {
-        $value = (int) $value;
+        if (!is_int($value)) {
+            throw ApiException::validation(['value' => 'Expected integer.']);
+        }
 
         if ($value < 0) {
             throw ApiException::validation(['value' => 'Expected non-negative integer.']);
@@ -88,7 +108,9 @@ abstract class AbstractEntityService
 
     protected function dayOfWeek(mixed $value): int
     {
-        $value = (int) $value;
+        if (!is_int($value)) {
+            throw ApiException::validation(['dayOfWeek' => 'Expected integer.']);
+        }
 
         if ($value < 1 || $value > 7) {
             throw ApiException::validation(['dayOfWeek' => 'Expected day of week from 1 to 7.']);
@@ -99,8 +121,12 @@ abstract class AbstractEntityService
 
     protected function date(mixed $value): \DateTimeImmutable
     {
+        if (!is_string($value)) {
+            throw ApiException::validation(['date' => 'Expected valid date.']);
+        }
+
         try {
-            return new \DateTimeImmutable((string) $value);
+            return new \DateTimeImmutable($value);
         } catch (\Exception) {
             throw ApiException::validation(['date' => 'Expected valid date.']);
         }
@@ -108,8 +134,12 @@ abstract class AbstractEntityService
 
     protected function time(mixed $value): \DateTimeImmutable
     {
+        if (!is_string($value)) {
+            throw ApiException::validation(['time' => 'Expected valid time.']);
+        }
+
         try {
-            return new \DateTimeImmutable((string) $value);
+            return new \DateTimeImmutable($value);
         } catch (\Exception) {
             throw ApiException::validation(['time' => 'Expected valid time.']);
         }
@@ -127,11 +157,15 @@ abstract class AbstractEntityService
             };
         }
 
-        try {
-            return LessonType::from((int) $value);
-        } catch (\ValueError) {
-            throw ApiException::validation(['lessonType' => 'Unknown lesson type.']);
+        if (is_int($value)) {
+            try {
+                return LessonType::from($value);
+            } catch (\ValueError) {
+                throw ApiException::validation(['lessonType' => 'Unknown lesson type.']);
+            }
         }
+
+        throw ApiException::validation(['lessonType' => 'Unknown lesson type.']);
     }
 
     protected function weekParity(mixed $value): WeekParity
@@ -145,10 +179,14 @@ abstract class AbstractEntityService
             };
         }
 
-        try {
-            return WeekParity::from((int) $value);
-        } catch (\ValueError) {
-            throw ApiException::validation(['firstWeekParity' => 'Unknown week parity.']);
+        if (is_int($value)) {
+            try {
+                return WeekParity::from($value);
+            } catch (\ValueError) {
+                throw ApiException::validation(['firstWeekParity' => 'Unknown week parity.']);
+            }
         }
+
+        throw ApiException::validation(['firstWeekParity' => 'Unknown week parity.']);
     }
 }
