@@ -15,9 +15,12 @@ Read before starting:
 
 Validation is the trust boundary of the product.
 
+The Go schedule service owns the hard schedule validation rules because automatic generation needs the same rule implementation. Symfony exposes the admin API boundary and owns publishing state changes, but delegates full schedule validation to Go before publishing.
+
 ## Scope
 
-- Implement reusable validation service for schedule entries.
+- Implement reusable validation logic in the Go schedule service.
+- Add a Symfony validation client and schedule snapshot payload builder.
 - Detect hard constraint conflicts.
 - Detect unsatisfied teaching-load requirements.
 - Expose validation endpoint.
@@ -43,6 +46,7 @@ Validation is the trust boundary of the product.
 
 ## Suggested Files Or Areas
 
+- `services/schedule`
 - `rest-api/src/Service`
 - `rest-api/src/Controller`
 - `rest-api/src/Enum/ScheduleStatus.php`

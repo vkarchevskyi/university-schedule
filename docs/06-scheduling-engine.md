@@ -71,6 +71,8 @@ Validation should be available independently from generation.
 
 Validation-only logic uses CSP-style constraint checking for hard constraints. Tabu search is used for optimization during generation, not for basic validation.
 
+The Go schedule service owns the full validation rule implementation. Symfony may keep lightweight editor guardrails for fast API feedback, but publication validation must delegate to the Go service to avoid rule drift between manual publishing and automatic generation.
+
 Use cases:
 
 - Validate a draft before publishing.
