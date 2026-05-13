@@ -10,6 +10,8 @@ parameters:
     schedule_service_url_default: 'http://127.0.0.1:8081'
     rabbitmq_url_default: 'amqp://app:!ChangeMe!@127.0.0.1:5672/app'
     schedule_generation_queue_default: 'schedule_generation'
+    exam_consultation_days_before_default: 1
+    exam_min_days_between_group_exams_default: 1
 
 services:
     # default configuration for services in *this* file
@@ -32,6 +34,11 @@ services:
         arguments:
             $rabbitmqUrl: '%env(default:rabbitmq_url_default:RABBITMQ_URL)%'
             $queueName: '%env(default:schedule_generation_queue_default:SCHEDULE_GENERATION_QUEUE)%'
+
+    App\Service\ExamScheduleValidation\ValidateExamScheduleRulesService:
+        arguments:
+            $consultationDaysBefore: '%env(int:default:exam_consultation_days_before_default:EXAM_CONSULTATION_DAYS_BEFORE)%'
+            $minimumDaysBetweenGroupExams: '%env(int:default:exam_min_days_between_group_exams_default:EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

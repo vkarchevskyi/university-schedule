@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\ExamGroup;
+use App\Entity\ExamSchedule;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<ExamGroup>
- */
-class ExamGroupRepository extends ServiceEntityRepository
+/** @extends ServiceEntityRepository<ExamSchedule> */
+final class ExamScheduleRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ExamGroup::class);
+        parent::__construct($registry, ExamSchedule::class);
     }
 }

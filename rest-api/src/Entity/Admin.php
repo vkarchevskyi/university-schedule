@@ -40,9 +40,9 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Schedule::class, mappedBy: 'createdBy')]
     private Collection $schedules;
 
-    /** @var Collection<int, Exam> */
-    #[ORM\OneToMany(targetEntity: Exam::class, mappedBy: 'createdBy')]
-    private Collection $exams;
+    /** @var Collection<int, ExamSchedule> */
+    #[ORM\OneToMany(targetEntity: ExamSchedule::class, mappedBy: 'createdBy')]
+    private Collection $examSchedules;
 
     /** @var Collection<int, ActionLog> */
     #[ORM\OneToMany(targetEntity: ActionLog::class, mappedBy: 'admin', cascade: ['persist', 'remove'])]
@@ -61,7 +61,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         $this->passwordHash = $passwordHash;
         $this->createdAt = $createdAt;
         $this->schedules = new ArrayCollection();
-        $this->exams = new ArrayCollection();
+        $this->examSchedules = new ArrayCollection();
         $this->actionLogs = new ArrayCollection();
     }
 
@@ -143,10 +143,10 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->schedules;
     }
 
-    /** @return Collection<int, Exam> */
-    public function getExams(): Collection
+    /** @return Collection<int, ExamSchedule> */
+    public function getExamSchedules(): Collection
     {
-        return $this->exams;
+        return $this->examSchedules;
     }
 
     /** @return Collection<int, ActionLog> */
