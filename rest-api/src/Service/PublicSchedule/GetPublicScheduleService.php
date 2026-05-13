@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Service\PublicSchedule;
 
 use App\Dto\PublicScheduleQueryDto;
 use App\Entity\Group as StudentGroup;
@@ -18,61 +18,25 @@ use App\Entity\TimeSlot;
 use App\Enum\WeekParity;
 use App\Exception\ApiException;
 use App\Repository\ScheduleRepository;
-use App\Resource\Public\GroupResource;
 use App\Resource\Public\PublicScheduleResource;
-use App\Resource\Public\ResourceCollection;
-use App\Resource\Public\RoomResource;
 use App\Resource\Public\ScheduleGroupResource;
 use App\Resource\Public\ScheduleItemResource;
 use App\Resource\Public\ScheduleRoomResource;
 use App\Resource\Public\ScheduleTeacherResource;
 use App\Resource\Public\SubjectResource;
-use App\Resource\Public\TeacherResource;
 use App\Resource\Public\TimeSlotResource;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-final readonly class PublicScheduleService
+final readonly class GetPublicScheduleService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ScheduleRepository $schedules,
     ) {}
 
-    public function groups(): ResourceCollection
-    {
-        $groups = $this->entityManager->getRepository(StudentGroup::class)->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
-
-        return new ResourceCollection(array_map(fn(StudentGroup $group): GroupResource => new GroupResource(
-            $group->getId(),
-            $group->getName(),
-            $group->getSpeciality(),
-            $group->getCourse(),
-            $group->getStudentCount(),
-        ), $groups));
-    }
-
-    public function teachers(): ResourceCollection
-    {
-        $teachers = $this->entityManager->getRepository(Teacher::class)->findBy([], ['lastName' => 'ASC', 'firstName' => 'ASC', 'id' => 'ASC']);
-
-        return new ResourceCollection(array_map(fn(Teacher $teacher): TeacherResource => new TeacherResource(
-            $teacher->getId(),
-            $teacher->getFirstName(),
-            $teacher->getLastName(),
-            $teacher->getDepartment(),
-        ), $teachers));
-    }
-
-    public function rooms(): ResourceCollection
-    {
-        $rooms = $this->entityManager->getRepository(Room::class)->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
-
-        return new ResourceCollection(array_map(fn(Room $room): RoomResource => $this->lookupRoom($room), $rooms));
-    }
-
-    public function schedule(PublicScheduleQueryDto $query): PublicScheduleResource
+    public function get(PublicScheduleQueryDto $query): PublicScheduleResource
     {
         $this->ensureFilterTargetExists($query);
 
@@ -255,11 +219,6 @@ final readonly class PublicScheduleService
     private function room(Room $room): ScheduleRoomResource
     {
         return new ScheduleRoomResource($room->getId(), $room->getName(), $room->getType());
-    }
-
-    private function lookupRoom(Room $room): RoomResource
-    {
-        return new RoomResource($room->getId(), $room->getName(), $room->getType(), $room->getCapacity());
     }
 
     private function timeSlot(TimeSlot $timeSlot): TimeSlotResource
