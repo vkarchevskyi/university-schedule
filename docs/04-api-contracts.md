@@ -186,6 +186,32 @@ Returns rooms available for schedule filtering.
 
 Creates a draft schedule.
 
+Request:
+
+```json
+{
+  "semesterId": 1,
+  "validFrom": "2026-09-01",
+  "validTo": "2026-12-31"
+}
+```
+
+Response:
+
+```json
+{
+  "id": 12,
+  "semesterId": 1,
+  "status": "draft",
+  "validFrom": "2026-09-01",
+  "validTo": "2026-12-31",
+  "createdBy": 1,
+  "createdAt": "2026-05-13T13:00:00+00:00",
+  "publishedAt": null,
+  "entries": []
+}
+```
+
 ### GET `/api/admin/schedules/{id}`
 
 Returns schedule details.
@@ -210,9 +236,27 @@ Request:
 }
 ```
 
+Response:
+
+```json
+{
+  "id": 22,
+  "scheduleId": 12,
+  "subjectId": 4,
+  "teacherId": 7,
+  "lessonType": "laboratory",
+  "roomId": 3,
+  "timeSlotId": 2,
+  "dayOfWeek": 1,
+  "weekParity": "both",
+  "groupIds": [1],
+  "teachingLoadIds": [41]
+}
+```
+
 ### PATCH `/api/admin/schedules/{id}/entries/{entryId}`
 
-Updates a schedule entry.
+Updates a schedule entry. The request accepts the same fields as creation, and fields may be omitted for partial updates.
 
 ### DELETE `/api/admin/schedules/{id}/entries/{entryId}`
 
@@ -242,6 +286,8 @@ Validation should include both conflict checks and teaching-load completion chec
 ### GET `/api/admin/schedules/{id}/lesson-cards`
 
 Returns card data for the table-first admin editor. Cards are derived from teaching loads and scheduled entries.
+
+The first implementation counts `weekParity: "both"` as two scheduled lessons and `odd` or `even` as one scheduled lesson for lesson-card progress.
 
 Response:
 
