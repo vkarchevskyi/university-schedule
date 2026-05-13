@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/examgeneration"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/generation"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
@@ -28,6 +30,7 @@ func main() {
 		}()
 	}
 	startGenerationWorker(validator)
+	startExamGenerationWorker()
 
 	router.Get("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusNoContent)
@@ -99,6 +102,52 @@ func startGenerationWorker(validator validation.Validator) {
 			log.Printf("schedule generation worker stopped: %v", err)
 		}
 	}()
+}
+
+func startExamGenerationWorker() {
+	databaseURL := os.Getenv("DATABASE_URL")
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+	if databaseURL == "" || rabbitmqURL == "" {
+		return
+	}
+
+	queueName := os.Getenv("EXAM_SCHEDULE_GENERATION_QUEUE")
+	if queueName == "" {
+		queueName = "exam_schedule_generation"
+	}
+
+	store, err := examgeneration.NewPostgresStore(databaseURL, intEnv("EXAM_CONSULTATION_DAYS_BEFORE", 1), intEnv("EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS", 1))
+	if err != nil {
+		log.Printf("exam schedule generation worker disabled: %v", err)
+		return
+	}
+
+	worker := examgeneration.NewWorker(store, examgeneration.NewGenerator(), queueName)
+	go func() {
+		defer func() {
+			if err := store.Close(); err != nil {
+				log.Printf("close exam generation database: %v", err)
+			}
+		}()
+		if err := worker.Start(context.Background(), rabbitmqURL); err != nil {
+			log.Printf("exam schedule generation worker stopped: %v", err)
+		}
+	}()
+}
+
+func intEnv(name string, fallback int) int {
+	value := os.Getenv(name)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		log.Printf("invalid %s value %q, using %d", name, value, fallback)
+		return fallback
+	}
+
+	return parsed
 }
 
 func requestSchedule(request *http.Request, payload validation.ScheduleValidationRequest, store *validation.PostgresStore) (validation.Schedule, bool) {
