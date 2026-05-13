@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Dto\Admin\SemesterRequestDto;
-use App\Service\SemesterService;
+use App\Service\Semester\CreateSemesterService;
+use App\Service\Semester\DeleteSemesterService;
+use App\Service\Semester\GetSemesterService;
+use App\Service\Semester\ListSemestersService;
+use App\Service\Semester\UpdateSemesterService;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,35 +18,33 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/admin/semesters')]
 final class SemesterController extends AbstractAdminController
 {
-    public function __construct(private readonly SemesterService $semesters) {}
-
     #[Route('', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function list(ListSemestersService $semesters): JsonResponse
     {
-        return $this->respond($this->semesters->list(...));
+        return $this->respond($semesters->list(...));
     }
 
     #[Route('', methods: ['POST'])]
-    public function create(#[MapRequestPayload(acceptFormat: 'json', validationGroups: ['create'])] SemesterRequestDto $request): JsonResponse
+    public function create(#[MapRequestPayload(acceptFormat: 'json', validationGroups: ['create'])] SemesterRequestDto $request, CreateSemesterService $semesters): JsonResponse
     {
-        return $this->respond(fn() => $this->semesters->create($request), Response::HTTP_CREATED);
+        return $this->respond(fn() => $semesters->handle($request), Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', methods: ['GET'])]
-    public function get(int $id): JsonResponse
+    public function get(int $id, GetSemesterService $semesters): JsonResponse
     {
-        return $this->respond(fn() => $this->semesters->get($id));
+        return $this->respond(fn() => $semesters->get($id));
     }
 
     #[Route('/{id}', methods: ['PATCH'])]
-    public function update(int $id, #[MapRequestPayload(acceptFormat: 'json', validationGroups: ['update'])] SemesterRequestDto $request): JsonResponse
+    public function update(int $id, #[MapRequestPayload(acceptFormat: 'json', validationGroups: ['update'])] SemesterRequestDto $request, UpdateSemesterService $semesters): JsonResponse
     {
-        return $this->respond(fn() => $this->semesters->update($id, $request));
+        return $this->respond(fn() => $semesters->handle($id, $request));
     }
 
     #[Route('/{id}', methods: ['DELETE'])]
-    public function delete(int $id): JsonResponse
+    public function delete(int $id, DeleteSemesterService $semesters): JsonResponse
     {
-        return $this->noContent(fn() => $this->semesters->deleteById($id));
+        return $this->noContent(fn() => $semesters->handle($id));
     }
 }
