@@ -63,7 +63,7 @@ Controllers must stay tiny. A controller action should normally call one service
 - Prefer PHP enums for fixed value sets; keep backed enum storage aligned with `../docs/db-diagram.uml`.
 - Keep code compatible with the PHP version declared in `composer.json`.
 - Format PHP with PHP CS Fixer using the configured `@PER-CS3.0` ruleset.
-- Keep PHPStan passing at level 10 using the configured Symfony extension.
+- PHPStan is a required check. Keep PHPStan passing at level 10 using the configured Symfony and Doctrine extensions.
 
 ## Validation Rules
 
