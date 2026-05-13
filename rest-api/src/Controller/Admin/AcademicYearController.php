@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Dto\Admin\AcademicYearRequestDto;
-use App\Service\AcademicYearService;
+use App\Service\AcademicYear\CreateAcademicYearService;
+use App\Service\AcademicYear\DeleteAcademicYearService;
+use App\Service\AcademicYear\GetAcademicYearService;
+use App\Service\AcademicYear\ListAcademicYearsService;
+use App\Service\AcademicYear\UpdateAcademicYearService;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,35 +18,33 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/admin/academic-years')]
 final class AcademicYearController extends AbstractAdminController
 {
-    public function __construct(private readonly AcademicYearService $academicYears) {}
-
     #[Route('', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function list(ListAcademicYearsService $academicYears): JsonResponse
     {
-        return $this->respond($this->academicYears->list(...));
+        return $this->respond($academicYears->list(...));
     }
 
     #[Route('', methods: ['POST'])]
-    public function create(#[MapRequestPayload(acceptFormat: 'json', validationGroups: ['create'])] AcademicYearRequestDto $request): JsonResponse
+    public function create(#[MapRequestPayload(acceptFormat: 'json', validationGroups: ['create'])] AcademicYearRequestDto $request, CreateAcademicYearService $academicYears): JsonResponse
     {
-        return $this->respond(fn() => $this->academicYears->create($request), Response::HTTP_CREATED);
+        return $this->respond(fn() => $academicYears->handle($request), Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', methods: ['GET'])]
-    public function get(int $id): JsonResponse
+    public function get(int $id, GetAcademicYearService $academicYears): JsonResponse
     {
-        return $this->respond(fn() => $this->academicYears->get($id));
+        return $this->respond(fn() => $academicYears->get($id));
     }
 
     #[Route('/{id}', methods: ['PATCH'])]
-    public function update(int $id, #[MapRequestPayload(acceptFormat: 'json', validationGroups: ['update'])] AcademicYearRequestDto $request): JsonResponse
+    public function update(int $id, #[MapRequestPayload(acceptFormat: 'json', validationGroups: ['update'])] AcademicYearRequestDto $request, UpdateAcademicYearService $academicYears): JsonResponse
     {
-        return $this->respond(fn() => $this->academicYears->update($id, $request));
+        return $this->respond(fn() => $academicYears->handle($id, $request));
     }
 
     #[Route('/{id}', methods: ['DELETE'])]
-    public function delete(int $id): JsonResponse
+    public function delete(int $id, DeleteAcademicYearService $academicYears): JsonResponse
     {
-        return $this->noContent(fn() => $this->academicYears->deleteById($id));
+        return $this->noContent(fn() => $academicYears->handle($id));
     }
 }
