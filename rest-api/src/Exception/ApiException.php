@@ -32,6 +32,12 @@ final class ApiException extends \RuntimeException
         return new self(['error' => 'Entity is in use and cannot be deleted.'], Response::HTTP_CONFLICT);
     }
 
+    /** @param array<string, mixed> $body */
+    public static function http(array $body, int $statusCode): self
+    {
+        return new self($body, $statusCode);
+    }
+
     /** @return array<string, mixed> */
     public function getBody(): array
     {

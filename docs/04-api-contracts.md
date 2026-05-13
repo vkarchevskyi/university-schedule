@@ -119,7 +119,7 @@ Query parameters:
 
 - `type`: `group`, `teacher`, or `room`
 - `id`: entity id
-- `weekStart`: ISO date for Monday or configured week start
+- `weekStart`: ISO date for Monday
 
 Response:
 
@@ -165,6 +165,8 @@ Response:
   ]
 }
 ```
+
+Only published schedules are returned. If multiple published schedules overlap the requested week, the newest schedule by `publishedAt` is used. If no published schedule exists for the requested week, the response contains an empty `items` array.
 
 ### GET `/api/public/groups`
 
