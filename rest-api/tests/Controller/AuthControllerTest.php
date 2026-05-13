@@ -12,6 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AuthControllerTest extends WebTestCase
 {
+    use JsonTestAssertions;
+
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
 
@@ -38,11 +40,13 @@ final class AuthControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+        $payload = $this->responseJson($this->client);
 
         self::assertArrayHasKey('token', $payload);
-        self::assertSame('admin@example.com', $payload['admin']['email']);
-        self::assertSame('Ada', $payload['admin']['firstName']);
+        $admin = $this->objectValue($payload, 'admin');
+
+        self::assertSame('admin@example.com', $this->stringValue($admin, 'email'));
+        self::assertSame('Ada', $this->stringValue($admin, 'firstName'));
     }
 
     public function testAdminCannotLoginWithInvalidCredentials(): void
@@ -73,24 +77,23 @@ final class AuthControllerTest extends WebTestCase
             'password' => 'correct-password',
         ]);
 
-        $payload = json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+        $payload = $this->responseJson($this->client);
 
         $this->client->request('GET', '/api/auth/me', server: [
-            'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $payload['token']),
+            'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $this->stringValue($payload, 'token')),
         ]);
 
         self::assertResponseIsSuccessful();
 
-        $mePayload = json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+        $mePayload = $this->responseJson($this->client);
+        $admin = $this->objectValue($mePayload, 'admin');
 
-        self::assertSame('admin@example.com', $mePayload['admin']['email']);
+        self::assertSame('admin@example.com', $this->stringValue($admin, 'email'));
     }
 
     private function createAdmin(string $email, string $plainPassword): Admin
     {
         $passwordHash = password_hash($plainPassword, PASSWORD_BCRYPT);
-
-        self::assertIsString($passwordHash);
 
         $admin = new Admin('Ada', 'Lovelace', $email, $passwordHash, new \DateTimeImmutable());
 

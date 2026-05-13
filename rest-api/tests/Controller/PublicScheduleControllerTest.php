@@ -27,6 +27,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PublicScheduleControllerTest extends WebTestCase
 {
+    use JsonTestAssertions;
+
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
 
@@ -49,9 +51,9 @@ final class PublicScheduleControllerTest extends WebTestCase
         $teachers = $this->requestJson('/api/public/teachers');
         $rooms = $this->requestJson('/api/public/rooms');
 
-        self::assertSame($fixtures->group->getId(), $groups['items'][0]['id']);
-        self::assertSame($fixtures->teacher->getId(), $teachers['items'][0]['id']);
-        self::assertSame($fixtures->room->getId(), $rooms['items'][0]['id']);
+        self::assertSame($fixtures->group->getId(), $this->intValue($this->objectAt($this->listValue($groups, 'items'), 0), 'id'));
+        self::assertSame($fixtures->teacher->getId(), $this->intValue($this->objectAt($this->listValue($teachers, 'items'), 0), 'id'));
+        self::assertSame($fixtures->room->getId(), $this->intValue($this->objectAt($this->listValue($rooms, 'items'), 0), 'id'));
     }
 
     public function testScheduleCanBeFilteredByGroupTeacherAndRoom(): void
@@ -63,12 +65,16 @@ final class PublicScheduleControllerTest extends WebTestCase
         $roomSchedule = $this->requestJson(sprintf('/api/public/schedule?type=room&id=%d&weekStart=2026-09-07', $fixtures->room->getId()));
 
         foreach ([$groupSchedule, $teacherSchedule, $roomSchedule] as $schedule) {
-            self::assertSame('2026-09-07', $schedule['weekStart']);
-            self::assertCount(1, $schedule['items']);
-            self::assertSame('Programming', $schedule['items'][0]['subject']['name']);
-            self::assertSame('laboratory', $schedule['items'][0]['lessonType']);
-            self::assertFalse($schedule['items'][0]['isCancelled']);
-            self::assertFalse($schedule['items'][0]['isOverride']);
+            self::assertSame('2026-09-07', $this->stringValue($schedule, 'weekStart'));
+            $items = $this->listValue($schedule, 'items');
+            $item = $this->objectAt($items, 0);
+            $subject = $this->objectValue($item, 'subject');
+
+            self::assertCount(1, $items);
+            self::assertSame('Programming', $this->stringValue($subject, 'name'));
+            self::assertSame('laboratory', $this->stringValue($item, 'lessonType'));
+            self::assertFalse($this->boolValue($item, 'isCancelled'));
+            self::assertFalse($this->boolValue($item, 'isOverride'));
         }
     }
 
@@ -78,7 +84,7 @@ final class PublicScheduleControllerTest extends WebTestCase
 
         $schedule = $this->requestJson(sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-07', $fixtures->group->getId()));
 
-        self::assertSame([], $schedule['items']);
+        self::assertSame([], $this->listValue($schedule, 'items'));
     }
 
     public function testWeekParityIsApplied(): void
@@ -88,8 +94,8 @@ final class PublicScheduleControllerTest extends WebTestCase
         $oddWeek = $this->requestJson(sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-07', $fixtures->group->getId()));
         $evenWeek = $this->requestJson(sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-14', $fixtures->group->getId()));
 
-        self::assertCount(1, $oddWeek['items']);
-        self::assertSame([], $evenWeek['items']);
+        self::assertCount(1, $this->listValue($oddWeek, 'items'));
+        self::assertSame([], $this->listValue($evenWeek, 'items'));
     }
 
     public function testLessonOverrideAndCancellationFlagsAreReturned(): void
@@ -118,26 +124,31 @@ final class PublicScheduleControllerTest extends WebTestCase
 
         $schedule = $this->requestJson(sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-07', $fixtures->group->getId()));
 
-        self::assertTrue($schedule['items'][0]['isCancelled']);
-        self::assertTrue($schedule['items'][0]['isOverride']);
-        self::assertSame('Lab 2', $schedule['items'][0]['room']['name']);
+        $item = $this->objectAt($this->listValue($schedule, 'items'), 0);
+        $room = $this->objectValue($item, 'room');
+
+        self::assertTrue($this->boolValue($item, 'isCancelled'));
+        self::assertTrue($this->boolValue($item, 'isOverride'));
+        self::assertSame('Lab 2', $this->stringValue($room, 'name'));
     }
 
     public function testInvalidScheduleQueryReturnsValidationErrors(): void
     {
         $payload = $this->requestJson('/api/public/schedule?type=student&id=0&weekStart=2026-09-08', 422);
 
-        self::assertSame(422, $payload['status']);
-        self::assertArrayHasKey('type', $payload['errors']);
-        self::assertArrayHasKey('id', $payload['errors']);
-        self::assertArrayHasKey('weekStart', $payload['errors']);
+        $errors = $this->objectValue($payload, 'errors');
+
+        self::assertSame(422, $this->intValue($payload, 'status'));
+        self::assertArrayHasKey('type', $errors);
+        self::assertArrayHasKey('id', $errors);
+        self::assertArrayHasKey('weekStart', $errors);
     }
 
     public function testUnknownFilterTargetReturnsNotFound(): void
     {
         $payload = $this->requestJson('/api/public/schedule?type=group&id=999&weekStart=2026-09-07', 404);
 
-        self::assertSame('Filter target not found.', $payload['error']);
+        self::assertSame('Filter target not found.', $this->stringValue($payload, 'error'));
     }
 
     /** @return array<string, mixed> */
@@ -147,7 +158,7 @@ final class PublicScheduleControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame($expectedStatus);
 
-        return json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+        return $this->responseJson($this->client);
     }
 
     private function createPublishedScheduleFixtures(
