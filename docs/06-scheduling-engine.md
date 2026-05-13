@@ -65,6 +65,8 @@ Soft constraints should produce a score and explanation so administrators can un
 8. API exposes status and result to admin.
 9. Admin reviews and publishes.
 
+The first implementation may use deterministic CSP placement with a bounded score calculation before deeper optimization is tuned against real datasets. A generated draft is acceptable only when hard validation passes and the quality score is at least 80/100.
+
 ## Validation Workflow
 
 Validation should be available independently from generation.
