@@ -56,7 +56,7 @@ Soft constraints should produce a score and explanation so administrators can un
 ## Generation Workflow
 
 1. API creates generation job for a semester.
-2. API validates that required reference data and teaching-load requirements exist.
+2. API validates that required entities and teaching-load requirements exist.
 3. API sends message to RabbitMQ.
 4. Go worker loads input data.
 5. Go worker generates a candidate schedule using CSP for feasible construction and Tabu search for optimization.

@@ -24,7 +24,7 @@ Recommended first sequence:
 
 1. `tasks/001-complete-local-dev-environment.md`
 2. `tasks/002-admin-auth.md`
-3. `tasks/003-reference-data-crud.md`
+3. `tasks/003-entity-crud.md`
 4. `tasks/004-public-schedule-api.md`
 5. `tasks/005-public-schedule-frontend.md`
 6. `tasks/006-manual-schedule-editor.md`

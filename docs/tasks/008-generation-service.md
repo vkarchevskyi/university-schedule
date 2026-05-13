@@ -45,4 +45,4 @@ Generation is asynchronous because it can be computationally expensive.
 - `rest-api/src`
 - `services/schedule/main.go`
 - `services/schedule`
-- `rest-api/compose.yaml`
+- `docker/compose.yaml`

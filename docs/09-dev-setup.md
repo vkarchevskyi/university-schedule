@@ -7,7 +7,7 @@ frontend/          Vue SPA
 rest-api/          Symfony REST API
 services/schedule/ Go schedule generation service
 docs/              Product, architecture, and task docs
-diagram.uml        Database/entity diagram
+docs/db-diagram.uml Database/entity diagram and schema source of truth
 ```
 
 ## Prerequisites
@@ -19,7 +19,7 @@ diagram.uml        Database/entity diagram
 
 ## Current Local Services
 
-`rest-api/compose.yaml` currently defines PostgreSQL. Redis and RabbitMQ are part of the target architecture but are not yet present in the compose file.
+Project-level Docker configuration lives in `docker/`. `docker/compose.yaml` defines PostgreSQL, Redis, and RabbitMQ for local development.
 
 ## Backend
 
@@ -27,18 +27,31 @@ From `rest-api`:
 
 ```bash
 composer install
-docker compose up -d
 php bin/console doctrine:migrations:migrate
 symfony server:start
 ```
 
-Adjust commands to the local Symfony tooling actually used in the project.
+From the repository root, start infrastructure first:
+
+```bash
+docker compose -f docker/compose.yaml up -d
+```
+
+Useful infrastructure URLs after startup:
+
+- PostgreSQL: `127.0.0.1:5432`
+- Redis: `127.0.0.1:6379`
+- RabbitMQ AMQP: `127.0.0.1:5672`
+- RabbitMQ management UI: `http://127.0.0.1:15672`
+
+Copy `rest-api/.env.example` to `rest-api/.env.local` if needed, but do not commit real secrets.
 
 ## Frontend
 
 From `frontend`:
 
 ```bash
+cp .env.example .env.local
 pnpm install
 pnpm dev
 ```
@@ -57,6 +70,7 @@ pnpm build
 From `services/schedule`:
 
 ```bash
+cp .env.example .env.local
 go run .
 ```
 
@@ -77,10 +91,8 @@ Expected categories:
 
 Do not commit real secrets.
 
-## Open Setup Tasks
+## Remaining Setup Tasks
 
-- Add Redis to local compose setup.
-- Add RabbitMQ to local compose setup.
-- Add full Docker Compose setup for local and VPS deployment.
-- Add documented `.env.example` files.
-- Decide how to run all services together in development.
+- Add application containers for Symfony, frontend, and Go worker to a deployment compose file.
+- Add JWT key-generation instructions once the JWT package is installed.
+- Add one-command local orchestration if the separate service commands become tedious.

@@ -68,7 +68,7 @@ Manual schedule creation with spreadsheets is slow and error-prone. It is diffic
 
 ## Shippable Definition
 
-The app is shippable when an administrator can create academic reference data, create or import a schedule, validate it, publish it, and users can view the current published schedule through the web UI and Telegram. Invalid schedules must not be publishable.
+The app is shippable when an administrator can create academic entities, create or import a schedule, validate it, publish it, and users can view the current published schedule through the web UI and Telegram. Invalid schedules must not be publishable.
 
 ## AI Development Rule
 
