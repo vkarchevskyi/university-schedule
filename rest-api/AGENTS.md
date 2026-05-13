@@ -43,6 +43,15 @@ Layer responsibilities:
 
 Controllers must stay tiny. A controller action should normally call one service method and return its result.
 
+## Service Design
+
+- Services must be single-purpose application use cases.
+- Each service should have one public method. Use `handle()` for commands/mutations, `get()` for single-item queries, `list()` for collection queries, or another precise verb when it reads better.
+- The service class name must describe the use case, not just the entity. Prefer names such as `CreateTeacherService`, `UpdateTeacherService`, `ListTeachersService`, and `GetPublicScheduleService`.
+- Group services by entity or feature under `src/Service/`. For entity services, use subfolders such as `src/Service/Teacher/`, `src/Service/Group/`, and `src/Service/Schedule/`.
+- Do not create broad entity services with many CRUD methods. Split operations into dedicated services and inject only the service needed by the controller action.
+- Keep shared private helpers inside the dedicated service when they are genuinely local. Extract shared collaborators only when multiple services need the same behavior.
+
 ## Symfony And PHP Practices
 
 - Use strict types in all PHP files.
@@ -54,6 +63,7 @@ Controllers must stay tiny. A controller action should normally call one service
 - Prefer PHP enums for fixed value sets; keep backed enum storage aligned with `../docs/db-diagram.uml`.
 - Keep code compatible with the PHP version declared in `composer.json`.
 - Format PHP with PHP CS Fixer using the configured `@PER-CS3.0` ruleset.
+- PHPStan is a required check. Keep PHPStan passing at level 10 using the configured Symfony and Doctrine extensions.
 
 ## Validation Rules
 
@@ -113,7 +123,9 @@ From `rest-api/`:
 php bin/phpunit
 php bin/console lint:container
 php bin/console doctrine:schema:validate --skip-sync
+vendor/bin/phpstan analyse --debug --memory-limit=1G
 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff --using-cache=no --sequential --allow-unsupported-php-version=yes
 ```
 
+Use `--debug` for PHPStan in sandboxed environments where its parallel worker cannot bind to localhost.
 Use `--sequential` for PHP CS Fixer in sandboxed environments where its parallel worker cannot bind to localhost.

@@ -122,6 +122,10 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
+        if ($this->email === '') {
+            throw new \LogicException('Admin email must not be empty.');
+        }
+
         return $this->email;
     }
 

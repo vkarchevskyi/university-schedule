@@ -21,7 +21,7 @@ class ScheduleRepository extends ServiceEntityRepository
 
     public function findPublishedForWeek(\DateTimeImmutable $weekStart, \DateTimeImmutable $weekEnd): ?Schedule
     {
-        return $this->createQueryBuilder('schedule')
+        $schedule = $this->createQueryBuilder('schedule')
             ->andWhere('schedule.status = :status')
             ->andWhere('schedule.validFrom <= :weekEnd')
             ->andWhere('schedule.validTo >= :weekStart')
@@ -33,5 +33,11 @@ class ScheduleRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+
+        if ($schedule === null || $schedule instanceof Schedule) {
+            return $schedule;
+        }
+
+        throw new \UnexpectedValueException('Expected published schedule query to return a Schedule or null.');
     }
 }

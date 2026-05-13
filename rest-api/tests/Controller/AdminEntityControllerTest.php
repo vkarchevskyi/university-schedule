@@ -12,6 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AdminEntityControllerTest extends WebTestCase
 {
+    use JsonTestAssertions;
+
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
     private string $token;
@@ -45,17 +47,17 @@ final class AdminEntityControllerTest extends WebTestCase
             'studentCount' => 24,
         ], 201);
 
-        self::assertSame('KN-22', $payload['name']);
+        self::assertSame('KN-22', $this->stringValue($payload, 'name'));
 
-        $updated = $this->requestJson('PATCH', '/api/admin/groups/' . $payload['id'], [
+        $updated = $this->requestJson('PATCH', '/api/admin/groups/' . $this->intValue($payload, 'id'), [
             'studentCount' => 25,
         ]);
 
-        self::assertSame(25, $updated['studentCount']);
+        self::assertSame(25, $this->intValue($updated, 'studentCount'));
 
         $list = $this->requestJson('GET', '/api/admin/groups');
 
-        self::assertCount(1, $list['items']);
+        self::assertCount(1, $this->listValue($list, 'items'));
     }
 
     public function testInvalidTimeSlotReturnsValidationError(): void
@@ -66,7 +68,7 @@ final class AdminEntityControllerTest extends WebTestCase
             'endsAt' => '09:00',
         ], 422);
 
-        self::assertArrayHasKey('endsAt', $payload['errors']);
+        self::assertArrayHasKey('endsAt', $this->objectValue($payload, 'errors'));
     }
 
     public function testDtoValidationRejectsMissingFields(): void
@@ -76,8 +78,10 @@ final class AdminEntityControllerTest extends WebTestCase
             'course' => 4,
         ], 422);
 
-        self::assertArrayHasKey('speciality', $payload['errors']);
-        self::assertArrayHasKey('studentCount', $payload['errors']);
+        $errors = $this->objectValue($payload, 'errors');
+
+        self::assertArrayHasKey('speciality', $errors);
+        self::assertArrayHasKey('studentCount', $errors);
     }
 
     public function testDtoValidationRejectsWronglyTypedFields(): void
@@ -89,7 +93,7 @@ final class AdminEntityControllerTest extends WebTestCase
             'studentCount' => 24,
         ], 422);
 
-        self::assertArrayHasKey('course', $payload['errors']);
+        self::assertArrayHasKey('course', $this->objectValue($payload, 'errors'));
     }
 
     public function testPatchRejectsEmptyPayloadAndExplicitNull(): void
@@ -101,13 +105,13 @@ final class AdminEntityControllerTest extends WebTestCase
             'studentCount' => 24,
         ], 201);
 
-        $emptyPatch = $this->requestJson('PATCH', '/api/admin/groups/' . $group['id'], [], 422);
-        self::assertArrayHasKey('json', $emptyPatch['errors']);
+        $emptyPatch = $this->requestJson('PATCH', '/api/admin/groups/' . $this->intValue($group, 'id'), [], 422);
+        self::assertArrayHasKey('json', $this->objectValue($emptyPatch, 'errors'));
 
-        $nullPatch = $this->requestJson('PATCH', '/api/admin/groups/' . $group['id'], [
+        $nullPatch = $this->requestJson('PATCH', '/api/admin/groups/' . $this->intValue($group, 'id'), [
             'name' => null,
         ], 422);
-        self::assertArrayHasKey('json', $nullPatch['errors']);
+        self::assertArrayHasKey('json', $this->objectValue($nullPatch, 'errors'));
     }
 
     public function testTeachingLoadCanBeCreatedForSemesterGroupSubjectAndTeacher(): void
@@ -118,7 +122,7 @@ final class AdminEntityControllerTest extends WebTestCase
             'endsAt' => '2027-06-30',
         ], 201);
         $semester = $this->requestJson('POST', '/api/admin/semesters', [
-            'academicYearId' => $academicYear['id'],
+            'academicYearId' => $this->intValue($academicYear, 'id'),
             'number' => 1,
             'startsAt' => '2026-09-01',
             'endsAt' => '2026-12-31',
@@ -140,31 +144,33 @@ final class AdminEntityControllerTest extends WebTestCase
         ], 201);
 
         $teacherSubject = $this->requestJson('POST', '/api/admin/teacher-subjects', [
-            'teacherId' => $teacher['id'],
-            'subjectId' => $subject['id'],
+            'teacherId' => $this->intValue($teacher, 'id'),
+            'subjectId' => $this->intValue($subject, 'id'),
         ], 201);
 
-        self::assertSame($teacher['id'], $teacherSubject['teacherId']);
+        self::assertSame($this->intValue($teacher, 'id'), $this->intValue($teacherSubject, 'teacherId'));
 
         $teachingLoad = $this->requestJson('POST', '/api/admin/teaching-loads', [
-            'semesterId' => $semester['id'],
-            'groupId' => $group['id'],
-            'subjectId' => $subject['id'],
-            'teacherId' => $teacher['id'],
+            'semesterId' => $this->intValue($semester, 'id'),
+            'groupId' => $this->intValue($group, 'id'),
+            'subjectId' => $this->intValue($subject, 'id'),
+            'teacherId' => $this->intValue($teacher, 'id'),
             'lessonType' => 'laboratory',
             'requiredLessonCount' => 8,
         ], 201);
 
-        self::assertSame('laboratory', $teachingLoad['lessonType']);
-        self::assertSame(8, $teachingLoad['requiredLessonCount']);
+        self::assertSame('laboratory', $this->stringValue($teachingLoad, 'lessonType'));
+        self::assertSame(8, $this->intValue($teachingLoad, 'requiredLessonCount'));
 
-        $deleted = $this->requestJson('DELETE', '/api/admin/teaching-loads/' . $teachingLoad['id'], expectedStatus: 204);
-
-        self::assertNull($deleted);
+        $this->requestNoContent('DELETE', '/api/admin/teaching-loads/' . $this->intValue($teachingLoad, 'id'));
     }
 
-    /** @param array<string, mixed> $payload @return array<string, mixed>|null */
-    private function requestJson(string $method, string $uri, array $payload = [], int $expectedStatus = 200): ?array
+    /**
+     * @param array<string, mixed> $payload
+     *
+     * @return array<string, mixed>
+     */
+    private function requestJson(string $method, string $uri, array $payload = [], int $expectedStatus = 200): array
     {
         $server = ['HTTP_AUTHORIZATION' => sprintf('Bearer %s', $this->token)];
 
@@ -176,18 +182,19 @@ final class AdminEntityControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame($expectedStatus);
 
-        if ($expectedStatus === 204) {
-            return null;
-        }
+        return $this->responseJson($this->client);
+    }
 
-        return json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+    private function requestNoContent(string $method, string $uri): void
+    {
+        $this->client->request($method, $uri, server: ['HTTP_AUTHORIZATION' => sprintf('Bearer %s', $this->token)]);
+
+        self::assertResponseStatusCodeSame(204);
     }
 
     private function login(): string
     {
         $passwordHash = password_hash('correct-password', PASSWORD_BCRYPT);
-
-        self::assertIsString($passwordHash);
 
         $admin = new Admin('Ada', 'Lovelace', 'admin@example.com', $passwordHash, new \DateTimeImmutable());
         $this->entityManager->persist($admin);
@@ -200,8 +207,8 @@ final class AdminEntityControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode($this->client->getResponse()->getContent() ?: '', true, flags: JSON_THROW_ON_ERROR);
+        $payload = $this->responseJson($this->client);
 
-        return $payload['token'];
+        return $this->stringValue($payload, 'token');
     }
 }
