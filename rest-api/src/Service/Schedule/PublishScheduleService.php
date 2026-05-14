@@ -12,6 +12,7 @@ use App\Resource\Admin\ScheduleResource;
 use App\Resource\Admin\ScheduleResourceMapper;
 use App\Service\AbstractEntityService;
 use App\Service\ScheduleValidation\ValidateScheduleService;
+use App\Service\Telegram\PublishScheduleNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -21,6 +22,7 @@ final class PublishScheduleService extends AbstractEntityService
         private readonly ValidateScheduleService $validator,
         private readonly ScheduleResourceMapper $mapper,
         private readonly LogSchedulePublicationService $publicationLogger,
+        private readonly PublishScheduleNotificationService $notifications,
         private readonly Security $security,
         EntityManagerInterface $entityManager,
     ) {
@@ -49,6 +51,7 @@ final class PublishScheduleService extends AbstractEntityService
         $schedule->setPublishedAt($publishedAt);
         $this->publicationLogger->handle($this->currentAdmin(), $schedule, $publishedAt);
         $this->flush();
+        $this->notifications->handle($schedule);
 
         return $this->mapper->map($schedule);
     }
