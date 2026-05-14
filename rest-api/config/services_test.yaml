@@ -10,6 +10,12 @@ services:
     App\Tests\Double\FakeExamScheduleGenerationPublisher:
         public: true
 
+    App\Tests\Double\FakeTelegramSender:
+        public: true
+
+    App\Tests\Double\FakeTelegramNotificationPublisher:
+        public: true
+
     App\Service\ScheduleValidation\ScheduleValidationClientInterface:
         alias: App\Tests\Double\FakeScheduleValidationClient
 
@@ -18,3 +24,13 @@ services:
 
     App\Service\ExamScheduleGeneration\ExamScheduleGenerationPublisherInterface:
         alias: App\Tests\Double\FakeExamScheduleGenerationPublisher
+
+    App\Service\Telegram\TelegramSenderInterface:
+        alias: App\Tests\Double\FakeTelegramSender
+
+    App\Service\Telegram\TelegramNotificationPublisherInterface:
+        alias: App\Tests\Double\FakeTelegramNotificationPublisher
+
+    App\Service\Telegram\VerifyTelegramWebhookSecretService:
+        arguments:
+            $webhookSecret: 'test-secret'

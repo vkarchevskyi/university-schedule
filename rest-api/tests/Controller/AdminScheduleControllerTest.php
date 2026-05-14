@@ -8,6 +8,7 @@ use App\Entity\Admin;
 use App\Entity\ActionLog;
 use App\Tests\Double\FakeScheduleGenerationPublisher;
 use App\Tests\Double\FakeScheduleValidationClient;
+use App\Tests\Double\FakeTelegramNotificationPublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,6 +35,7 @@ final class AdminScheduleControllerTest extends WebTestCase
         $this->token = $this->login();
         FakeScheduleValidationClient::resetResult();
         FakeScheduleGenerationPublisher::reset();
+        FakeTelegramNotificationPublisher::reset();
     }
 
     public function testScheduleRoutesRequireAuthentication(): void
@@ -209,6 +211,8 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         $logs = $this->entityManager->getRepository(ActionLog::class)->findBy(['action' => 'schedule.published']);
         self::assertCount(1, $logs);
+        self::assertNotSame([], FakeTelegramNotificationPublisher::$messages);
+        self::assertSame('schedule_published', FakeTelegramNotificationPublisher::$messages[0]['eventType']);
     }
 
     public function testInvalidScheduleCannotBePublished(): void
