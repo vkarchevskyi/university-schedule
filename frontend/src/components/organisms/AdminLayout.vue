@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import AppButton from '@/components/atoms/AppButton.vue'
@@ -14,14 +14,14 @@ const { admin } = storeToRefs(auth)
 const adminName = computed(() => (admin.value === null ? '' : `${admin.value.firstName} ${admin.value.lastName}`))
 
 const navItems = [
-  adminCopy.nav.schedules,
-  adminCopy.nav.groups,
-  adminCopy.nav.teachers,
-  adminCopy.nav.subjects,
-  adminCopy.nav.rooms,
-  adminCopy.nav.timeSlots,
-  adminCopy.nav.generationJobs,
-  adminCopy.nav.examSchedules,
+  { label: adminCopy.nav.schedules, route: { name: 'admin-schedules' } },
+  { label: adminCopy.nav.groups },
+  { label: adminCopy.nav.teachers },
+  { label: adminCopy.nav.subjects },
+  { label: adminCopy.nav.rooms },
+  { label: adminCopy.nav.timeSlots },
+  { label: adminCopy.nav.generationJobs },
+  { label: adminCopy.nav.examSchedules },
 ]
 
 async function logout(): Promise<void> {
@@ -35,7 +35,13 @@ async function logout(): Promise<void> {
     <aside class="admin-sidebar" aria-label="Admin navigation">
       <strong>{{ adminCopy.dashboard }}</strong>
       <nav>
-        <a v-for="item in navItems" :key="item" href="#" @click.prevent>{{ item }}</a>
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.label"
+          :to="item.route ?? { name: 'admin-dashboard' }"
+        >
+          {{ item.label }}
+        </RouterLink>
       </nav>
     </aside>
     <div class="admin-main">

@@ -6,10 +6,12 @@ namespace App\Controller\Admin;
 
 use App\Dto\Admin\ScheduleEntryRequestDto;
 use App\Dto\Admin\ScheduleGenerationRequestDto;
+use App\Dto\Admin\ScheduleQueryDto;
 use App\Dto\Admin\ScheduleRequestDto;
 use App\Service\LessonCard\ListLessonCardsService;
 use App\Service\Schedule\CreateScheduleService;
 use App\Service\Schedule\GetScheduleService;
+use App\Service\Schedule\ListSchedulesService;
 use App\Service\Schedule\PublishScheduleService;
 use App\Service\ScheduleGeneration\CreateScheduleGenerationJobService;
 use App\Service\ScheduleEntry\CreateScheduleEntryService;
@@ -18,12 +20,19 @@ use App\Service\ScheduleEntry\UpdateScheduleEntryService;
 use App\Service\ScheduleValidation\ValidateScheduleService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/admin/schedules')]
 final class ScheduleController extends AbstractAdminController
 {
+    #[Route('', methods: ['GET'])]
+    public function list(#[MapQueryString] ?ScheduleQueryDto $query, ListSchedulesService $schedules): JsonResponse
+    {
+        return $this->respond(fn() => $schedules->list($query));
+    }
+
     #[Route('', methods: ['POST'])]
     public function create(#[MapRequestPayload(acceptFormat: 'json')] ScheduleRequestDto $request, CreateScheduleService $schedules): JsonResponse
     {

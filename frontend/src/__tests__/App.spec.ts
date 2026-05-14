@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createScheduleEntry, deleteScheduleEntry } from '@/api/adminSchedule'
 import PublicSchedulePage from '@/components/pages/PublicSchedulePage.vue'
 import { requestJson } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
@@ -61,6 +62,63 @@ describe('App', () => {
     await requestJson('/api/auth/me', { authenticated: true })
 
     expect(authorizationHeader).toBe('Bearer jwt-token')
+  })
+
+  it('sends schedule entry mutations through authenticated API requests', async () => {
+    const requests: Array<{ url: string; method: string; body: string | null; authorization: string | null }> = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
+        const headers = options?.headers
+        requests.push({
+          url: String(input),
+          method: options?.method ?? 'GET',
+          body: typeof options?.body === 'string' ? options.body : null,
+          authorization: headers instanceof Headers ? headers.get('Authorization') : null,
+        })
+
+        return options?.method === 'DELETE' ? new Response(null, { status: 204 }) : jsonResponse({ id: 99 })
+      }),
+    )
+    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+
+    await createScheduleEntry(12, {
+      teachingLoadIds: [44],
+      subjectId: 3,
+      teacherId: 7,
+      lessonType: 'lecture',
+      roomId: 2,
+      timeSlotId: 1,
+      dayOfWeek: 1,
+      weekParity: 'both',
+      groupIds: [9],
+    })
+    await deleteScheduleEntry(12, 99)
+
+    const createRequest = requests[0]
+    const deleteRequest = requests[1]
+    expect(createRequest).toBeDefined()
+    expect(deleteRequest).toBeDefined()
+
+    if (createRequest === undefined || deleteRequest === undefined) {
+      throw new Error('Expected schedule entry mutation requests')
+    }
+
+    expect(createRequest).toMatchObject({
+      url: 'http://localhost:8000/api/admin/schedules/12/entries',
+      method: 'POST',
+      authorization: 'Bearer jwt-token',
+    })
+    expect(JSON.parse(createRequest.body ?? '{}')).toMatchObject({
+      teachingLoadIds: [44],
+      roomId: 2,
+      weekParity: 'both',
+    })
+    expect(deleteRequest).toMatchObject({
+      url: 'http://localhost:8000/api/admin/schedules/12/entries/99',
+      method: 'DELETE',
+      authorization: 'Bearer jwt-token',
+    })
   })
 })
 

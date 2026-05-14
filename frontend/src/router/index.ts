@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import AdminDashboardPage from '@/components/pages/AdminDashboardPage.vue'
 import AdminLoginPage from '@/components/pages/AdminLoginPage.vue'
+import AdminScheduleEditorPage from '@/components/pages/AdminScheduleEditorPage.vue'
+import AdminSchedulesPage from '@/components/pages/AdminSchedulesPage.vue'
 import PublicSchedulePage from '@/components/pages/PublicSchedulePage.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -22,6 +24,18 @@ const router = createRouter({
       path: '/admin',
       name: 'admin-dashboard',
       component: AdminDashboardPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/schedules',
+      name: 'admin-schedules',
+      component: AdminSchedulesPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/schedules/:id',
+      name: 'admin-schedule-editor',
+      component: AdminScheduleEditorPage,
       meta: { requiresAuth: true },
     },
   ],

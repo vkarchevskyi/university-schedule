@@ -181,6 +181,67 @@ test('loads persisted admin token on protected routes', async ({ page }) => {
   await expect(page.getByTestId('admin-name')).toHaveText('Ada Lovelace')
 })
 
+test('opens schedule management and creates a draft schedule', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules')
+
+  await expect(page.getByRole('heading', { name: 'Розклади' })).toBeVisible()
+  await expect(page.getByTestId('schedule-list')).toContainText('#12')
+
+  await page.getByTestId('create-schedule').click()
+
+  await expect(page).toHaveURL(/\/admin\/schedules\/13$/)
+  await expect(page.getByRole('heading', { name: 'Редактор розкладу #13' })).toBeVisible()
+})
+
+test('places, edits, validates, and deletes a schedule entry', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+
+  await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+
+  await expect(page.getByTestId('schedule-entry')).toContainText('Лекція')
+
+  await page.getByTestId('schedule-entry').click()
+  await page.getByTestId('week-parity-select').selectOption('odd')
+  await page.getByTestId('save-entry').click()
+
+  await expect(page.getByTestId('schedule-entry')).toContainText('Непарний')
+
+  await page.getByTestId('validate-schedule').click()
+
+  await expect(page.getByTestId('validation-result')).toContainText('Потрібно вибрати іншу аудиторію.')
+
+  await page.getByTestId('schedule-entry').click()
+  await page.getByTestId('delete-entry').click()
+
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
 async function mockSchedule(
   page: Page,
   onRequest?: (url: URL) => void,
@@ -223,6 +284,102 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
   })
 }
 
+async function mockAdminScheduleManagement(page: Page): Promise<void> {
+  let entries: AdminScheduleEntry[] = []
+
+  await page.route('**/api/admin/semesters', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [adminSemester] }),
+    })
+  })
+
+  await page.route('**/api/admin/rooms', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [adminRoom] }),
+    })
+  })
+
+  await page.route('**/api/admin/time-slots', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [adminTimeSlot] }),
+    })
+  })
+
+  await page.route('**/api/admin/schedules', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(adminSchedule(13, [])),
+      })
+      return
+    }
+
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [adminSchedule(12, entries)] }),
+    })
+  })
+
+  await page.route('**/api/admin/schedules?**', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [adminSchedule(12, entries)] }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+\/lesson-cards$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [lessonCard] }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+\/entries$/, async (route) => {
+    const payload = (await route.request().postDataJSON()) as AdminScheduleEntryPayload
+    entries = [{ id: 77, scheduleId: 12, ...payload }]
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(entries[0]),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+\/entries\/\d+$/, async (route) => {
+    if (route.request().method() === 'DELETE') {
+      entries = []
+      await route.fulfill({ status: 204 })
+      return
+    }
+
+    const payload = (await route.request().postDataJSON()) as Partial<AdminScheduleEntryPayload>
+    entries = entries.map((entry) => ({ ...entry, ...payload }))
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(entries[0]),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+\/validate$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        valid: false,
+        conflicts: [{ type: 'room_conflict', message: 'Потрібно вибрати іншу аудиторію.', entryIds: [77] }],
+      }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+$/, async (route) => {
+    const id = Number(new URL(route.request().url()).pathname.split('/').pop())
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(adminSchedule(id, entries)),
+    })
+  })
+}
+
 function scheduleResponse(items = scheduleItems, weekStart = '2026-09-07') {
   return {
     weekStart,
@@ -260,4 +417,69 @@ const adminResponse = {
   firstName: 'Ada',
   lastName: 'Lovelace',
   email: 'admin@example.com',
+}
+
+interface AdminScheduleEntryPayload {
+  teachingLoadIds: number[]
+  subjectId: number
+  teacherId: number
+  lessonType: 'lecture' | 'laboratory' | 'seminar' | 'practical'
+  roomId: number
+  timeSlotId: number
+  dayOfWeek: number
+  weekParity: 'odd' | 'even' | 'both'
+  groupIds: number[]
+}
+
+interface AdminScheduleEntry extends AdminScheduleEntryPayload {
+  id: number
+  scheduleId: number
+}
+
+function adminSchedule(id: number, entries: AdminScheduleEntry[]) {
+  return {
+    id,
+    semesterId: 1,
+    status: 'draft',
+    validFrom: '2026-09-01',
+    validTo: '2026-12-31',
+    createdBy: 1,
+    createdAt: '2026-05-14T10:00:00+00:00',
+    publishedAt: null,
+    entries,
+  }
+}
+
+const adminSemester = {
+  id: 1,
+  academicYearId: 1,
+  number: 1,
+  startsAt: '2026-09-01',
+  endsAt: '2026-12-31',
+  firstWeekParity: 'odd',
+}
+
+const adminRoom = {
+  id: 3,
+  name: 'Лаб 1',
+  type: 'computer',
+  capacity: 30,
+}
+
+const adminTimeSlot = {
+  id: 1,
+  number: 1,
+  startsAt: '08:30:00',
+  endsAt: '10:00:00',
+}
+
+const lessonCard = {
+  teachingLoadId: 44,
+  group: { id: 1, name: 'КН-22' },
+  subject: { id: 4, name: 'Алгоритми' },
+  teacher: { id: 7, firstName: 'Іван', lastName: 'Петренко', department: 'Інформатика' },
+  lessonType: 'lecture',
+  requiredLessonCount: 8,
+  scheduledLessonCount: 0,
+  remainingLessonCount: 8,
 }
