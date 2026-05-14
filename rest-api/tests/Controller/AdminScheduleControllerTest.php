@@ -38,6 +38,10 @@ final class AdminScheduleControllerTest extends WebTestCase
 
     public function testScheduleRoutesRequireAuthentication(): void
     {
+        $this->client->request('GET', '/api/admin/schedules');
+
+        self::assertResponseStatusCodeSame(401);
+
         $this->client->jsonRequest('POST', '/api/admin/schedules', [
             'semesterId' => 1,
             'validFrom' => '2026-09-01',
@@ -45,6 +49,32 @@ final class AdminScheduleControllerTest extends WebTestCase
         ]);
 
         self::assertResponseStatusCodeSame(401);
+    }
+
+    public function testAdminCanListSchedulesWithOptionalSemesterFilter(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $first = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+        $second = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-15',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $list = $this->requestJson('GET', '/api/admin/schedules');
+        $items = $this->listValue($list, 'items');
+
+        self::assertCount(2, $items);
+        self::assertSame($this->intValue($second, 'id'), $this->intValue($this->objectAt($items, 0), 'id'));
+
+        $filtered = $this->requestJson('GET', sprintf('/api/admin/schedules?semesterId=%d', $fixtures->semesterId));
+
+        self::assertCount(2, $this->listValue($filtered, 'items'));
+        self::assertNotSame($this->intValue($first, 'id'), $this->intValue($second, 'id'));
     }
 
     public function testAdminCanCreateUpdateAndDeleteDraftScheduleEntry(): void

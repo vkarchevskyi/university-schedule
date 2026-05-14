@@ -182,6 +182,34 @@ Returns rooms available for schedule filtering.
 
 ## Schedule Administration
 
+### GET `/api/admin/schedules`
+
+Lists schedules for the admin workspace.
+
+Query parameters:
+
+- `semesterId` optional
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": 12,
+      "semesterId": 1,
+      "status": "draft",
+      "validFrom": "2026-09-01",
+      "validTo": "2026-12-31",
+      "createdBy": 1,
+      "createdAt": "2026-05-13T13:00:00+00:00",
+      "publishedAt": null,
+      "entries": []
+    }
+  ]
+}
+```
+
 ### POST `/api/admin/schedules`
 
 Creates a draft schedule.
