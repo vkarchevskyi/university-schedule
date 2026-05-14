@@ -13,6 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6",
         "lexik/jwt-authentication-bundle": "^3.2",
+        "nutgram/nutgram": "^4.46",
         "php-amqplib/php-amqplib": "^3.7",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
