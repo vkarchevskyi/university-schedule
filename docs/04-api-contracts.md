@@ -560,3 +560,30 @@ Security requirements:
 
 - Verify Telegram webhook secret token or equivalent signature mechanism.
 - Do not expose admin operations.
+
+Required header:
+
+- `X-Telegram-Bot-Api-Secret-Token`
+
+Initial supported text commands:
+
+- `/start`
+- `/schedule group КН-22`
+- `/schedule teacher John Doe`
+- `/subscribe group КН-22`
+- `/subscribe teacher John Doe`
+- `/unsubscribe group КН-22`
+- `/unsubscribe teacher John Doe`
+
+Responses are sent back through Telegram, not in the HTTP response body. The webhook returns `204 No Content` when an update is accepted.
+
+Subscription notification jobs are published when a schedule is successfully published. Queue payload:
+
+```json
+{
+  "eventType": "schedule_published",
+  "scheduleId": 1,
+  "targetType": "group",
+  "targetId": 1
+}
+```

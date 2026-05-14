@@ -24,6 +24,11 @@ Introduces available actions and basic usage.
 
 Returns the schedule for a selected group or teacher. The command should support week navigation through inline buttons.
 
+Initial command format:
+
+- `/schedule group КН-22`
+- `/schedule teacher John Doe`
+
 ### `/subscribe`
 
 Starts a multi-step flow:
@@ -32,9 +37,19 @@ Starts a multi-step flow:
 2. Choose the concrete group or teacher.
 3. Save subscription if it does not already exist.
 
+Initial command format:
+
+- `/subscribe group КН-22`
+- `/subscribe teacher John Doe`
+
 ### `/unsubscribe`
 
 Allows the user to remove one or more subscriptions.
+
+Initial command format:
+
+- `/unsubscribe group КН-22`
+- `/unsubscribe teacher John Doe`
 
 ## Free-Text Messages
 
@@ -67,11 +82,19 @@ Trigger examples:
 
 Notification sending should be queued and nearly immediate. It must be asynchronous or rate-limited to respect Telegram API limits.
 
+The first implementation publishes notification jobs on schedule publication. A consumer reads the Telegram notification queue and sends messages to matching group or teacher subscribers.
+
 ## Security
 
 - Verify webhook secret token or equivalent Telegram-provided mechanism.
 - The bot must expose only public schedule information.
 - The bot must never allow admin mutations.
+
+## Configuration
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_WEBHOOK_SECRET`
+- `TELEGRAM_NOTIFICATIONS_QUEUE`, default `telegram_notifications`
 
 ## Decisions
 

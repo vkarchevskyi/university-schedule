@@ -91,6 +91,7 @@ Expected categories:
 - Admin JWT secret or JWT key paths.
 - Telegram bot token.
 - Telegram webhook secret.
+- Telegram notification queue name, default `telegram_notifications`.
 - Gemini API key.
 
 Do not commit real secrets.
