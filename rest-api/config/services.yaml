@@ -14,6 +14,7 @@ parameters:
     telegram_notifications_queue_default: 'telegram_notifications'
     telegram_bot_token_default: ''
     telegram_webhook_secret_default: ''
+    gemini_model_default: 'gemini-2.5-flash'
     exam_consultation_days_before_default: 1
     exam_min_days_between_group_exams_default: 1
 
@@ -42,6 +43,13 @@ services:
 
     App\Service\Telegram\TelegramNotificationPublisherInterface:
         alias: App\Service\Telegram\AmqpTelegramNotificationPublisher
+
+    App\Service\AI\TelegramIntentParserInterface:
+        alias: App\Service\AI\ParseTelegramIntentService
+
+    App\Service\AI\ParseTelegramIntentService:
+        arguments:
+            $model: '%env(default:gemini_model_default:GEMINI_MODEL)%'
 
     App\Service\ScheduleGeneration\AmqpScheduleGenerationPublisher:
         arguments:
