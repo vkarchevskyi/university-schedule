@@ -19,6 +19,8 @@ use App\Entity\TimeSlot;
 use App\Enum\LessonType;
 use App\Enum\ScheduleStatus;
 use App\Enum\WeekParity;
+use App\Service\AI\TelegramIntent;
+use App\Tests\Double\FakeTelegramIntentParser;
 use App\Tests\Double\FakeTelegramSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -41,6 +43,7 @@ final class TelegramWebhookControllerTest extends WebTestCase
         $schemaTool->createSchema($metadata);
 
         FakeTelegramSender::reset();
+        FakeTelegramIntentParser::reset();
     }
 
     public function testWebhookRejectsInvalidSecret(): void
@@ -57,6 +60,7 @@ final class TelegramWebhookControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(204);
         self::assertStringContainsString('/schedule group КН-22', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame(0, FakeTelegramIntentParser::$calls);
     }
 
     public function testScheduleCommandReturnsPublicSchedule(): void
@@ -104,6 +108,78 @@ final class TelegramWebhookControllerTest extends WebTestCase
         self::assertCount(0, $this->entityManager->getRepository(TelegramSubscription::class)->findAll());
     }
 
+    public function testFreeTextScheduleLookupUsesAiIntent(): void
+    {
+        $this->createPublishedScheduleFixtures();
+        FakeTelegramIntentParser::$intent = $this->intent('get_schedule', 'group', 'КН-22', date: '2026-05-12', range: 'tomorrow');
+
+        $this->postUpdate('Покажи розклад КН-22 завтра');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(1, FakeTelegramIntentParser::$calls);
+        self::assertStringContainsString('Розклад на тиждень з 2026-05-11', FakeTelegramSender::$messages[0]['text']);
+        self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
+    }
+
+    public function testFreeTextRoomScheduleLookupUsesAiIntent(): void
+    {
+        $this->createPublishedScheduleFixtures();
+        FakeTelegramIntentParser::$intent = $this->intent('get_schedule', 'room', 'Lab 1', weekStart: '2026-05-11', range: 'week');
+
+        $this->postUpdate('Що в аудиторії Lab 1 цього тижня?');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
+        self::assertStringContainsString('Lab 1', FakeTelegramSender::$messages[0]['text']);
+    }
+
+    public function testFreeTextSubscribeUsesAiIntent(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+        FakeTelegramIntentParser::$intent = $this->intent('subscribe', 'teacher', 'John Doe');
+
+        $this->postUpdate('Підпиши мене на викладача John Doe');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('створено', FakeTelegramSender::$messages[0]['text']);
+        self::assertCount(1, $this->entityManager->getRepository(TelegramSubscription::class)->findBy([
+            'telegramChatId' => 123456,
+            'entityType' => 'teacher',
+            'entityId' => $fixtures->teacher->getId(),
+        ]));
+    }
+
+    public function testFreeTextRoomSubscribeIsRejected(): void
+    {
+        $this->createPublishedScheduleFixtures();
+        FakeTelegramIntentParser::$intent = $this->intent('subscribe', 'room', 'Lab 1');
+
+        $this->postUpdate('Підпиши мене на аудиторію Lab 1');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Підписки доступні лише для груп і викладачів', FakeTelegramSender::$messages[0]['text']);
+    }
+
+    public function testLowConfidenceAiIntentReturnsClarification(): void
+    {
+        FakeTelegramIntentParser::$intent = $this->intent('get_schedule', 'group', 'КН-22', confidence: 0.4, clarificationQuestion: 'Уточніть групу.');
+
+        $this->postUpdate('розклад');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame('Уточніть групу.', FakeTelegramSender::$messages[0]['text']);
+    }
+
+    public function testAiProviderFailureReturnsTemporaryUnavailableMessage(): void
+    {
+        FakeTelegramIntentParser::$throws = true;
+
+        $this->postUpdate('Покажи розклад');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('AI-помічник тимчасово недоступний', FakeTelegramSender::$messages[0]['text']);
+    }
+
     private function postUpdate(string $text, string $secret = 'test-secret'): void
     {
         $this->client->jsonRequest('POST', '/api/telegram/webhook', [
@@ -116,6 +192,29 @@ final class TelegramWebhookControllerTest extends WebTestCase
         ], [
             'HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN' => $secret,
         ]);
+    }
+
+    private function intent(
+        string $name,
+        ?string $targetType = null,
+        ?string $targetName = null,
+        float $confidence = 0.95,
+        ?string $date = null,
+        ?string $weekStart = null,
+        ?string $range = null,
+        ?string $clarificationQuestion = null,
+    ): TelegramIntent {
+        $intent = new TelegramIntent();
+        $intent->intent = $name;
+        $intent->confidence = $confidence;
+        $intent->targetType = $targetType;
+        $intent->targetName = $targetName;
+        $intent->date = $date;
+        $intent->weekStart = $weekStart;
+        $intent->range = $range;
+        $intent->clarificationQuestion = $clarificationQuestion;
+
+        return $intent;
     }
 
     private function createPublishedScheduleFixtures(): TelegramScheduleFixtures
@@ -148,11 +247,14 @@ final class TelegramWebhookControllerTest extends WebTestCase
 
         $this->entityManager->flush();
 
-        return new TelegramScheduleFixtures($group);
+        return new TelegramScheduleFixtures($group, $teacher);
     }
 }
 
 final readonly class TelegramScheduleFixtures
 {
-    public function __construct(public StudentGroup $group) {}
+    public function __construct(
+        public StudentGroup $group,
+        public Teacher $teacher,
+    ) {}
 }

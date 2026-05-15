@@ -570,10 +570,13 @@ Initial supported text commands:
 - `/start`
 - `/schedule group КН-22`
 - `/schedule teacher John Doe`
+- `/schedule room Lab 1`
 - `/subscribe group КН-22`
 - `/subscribe teacher John Doe`
 - `/unsubscribe group КН-22`
 - `/unsubscribe teacher John Doe`
+
+Free-text Telegram messages are accepted for schedule lookup, subscriptions, unsubscriptions, and help. Free-text parsing is handled by Symfony AI with Gemini and must resolve extracted entity names against database data before returning schedule information.
 
 Responses are sent back through Telegram, not in the HTTP response body. The webhook returns `204 No Content` when an update is accepted.
 

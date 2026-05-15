@@ -55,6 +55,17 @@ Initial command format:
 
 Free-text messages are passed to the AI intent parser. If the intent is `get_schedule`, the bot resolves the entity against the database and returns schedule data through the normal schedule service.
 
+The first implementation uses Symfony AI with Gemini for free-text parsing. Slash commands bypass AI and stay deterministic.
+
+Supported free-text actions:
+
+- Schedule lookup for groups, teachers, and rooms.
+- Subscribe to group or teacher schedule updates.
+- Unsubscribe from group or teacher schedule updates.
+- Help requests.
+
+Room subscriptions are rejected because subscriptions are limited to groups and teachers in the first release.
+
 ## State
 
 Redis should be used for temporary multi-step command state. Avoid server sessions for Telegram flows.
@@ -95,6 +106,8 @@ The first implementation publishes notification jobs on schedule publication. A 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_WEBHOOK_SECRET`
 - `TELEGRAM_NOTIFICATIONS_QUEUE`, default `telegram_notifications`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`, default `gemini-2.5-flash`
 
 ## Decisions
 

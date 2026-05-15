@@ -93,6 +93,7 @@ Expected categories:
 - Telegram webhook secret.
 - Telegram notification queue name, default `telegram_notifications`.
 - Gemini API key.
+- Gemini model name, default `gemini-2.5-flash`.
 
 Do not commit real secrets.
 
