@@ -104,4 +104,11 @@ The system prompt should:
 
 ## Provider
 
-Gemini API is the selected first-release provider. The implementation should still keep provider-specific code behind a small service boundary so the provider can be changed later.
+Gemini API is the selected first-release provider. The Symfony API uses Symfony AI packages for provider integration and keeps provider-specific code behind `rest-api/src/Service/AI`.
+
+Runtime configuration:
+
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`, default `gemini-2.5-flash`
+
+The Telegram handler treats confidence below `0.70` as ambiguous and returns a Ukrainian clarification message instead of executing the intent.
