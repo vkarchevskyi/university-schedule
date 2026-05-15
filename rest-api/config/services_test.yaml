@@ -16,6 +16,9 @@ services:
     App\Tests\Double\FakeTelegramNotificationPublisher:
         public: true
 
+    App\Tests\Double\FakeTelegramIntentParser:
+        public: true
+
     App\Service\ScheduleValidation\ScheduleValidationClientInterface:
         alias: App\Tests\Double\FakeScheduleValidationClient
 
@@ -30,6 +33,9 @@ services:
 
     App\Service\Telegram\TelegramNotificationPublisherInterface:
         alias: App\Tests\Double\FakeTelegramNotificationPublisher
+
+    App\Service\AI\TelegramIntentParserInterface:
+        alias: App\Tests\Double\FakeTelegramIntentParser
 
     App\Service\Telegram\VerifyTelegramWebhookSecretService:
         arguments:

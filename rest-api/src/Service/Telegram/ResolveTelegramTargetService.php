@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Telegram;
 
 use App\Entity\Group as StudentGroup;
+use App\Entity\Room;
 use App\Entity\Teacher;
 use App\Exception\ApiException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,8 @@ final readonly class ResolveTelegramTargetService
         return match ($this->normalize($type)) {
             'group' => $this->group($name),
             'teacher' => $this->teacher($name),
-            default => throw ApiException::validation(['type' => 'Підтримуються лише group або teacher.']),
+            'room' => $this->room($name),
+            default => throw ApiException::validation(['type' => 'Підтримуються лише group, teacher або room.']),
         };
     }
 
@@ -57,6 +59,23 @@ final readonly class ResolveTelegramTargetService
         }
 
         throw ApiException::validation(['target' => 'Викладача не знайдено.']);
+    }
+
+    private function room(string $name): TelegramTarget
+    {
+        $room = $this->entityManager->getRepository(Room::class)->createQueryBuilder('r')
+            ->andWhere('r.name = :rawName OR LOWER(r.name) = :name')
+            ->setParameter('rawName', trim($name))
+            ->setParameter('name', $this->normalize($name))
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$room instanceof Room || $room->getId() === null) {
+            throw ApiException::validation(['target' => 'Аудиторію не знайдено.']);
+        }
+
+        return new TelegramTarget('room', $room->getId(), $room->getName());
     }
 
     private function normalize(string $value): string
