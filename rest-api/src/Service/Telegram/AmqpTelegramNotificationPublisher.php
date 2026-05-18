@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Telegram;
 
-use App\Exception\ApiException;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Service\Amqp\AmqpConnectionFactory;
 use PhpAmqpLib\Message\AMQPMessage;
 
 final readonly class AmqpTelegramNotificationPublisher implements TelegramNotificationPublisherInterface
@@ -13,23 +12,12 @@ final readonly class AmqpTelegramNotificationPublisher implements TelegramNotifi
     public function __construct(
         private string $rabbitmqUrl,
         private string $queueName,
+        private AmqpConnectionFactory $connections,
     ) {}
 
     public function publish(array $message): void
     {
-        $parts = parse_url($this->rabbitmqUrl);
-
-        if (!is_array($parts) || !isset($parts['host'])) {
-            throw ApiException::http(['error' => 'RabbitMQ URL is not configured.'], 500);
-        }
-
-        $connection = new AMQPStreamConnection(
-            $parts['host'],
-            (int) ($parts['port'] ?? 5672),
-            rawurldecode((string) ($parts['user'] ?? 'guest')),
-            rawurldecode((string) ($parts['pass'] ?? 'guest')),
-            $this->vhost($parts),
-        );
+        $connection = $this->connections->create($this->rabbitmqUrl);
 
         try {
             $channel = $connection->channel();
@@ -42,15 +30,5 @@ final readonly class AmqpTelegramNotificationPublisher implements TelegramNotifi
         } finally {
             $connection->close();
         }
-    }
-
-    /** @param array<string, mixed> $parts */
-    private function vhost(array $parts): string
-    {
-        $rawPath = $parts['path'] ?? '/';
-        $path = is_string($rawPath) ? $rawPath : '/';
-        $vhost = ltrim($path, '/');
-
-        return $vhost === '' ? '/' : rawurldecode($vhost);
     }
 }
