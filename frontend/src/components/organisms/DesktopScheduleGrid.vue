@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import ScheduleCard from '@/components/molecules/ScheduleCard.vue'
 import { labels } from '@/i18n/publicSchedule'
 import type { ScheduleItem } from '@/types/publicSchedule'
@@ -9,8 +11,22 @@ const props = defineProps<{
   items: ScheduleItem[]
 }>()
 
+const slotNumbers = computed(() => [...new Set(props.items.map((item) => item.timeSlot.number))])
+const itemsByCell = computed(() => {
+  const map = new Map<string, ScheduleItem[]>()
+
+  for (const item of props.items) {
+    const key = cellKey(item.date, item.timeSlot.number)
+    const items = map.get(key) ?? []
+    items.push(item)
+    map.set(key, items)
+  }
+
+  return map
+})
+
 function itemsFor(date: string, slotNumber: number): ScheduleItem[] {
-  return props.items.filter((item) => item.date === date && item.timeSlot.number === slotNumber)
+  return itemsByCell.value.get(cellKey(date, slotNumber)) ?? []
 }
 
 function slotLabel(slotNumber: number): string {
@@ -21,6 +37,10 @@ function slotLabel(slotNumber: number): string {
   }
 
   return `${item.timeSlot.startsAt.slice(0, 5)}-${item.timeSlot.endsAt.slice(0, 5)}`
+}
+
+function cellKey(date: string, slotNumber: number): string {
+  return `${date}-${slotNumber}`
 }
 </script>
 
@@ -37,7 +57,7 @@ function slotLabel(slotNumber: number): string {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="slotNumber in [...new Set(items.map((item) => item.timeSlot.number))]" :key="slotNumber">
+        <tr v-for="slotNumber in slotNumbers" :key="slotNumber">
           <th scope="row">{{ slotLabel(slotNumber) }}</th>
           <td v-for="date in weekDates(weekStart)" :key="`${date}-${slotNumber}`">
             <ScheduleCard

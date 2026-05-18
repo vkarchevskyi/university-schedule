@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import { adminCopy } from '@/i18n/admin'
 import { labels } from '@/i18n/publicSchedule'
 import type { AdminScheduleEntry, AdminTimeSlot, LessonCard, WeekParity } from '@/types/adminSchedule'
@@ -13,8 +15,21 @@ const emit = defineEmits<{
   select: [entry: AdminScheduleEntry]
 }>()
 
+const entriesByCell = computed(() => {
+  const map = new Map<string, AdminScheduleEntry[]>()
+
+  for (const entry of props.entries) {
+    const key = cellKey(entry.dayOfWeek, entry.timeSlotId)
+    const entries = map.get(key) ?? []
+    entries.push(entry)
+    map.set(key, entries)
+  }
+
+  return map
+})
+
 function entriesFor(dayOfWeek: number, timeSlotId: number): AdminScheduleEntry[] {
-  return props.entries.filter((entry) => entry.dayOfWeek === dayOfWeek && entry.timeSlotId === timeSlotId)
+  return entriesByCell.value.get(cellKey(dayOfWeek, timeSlotId)) ?? []
 }
 
 function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
@@ -28,6 +43,10 @@ function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
 
 function weekParityLabel(value: WeekParity): string {
   return value === 'both' ? 'Обидва тижні' : value === 'odd' ? 'Непарний' : 'Парний'
+}
+
+function cellKey(dayOfWeek: number, timeSlotId: number): string {
+  return `${dayOfWeek}-${timeSlotId}`
 }
 </script>
 
