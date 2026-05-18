@@ -19,6 +19,17 @@ export function clearStoredToken(): void {
   window.localStorage.removeItem(tokenStorageKey)
 }
 
+function buildApiUrl(path: string): string {
+  const normalizedBaseUrl = apiBaseUrl.replace(/\/+$/, '')
+  const normalizedPath = path.replace(/^\/+/, '')
+
+  if (normalizedBaseUrl.endsWith('/api') && normalizedPath.startsWith('api/')) {
+    return `${normalizedBaseUrl}/${normalizedPath.slice(4)}`
+  }
+
+  return `${normalizedBaseUrl}/${normalizedPath}`
+}
+
 export async function requestJson<T>(
   path: string,
   options: RequestInit & { authenticated?: boolean } = {},
@@ -37,7 +48,7 @@ export async function requestJson<T>(
     }
   }
 
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(buildApiUrl(path), {
     ...options,
     headers,
   })
