@@ -110,6 +110,24 @@ class ScheduleEntry
         $this->subject = $subject;
     }
 
+    public function reschedule(
+        Subject $subject,
+        Teacher $teacher,
+        LessonType $lessonType,
+        Room $room,
+        TimeSlot $timeSlot,
+        int $dayOfWeek,
+        WeekParity $weekParity,
+    ): void {
+        $this->subject = $subject;
+        $this->teacher = $teacher;
+        $this->lessonType = $lessonType;
+        $this->room = $room;
+        $this->timeSlot = $timeSlot;
+        $this->dayOfWeek = $dayOfWeek;
+        $this->weekParity = $weekParity;
+    }
+
     public function getTeacher(): Teacher
     {
         return $this->teacher;

@@ -51,8 +51,7 @@ final class PublishScheduleService extends AbstractEntityService
         $publishedAt = new \DateTimeImmutable();
         $admin = $this->currentAdmin();
         $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $admin): ScheduleResource {
-            $schedule->setStatus(ScheduleStatus::Published);
-            $schedule->setPublishedAt($publishedAt);
+            $schedule->publish($publishedAt);
             $this->publicationLogger->handle($admin, $schedule, $publishedAt);
 
             return $this->mapper->map($schedule);

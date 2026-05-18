@@ -91,6 +91,12 @@ class Schedule
         $this->status = $status;
     }
 
+    public function publish(\DateTimeImmutable $publishedAt): void
+    {
+        $this->status = ScheduleStatus::Published;
+        $this->publishedAt = $publishedAt;
+    }
+
     public function getValidFrom(): \DateTimeImmutable
     {
         return $this->validFrom;

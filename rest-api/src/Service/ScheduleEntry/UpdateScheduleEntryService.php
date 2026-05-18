@@ -34,13 +34,15 @@ final class UpdateScheduleEntryService extends AbstractEntityService
         $resolved = $this->resolver->resolve($schedule, $data, $entry);
         $this->conflicts->validate($schedule, $resolved, $entry);
 
-        $entry->setSubject($resolved->subject);
-        $entry->setTeacher($resolved->teacher);
-        $entry->setLessonType($resolved->lessonType);
-        $entry->setRoom($resolved->room);
-        $entry->setTimeSlot($resolved->timeSlot);
-        $entry->setDayOfWeek($resolved->dayOfWeek);
-        $entry->setWeekParity($resolved->weekParity);
+        $entry->reschedule(
+            $resolved->subject,
+            $resolved->teacher,
+            $resolved->lessonType,
+            $resolved->room,
+            $resolved->timeSlot,
+            $resolved->dayOfWeek,
+            $resolved->weekParity,
+        );
         if ($data->groupIds !== null) {
             $this->replaceGroups($entry, $resolved);
         }
