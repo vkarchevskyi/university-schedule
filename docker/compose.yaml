@@ -1,6 +1,112 @@
 name: university-schedule
 
 services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/frontend/Dockerfile
+      target: prod
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
+    depends_on:
+      rest-api:
+        condition: service_started
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+  rest-api:
+    build:
+      context: ..
+      dockerfile: docker/rest-api/Dockerfile
+      target: prod
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      APP_SECRET: ${APP_SECRET:-change-me}
+      DEFAULT_URI: ${DEFAULT_URI:-http://localhost}
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=16&charset=utf8"
+      REDIS_URL: "redis://redis:6379"
+      RABBITMQ_URL: "amqp://${RABBITMQ_DEFAULT_USER:-app}:${RABBITMQ_DEFAULT_PASS:-!ChangeMe!}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST:-app}"
+      SCHEDULE_GENERATION_QUEUE: ${SCHEDULE_GENERATION_QUEUE:-schedule_generation}
+      EXAM_SCHEDULE_GENERATION_QUEUE: ${EXAM_SCHEDULE_GENERATION_QUEUE:-exam_schedule_generation}
+      TELEGRAM_NOTIFICATIONS_QUEUE: ${TELEGRAM_NOTIFICATIONS_QUEUE:-telegram_notifications}
+      SCHEDULE_SERVICE_URL: "http://schedule:8081"
+      EXAM_CONSULTATION_DAYS_BEFORE: ${EXAM_CONSULTATION_DAYS_BEFORE:-1}
+      EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS: ${EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS:-1}
+      JWT_SECRET_KEY: /app/config/jwt/private.pem
+      JWT_PUBLIC_KEY: /app/config/jwt/public.pem
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-change-me}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      rest-api-migrate:
+        condition: service_completed_successfully
+    expose:
+      - "80"
+    volumes:
+      - jwt_keys:/app/config/jwt
+      - rest_api_var:/app/var
+
+  rest-api-migrate:
+    build:
+      context: ..
+      dockerfile: docker/rest-api/Dockerfile
+      target: prod
+    command: ["php", "bin/console", "doctrine:migrations:migrate", "--no-interaction"]
+    restart: "no"
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      APP_SECRET: ${APP_SECRET:-change-me}
+      DEFAULT_URI: ${DEFAULT_URI:-http://localhost}
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=16&charset=utf8"
+      JWT_SECRET_KEY: /app/config/jwt/private.pem
+      JWT_PUBLIC_KEY: /app/config/jwt/public.pem
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-change-me}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - jwt_keys:/app/config/jwt
+      - rest_api_var:/app/var
+
+  schedule:
+    build:
+      context: ..
+      dockerfile: docker/schedule/Dockerfile
+      target: prod
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?sslmode=disable"
+      RABBITMQ_URL: "amqp://${RABBITMQ_DEFAULT_USER:-app}:${RABBITMQ_DEFAULT_PASS:-!ChangeMe!}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST:-app}"
+      SCHEDULE_GENERATION_QUEUE: ${SCHEDULE_GENERATION_QUEUE:-schedule_generation}
+      EXAM_SCHEDULE_GENERATION_QUEUE: ${EXAM_SCHEDULE_GENERATION_QUEUE:-exam_schedule_generation}
+      SCHEDULE_SERVICE_ADDRESS: ":8081"
+      EXAM_CONSULTATION_DAYS_BEFORE: ${EXAM_CONSULTATION_DAYS_BEFORE:-1}
+      EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS: ${EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS:-1}
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      rest-api-migrate:
+        condition: service_completed_successfully
+    expose:
+      - "8081"
+
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
@@ -48,6 +154,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
+  caddy_data:
+  caddy_config:
   database_data:
   redis_data:
   rabbitmq_data:
+  jwt_keys:
+  rest_api_var:
