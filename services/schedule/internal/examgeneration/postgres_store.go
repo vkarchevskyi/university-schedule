@@ -121,7 +121,7 @@ func (store *PostgresStore) CreateDraftExamSchedule(ctx context.Context, message
 		INSERT INTO exam_schedules (semester_id, status, created_by, created_at)
 		VALUES ($1, 1, $2, NOW())
 		RETURNING id
-	`, message.SemesterID, message.RequestedByAdminID).Scan(&examScheduleID); err != nil {
+	`, message.SemesterID, message.RequestedByUserID).Scan(&examScheduleID); err != nil {
 		return 0, fmt.Errorf("insert generated exam schedule: %w", err)
 	}
 

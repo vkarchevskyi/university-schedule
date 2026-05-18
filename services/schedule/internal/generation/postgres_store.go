@@ -113,7 +113,7 @@ func (store *PostgresStore) CreateDraftSchedule(ctx context.Context, message Job
 		INSERT INTO schedules (semester_id, status, valid_from, valid_to, created_by, created_at)
 		VALUES ($1, 'draft', $2, $3, $4, NOW())
 		RETURNING id
-	`, semester.ID, semester.StartsAt, semester.EndsAt, message.RequestedByAdminID).Scan(&scheduleID); err != nil {
+	`, semester.ID, semester.StartsAt, semester.EndsAt, message.RequestedByUserID).Scan(&scheduleID); err != nil {
 		return 0, fmt.Errorf("insert generated schedule: %w", err)
 	}
 
