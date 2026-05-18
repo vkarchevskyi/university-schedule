@@ -38,14 +38,15 @@ describe('App', () => {
     await auth.login('admin@example.com', 'correct-password')
 
     expect(auth.token).toBe('jwt-token')
-    expect(auth.admin?.email).toBe('admin@example.com')
-    expect(window.localStorage.getItem('university-schedule.admin-token')).toBe('jwt-token')
+    expect(auth.user?.email).toBe('admin@example.com')
+    expect(auth.user?.role).toBe('admin')
+    expect(window.localStorage.getItem('university-schedule.user-token')).toBe('jwt-token')
 
     auth.logout()
 
     expect(auth.token).toBeNull()
-    expect(auth.admin).toBeNull()
-    expect(window.localStorage.getItem('university-schedule.admin-token')).toBeNull()
+    expect(auth.user).toBeNull()
+    expect(window.localStorage.getItem('university-schedule.user-token')).toBeNull()
   })
 
   it('sends bearer token for authenticated requests', async () => {
@@ -54,10 +55,10 @@ describe('App', () => {
       const headers = options?.headers
       authorizationHeader = headers instanceof Headers ? headers.get('Authorization') : null
 
-      return jsonResponse({ admin: adminResponse })
+      return jsonResponse({ user: userResponse })
     })
     vi.stubGlobal('fetch', fetchMock)
-    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
 
     await requestJson('/api/auth/me', { authenticated: true })
 
@@ -65,7 +66,12 @@ describe('App', () => {
   })
 
   it('sends schedule entry mutations through authenticated API requests', async () => {
-    const requests: Array<{ url: string; method: string; body: string | null; authorization: string | null }> = []
+    const requests: Array<{
+      url: string
+      method: string
+      body: string | null
+      authorization: string | null
+    }> = []
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
@@ -77,10 +83,12 @@ describe('App', () => {
           authorization: headers instanceof Headers ? headers.get('Authorization') : null,
         })
 
-        return options?.method === 'DELETE' ? new Response(null, { status: 204 }) : jsonResponse({ id: 99 })
+        return options?.method === 'DELETE'
+          ? new Response(null, { status: 204 })
+          : jsonResponse({ id: 99 })
       }),
     )
-    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
 
     await createScheduleEntry(12, {
       teachingLoadIds: [44],
@@ -128,7 +136,9 @@ function mockFetch(): typeof fetch {
 
     if (url.includes('/api/public/groups')) {
       return jsonResponse({
-        items: [{ id: 1, name: 'КН-22', speciality: "Комп'ютерні науки", course: 4, studentCount: 24 }],
+        items: [
+          { id: 1, name: 'КН-22', speciality: "Комп'ютерні науки", course: 4, studentCount: 24 },
+        ],
       })
     }
 
@@ -176,11 +186,11 @@ function mockAuthFetch(): typeof fetch {
     if (url.includes('/api/auth/login')) {
       return jsonResponse({
         token: 'jwt-token',
-        admin: adminResponse,
+        user: userResponse,
       })
     }
 
-    return jsonResponse({ admin: adminResponse })
+    return jsonResponse({ user: userResponse })
   }) as typeof fetch
 }
 
@@ -196,9 +206,10 @@ async function flushPromises(): Promise<void> {
   await new Promise((resolve) => window.setTimeout(resolve, 0))
 }
 
-const adminResponse = {
+const userResponse = {
   id: 1,
   firstName: 'Ada',
   lastName: 'Lovelace',
   email: 'admin@example.com',
+  role: 'admin',
 }

@@ -165,14 +165,14 @@ test('logs out and clears the admin session', async ({ page }) => {
   await page.getByTestId('logout-button').click()
 
   await expect(page).toHaveURL(/\/admin\/login$/)
-  await expect(page.evaluate(() => window.localStorage.getItem('university-schedule.admin-token'))).resolves.toBeNull()
+  await expect(page.evaluate(() => window.localStorage.getItem('university-schedule.user-token'))).resolves.toBeNull()
 })
 
 test('loads persisted admin token on protected routes', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
   await page.addInitScript(() => {
-    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
   })
 
   await page.goto('/admin')
@@ -186,7 +186,7 @@ test('opens schedule management and creates a draft schedule', async ({ page }) 
   await mockSuccessfulAuth(page)
   await mockAdminScheduleManagement(page)
   await page.addInitScript(() => {
-    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
   })
 
   await page.goto('/admin/schedules')
@@ -205,7 +205,7 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   await mockSuccessfulAuth(page)
   await mockAdminScheduleManagement(page)
   await page.addInitScript(() => {
-    window.localStorage.setItem('university-schedule.admin-token', 'jwt-token')
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
   })
 
   await page.goto('/admin/schedules/12')
@@ -265,7 +265,7 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'jwt-token',
-        admin: adminResponse,
+        user: userResponse,
       }),
     })
   })
@@ -279,7 +279,7 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
 
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ admin: adminResponse }),
+      body: JSON.stringify({ user: userResponse }),
     })
   })
 }
@@ -412,11 +412,12 @@ const scheduleItems = [
   },
 ]
 
-const adminResponse = {
+const userResponse = {
   id: 1,
   firstName: 'Ada',
   lastName: 'Lovelace',
   email: 'admin@example.com',
+  role: 'admin',
 }
 
 interface AdminScheduleEntryPayload {

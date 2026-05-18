@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\AcademicYear;
-use App\Entity\Admin;
+use App\Entity\User;
+use App\Enum\UserRole;
 use App\Entity\Group as StudentGroup;
 use App\Entity\Room;
 use App\Entity\Schedule;
@@ -219,7 +220,7 @@ final class TelegramWebhookControllerTest extends WebTestCase
 
     private function createPublishedScheduleFixtures(): TelegramScheduleFixtures
     {
-        $admin = new Admin('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'));
+        $admin = new User('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'), UserRole::Admin);
         $academicYear = new AcademicYear('2025/2026', new \DateTimeImmutable('2025-09-01'), new \DateTimeImmutable('2026-06-30'));
         $semester = new Semester($academicYear, 2, new \DateTimeImmutable('2026-05-11'), new \DateTimeImmutable('2026-06-30'), WeekParity::Odd);
         $group = new StudentGroup('КН-22', 'Computer Science', 4, 24);

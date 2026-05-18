@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\AcademicYear;
-use App\Entity\Admin;
+use App\Entity\User;
+use App\Enum\UserRole;
 use App\Entity\Group as StudentGroup;
 use App\Entity\Lesson;
 use App\Entity\LessonGroup;
@@ -165,7 +166,7 @@ final class PublicScheduleControllerTest extends WebTestCase
         ScheduleStatus $status = ScheduleStatus::Published,
         WeekParity $weekParity = WeekParity::Both,
     ): PublicScheduleFixtures {
-        $admin = new Admin('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'));
+        $admin = new User('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'), UserRole::Admin);
         $academicYear = new AcademicYear('2026/2027', new \DateTimeImmutable('2026-09-01'), new \DateTimeImmutable('2027-06-30'));
         $semester = new Semester($academicYear, 1, new \DateTimeImmutable('2026-09-07'), new \DateTimeImmutable('2026-12-31'), WeekParity::Odd);
         $group = new StudentGroup('KN-22', 'Computer Science', 4, 24);

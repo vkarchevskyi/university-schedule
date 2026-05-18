@@ -3,7 +3,7 @@ package generation
 type JobMessage struct {
 	JobID              string `json:"jobId"`
 	SemesterID         int64  `json:"semesterId"`
-	RequestedByAdminID int64  `json:"requestedByAdminId"`
+	RequestedByUserID int64  `json:"requestedByUserId"`
 }
 
 type Result struct {

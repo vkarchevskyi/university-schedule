@@ -6,7 +6,8 @@ namespace App\Tests\Domain\Schedule;
 
 use App\Domain\Schedule\ScheduleEntryConflictPolicy;
 use App\Entity\AcademicYear;
-use App\Entity\Admin;
+use App\Entity\User;
+use App\Enum\UserRole;
 use App\Entity\Group as StudentGroup;
 use App\Entity\Room;
 use App\Entity\Schedule;
@@ -111,7 +112,7 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
 
     private function fixtures(WeekParity $weekParity): ScheduleEntryConflictFixtures
     {
-        $admin = new Admin('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'));
+        $admin = new User('Ada', 'Lovelace', 'admin@example.com', 'hash', new \DateTimeImmutable('2026-01-01'), UserRole::Admin);
         $academicYear = new AcademicYear('2026/2027', new \DateTimeImmutable('2026-09-01'), new \DateTimeImmutable('2027-06-30'));
         $semester = new Semester($academicYear, 1, new \DateTimeImmutable('2026-09-07'), new \DateTimeImmutable('2026-12-31'), WeekParity::Odd);
         $schedule = new Schedule($semester, ScheduleStatus::Draft, new \DateTimeImmutable('2026-09-07'), new \DateTimeImmutable('2026-12-31'), $admin, new \DateTimeImmutable('2026-08-01'));

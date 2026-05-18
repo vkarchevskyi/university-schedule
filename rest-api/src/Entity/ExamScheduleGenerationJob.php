@@ -21,9 +21,9 @@ class ExamScheduleGenerationJob
     #[ORM\JoinColumn(name: 'semester_id', referencedColumnName: 'id', nullable: false)]
     private Semester $semester;
 
-    #[ORM\ManyToOne(targetEntity: Admin::class)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'requested_by', referencedColumnName: 'id', nullable: false)]
-    private Admin $requestedBy;
+    private User $requestedBy;
 
     #[ORM\Column(type: Types::STRING, enumType: ExamScheduleGenerationJobStatus::class)]
     private ExamScheduleGenerationJobStatus $status;
@@ -54,7 +54,7 @@ class ExamScheduleGenerationJob
     #[ORM\Column(name: 'finished_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $finishedAt = null;
 
-    public function __construct(string $id, Semester $semester, Admin $requestedBy, \DateTimeImmutable $createdAt)
+    public function __construct(string $id, Semester $semester, User $requestedBy, \DateTimeImmutable $createdAt)
     {
         $this->id = $id;
         $this->semester = $semester;
@@ -73,7 +73,7 @@ class ExamScheduleGenerationJob
         return $this->semester;
     }
 
-    public function getRequestedBy(): Admin
+    public function getRequestedBy(): User
     {
         return $this->requestedBy;
     }

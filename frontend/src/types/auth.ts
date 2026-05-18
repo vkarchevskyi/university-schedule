@@ -1,15 +1,18 @@
-export interface AdminProfile {
+export type UserRole = 'user' | 'admin'
+
+export interface UserProfile {
   id: number
   firstName: string
   lastName: string
   email: string
+  role: UserRole
 }
 
 export interface LoginResponse {
   token: string
-  admin: AdminProfile
+  user: UserProfile
 }
 
-export interface CurrentAdminResponse {
-  admin: AdminProfile
+export interface CurrentUserResponse {
+  user: UserProfile
 }

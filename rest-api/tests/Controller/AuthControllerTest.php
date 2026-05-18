@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
-use App\Entity\Admin;
+use App\Entity\User;
+use App\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -43,10 +44,11 @@ final class AuthControllerTest extends WebTestCase
         $payload = $this->responseJson($this->client);
 
         self::assertArrayHasKey('token', $payload);
-        $admin = $this->objectValue($payload, 'admin');
+        $user = $this->objectValue($payload, 'user');
 
-        self::assertSame('admin@example.com', $this->stringValue($admin, 'email'));
-        self::assertSame('Ada', $this->stringValue($admin, 'firstName'));
+        self::assertSame('admin@example.com', $this->stringValue($user, 'email'));
+        self::assertSame('Ada', $this->stringValue($user, 'firstName'));
+        self::assertSame('admin', $this->stringValue($user, 'role'));
     }
 
     public function testApiCorsPreflightAllowsFrontendOrigin(): void
@@ -82,7 +84,7 @@ final class AuthControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(401);
     }
 
-    public function testCurrentAdminEndpointReturnsAuthenticatedAdmin(): void
+    public function testCurrentUserEndpointReturnsAuthenticatedAdminUser(): void
     {
         $this->createAdmin('admin@example.com', 'correct-password');
 
@@ -100,16 +102,17 @@ final class AuthControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $mePayload = $this->responseJson($this->client);
-        $admin = $this->objectValue($mePayload, 'admin');
+        $user = $this->objectValue($mePayload, 'user');
 
-        self::assertSame('admin@example.com', $this->stringValue($admin, 'email'));
+        self::assertSame('admin@example.com', $this->stringValue($user, 'email'));
+        self::assertSame('admin', $this->stringValue($user, 'role'));
     }
 
-    private function createAdmin(string $email, string $plainPassword): Admin
+    private function createAdmin(string $email, string $plainPassword): User
     {
         $passwordHash = password_hash($plainPassword, PASSWORD_BCRYPT);
 
-        $admin = new Admin('Ada', 'Lovelace', $email, $passwordHash, new \DateTimeImmutable());
+        $admin = new User('Ada', 'Lovelace', $email, $passwordHash, new \DateTimeImmutable(), UserRole::Admin);
 
         $this->entityManager->persist($admin);
         $this->entityManager->flush();

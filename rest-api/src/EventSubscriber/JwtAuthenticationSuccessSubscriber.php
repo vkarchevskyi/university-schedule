@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
-use App\Entity\Admin;
+use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,18 +20,19 @@ final class JwtAuthenticationSuccessSubscriber implements EventSubscriberInterfa
 
     public function onAuthenticationSuccess(AuthenticationSuccessEvent $event): void
     {
-        $admin = $event->getUser();
+        $user = $event->getUser();
 
-        if (!$admin instanceof Admin) {
+        if (!$user instanceof User) {
             return;
         }
 
         $data = $event->getData();
-        $data['admin'] = [
-            'id' => $admin->getId(),
-            'firstName' => $admin->getFirstName(),
-            'lastName' => $admin->getLastName(),
-            'email' => $admin->getEmail(),
+        $data['user'] = [
+            'id' => $user->getId(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'email' => $user->getEmail(),
+            'role' => $user->getRole()->value,
         ];
 
         $event->setData($data);

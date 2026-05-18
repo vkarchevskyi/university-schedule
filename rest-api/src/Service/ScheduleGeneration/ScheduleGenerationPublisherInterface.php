@@ -6,6 +6,6 @@ namespace App\Service\ScheduleGeneration;
 
 interface ScheduleGenerationPublisherInterface
 {
-    /** @param array{jobId: string, semesterId: int, requestedByAdminId: int} $message */
+    /** @param array{jobId: string, semesterId: int, requestedByUserId: int} $message */
     public function publish(array $message): void;
 }

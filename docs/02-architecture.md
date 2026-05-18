@@ -5,7 +5,7 @@
 ```mermaid
 flowchart LR
   PublicUser["Public user"] --> Frontend["Vue SPA"]
-  Admin["Administrator"] --> Frontend
+  Admin["Admin user"] --> Frontend
   TelegramUser["Telegram user"] --> Telegram["Telegram Bot API"]
 
   Frontend --> Api["Symfony REST API"]
@@ -58,7 +58,7 @@ Responsibilities:
 
 PostgreSQL stores authoritative structured data:
 
-- Admins.
+- Users with `user` or `admin` roles.
 - Academic years and semesters.
 - Groups, teachers, subjects, rooms, time slots.
 - Schedules and schedule entries.
