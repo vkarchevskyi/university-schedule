@@ -5,7 +5,7 @@ This document describes the intended REST API surface. Exact routes may evolve d
 ## General Rules
 
 - Request and response bodies use JSON.
-- Admin routes require authentication.
+- Admin routes require authentication with an `admin` role.
 - Public schedule routes do not require authentication.
 - Validation errors return RFC 7807-style JSON with field-level `violations`.
 - Mutation endpoints should be transaction-safe.
@@ -30,7 +30,7 @@ Validation error response:
 
 ### POST `/api/auth/login`
 
-Authenticates an administrator.
+Authenticates a user.
 
 Request:
 
@@ -46,11 +46,12 @@ Response:
 ```json
 {
   "token": "string",
-  "admin": {
+  "user": {
     "id": 1,
     "firstName": "Ada",
     "lastName": "Lovelace",
-    "email": "admin@example.com"
+    "email": "admin@example.com",
+    "role": "admin"
   }
 }
 ```
@@ -59,7 +60,21 @@ Authentication uses JWT for the first release.
 
 ### GET `/api/auth/me`
 
-Returns the current administrator.
+Returns the current user.
+
+Response:
+
+```json
+{
+  "user": {
+    "id": 1,
+    "firstName": "Ada",
+    "lastName": "Lovelace",
+    "email": "admin@example.com",
+    "role": "admin"
+  }
+}
+```
 
 ## Admin Entities
 

@@ -4,9 +4,9 @@ The source of truth for the database scheme is `docs/db-diagram.uml`. Symfony en
 
 ## Core Entities
 
-### Admin
+### User
 
-Represents an administrator account.
+Represents an authenticated account. Users have one role: `user` or `admin`.
 
 Fields:
 
@@ -15,6 +15,7 @@ Fields:
 - lastName
 - email
 - passwordHash
+- role
 - createdAt
 
 Relationships:
@@ -22,6 +23,11 @@ Relationships:
 - creates schedules
 - creates exams
 - creates action log records
+
+Rules:
+
+- `user` grants the `ROLE_USER` authority.
+- `admin` grants both `ROLE_USER` and `ROLE_ADMIN` authorities.
 
 ### TelegramSubscription
 
@@ -408,7 +414,7 @@ Records administrative actions.
 Fields:
 
 - id
-- admin
+- user
 - action
 - entityType
 - entityId

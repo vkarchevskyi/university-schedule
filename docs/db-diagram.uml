@@ -4,13 +4,14 @@ skinparam linetype ortho
 skinparam ranksep 60
 skinparam nodesep 40
 
-entity admins {
+entity users {
   * id : bigint <<PK>>
   --
   * first_name : varchar
   * last_name : varchar
   * email : varchar
   * password_hash : varchar
+  * role : varchar
   * created_at : timestamp
 }
 
@@ -228,18 +229,18 @@ entity exam_schedule_entry_groups {
 entity action_log {
   * id : bigint <<PK>>
   --
-  * admin_id : bigint <<FK>>
+  * user_id : bigint <<FK>>
   * action : varchar
   * entity_type : varchar
   * entity_id : bigint
   * created_at : timestamp
 }
 
-admins ||--o{ action_log : "створює"
-admins ||--o{ exam_schedules : "створює"
-admins ||--o{ schedules : "створює"
-admins ||--o{ schedule_generation_jobs : "запускає"
-admins ||--o{ exam_schedule_generation_jobs : "запускає"
+users ||--o{ action_log : "створює"
+users ||--o{ exam_schedules : "створює"
+users ||--o{ schedules : "створює"
+users ||--o{ schedule_generation_jobs : "запускає"
+users ||--o{ exam_schedule_generation_jobs : "запускає"
 
 academic_years ||--o{ semesters : "містить"
 
