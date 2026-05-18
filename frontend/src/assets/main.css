@@ -192,57 +192,6 @@ select {
   justify-content: end;
 }
 
-.app-button {
-  min-height: 38px;
-  padding: 8px 12px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.app-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.app-button--primary {
-  color: #ffffff;
-  background: #176b87;
-}
-
-.app-button--secondary {
-  border-color: #b8c7ce;
-  color: #172026;
-  background: #ffffff;
-}
-
-.app-button--ghost {
-  color: #176b87;
-  background: transparent;
-}
-
-.state-message {
-  display: grid;
-  justify-items: start;
-  gap: 10px;
-  padding: 24px;
-  border: 1px solid #dbe4e8;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.state-message p {
-  margin: 0;
-  color: #52636e;
-  font-weight: 650;
-}
-
-.state-message--error {
-  border-color: #efb0aa;
-  background: #fff7f6;
-}
-
 .schedule-section {
   min-width: 0;
 }
@@ -361,25 +310,6 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.status-badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 3px 7px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.status-badge--warning {
-  color: #8f2f16;
-  background: #ffe7db;
-}
-
-.status-badge--info {
-  color: #13536a;
-  background: #dff4fb;
 }
 
 .mobile-schedule {
