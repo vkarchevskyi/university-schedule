@@ -54,13 +54,26 @@ class ScheduleEntryRepository extends ServiceEntityRepository
             default => $queryBuilder->andWhere('1 = 0'),
         };
 
-        $entries = $queryBuilder
+        $results = $queryBuilder
             ->addOrderBy('entry.dayOfWeek', 'ASC')
             ->addOrderBy('timeSlot.number', 'ASC')
             ->addOrderBy('entry.id', 'ASC')
             ->getQuery()
             ->getResult();
 
-        return array_values(array_filter($entries, static fn(mixed $entry): bool => $entry instanceof ScheduleEntry));
+        if (!is_array($results)) {
+            throw new \UnexpectedValueException('Expected schedule entry query to return a list.');
+        }
+
+        $entries = [];
+        foreach ($results as $entry) {
+            if (!$entry instanceof ScheduleEntry) {
+                throw new \UnexpectedValueException('Expected schedule entry query to return ScheduleEntry instances.');
+            }
+
+            $entries[] = $entry;
+        }
+
+        return $entries;
     }
 }
