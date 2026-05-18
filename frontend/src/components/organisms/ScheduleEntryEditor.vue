@@ -4,7 +4,13 @@ import { computed, ref, watch } from 'vue'
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import { adminCopy } from '@/i18n/admin'
-import type { AdminRoom, AdminScheduleEntry, LookupOption, ScheduleEntryPayload, WeekParity } from '@/types/adminSchedule'
+import type {
+  AdminRoom,
+  AdminScheduleEntry,
+  LookupOption,
+  ScheduleEntryPayload,
+  WeekParity,
+} from '@/types/adminSchedule'
 
 const props = defineProps<{
   entry: AdminScheduleEntry | null
@@ -20,7 +26,11 @@ const roomId = ref<number | null>(null)
 const weekParity = ref<WeekParity>('both')
 
 const roomOptions = computed<LookupOption[]>(() =>
-  props.rooms.map((room) => ({ id: room.id, label: room.name, description: `${room.type}, ${room.capacity}` })),
+  props.rooms.map((room) => ({
+    id: room.id,
+    label: room.name,
+    description: `${room.type}, ${room.capacity}`,
+  })),
 )
 
 watch(
@@ -53,15 +63,24 @@ function save(): void {
     />
     <label class="field" for="entry-week-parity">
       <span class="field__label">{{ adminCopy.weekParity }}</span>
-      <select id="entry-week-parity" v-model="weekParity" class="field__control" data-testid="week-parity-select">
+      <select
+        id="entry-week-parity"
+        v-model="weekParity"
+        class="field__control"
+        data-testid="week-parity-select"
+      >
         <option value="both">{{ adminCopy.weekParityOptions.both }}</option>
         <option value="odd">{{ adminCopy.weekParityOptions.odd }}</option>
         <option value="even">{{ adminCopy.weekParityOptions.even }}</option>
       </select>
     </label>
     <div class="entry-editor__actions">
-      <AppButton variant="primary" data-testid="save-entry" @click="save">{{ adminCopy.saveEntry }}</AppButton>
-      <AppButton variant="ghost" data-testid="delete-entry" @click="emit('delete')">{{ adminCopy.deleteEntry }}</AppButton>
+      <AppButton variant="primary" data-testid="save-entry" @click="save">{{
+        adminCopy.saveEntry
+      }}</AppButton>
+      <AppButton variant="ghost" data-testid="delete-entry" @click="emit('delete')">{{
+        adminCopy.deleteEntry
+      }}</AppButton>
     </div>
   </aside>
 </template>

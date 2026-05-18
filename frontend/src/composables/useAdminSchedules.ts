@@ -28,7 +28,10 @@ export function useAdminSchedules() {
     error.value = null
 
     try {
-      const [semesterResponse, scheduleResponse] = await Promise.all([listSemesters(), listSchedules()])
+      const [semesterResponse, scheduleResponse] = await Promise.all([
+        listSemesters(),
+        listSchedules(),
+      ])
       semesters.value = semesterResponse.items
       schedules.value = scheduleResponse.items
       selectedSemesterId.value = semesterResponse.items[0]?.id ?? null

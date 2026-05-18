@@ -45,8 +45,16 @@ const {
           {{ labels.retry }}
         </AppButton>
       </StateMessage>
-      <StateMessage v-else-if="isLoadingSchedule" :title="labels.loading" data-testid="loading-state" />
-      <StateMessage v-else-if="items.length === 0" :title="labels.empty" data-testid="empty-state" />
+      <StateMessage
+        v-else-if="isLoadingSchedule"
+        :title="labels.loading"
+        data-testid="loading-state"
+      />
+      <StateMessage
+        v-else-if="items.length === 0"
+        :title="labels.empty"
+        data-testid="empty-state"
+      />
       <section v-else class="schedule-section" aria-label="Weekly schedule">
         <DesktopScheduleGrid :week-start="weekStart" :items="items" />
         <MobileScheduleList :week-start="weekStart" :items="items" />

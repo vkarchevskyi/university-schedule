@@ -60,11 +60,7 @@ function cellKey(date: string, slotNumber: number): string {
         <tr v-for="slotNumber in slotNumbers" :key="slotNumber">
           <th scope="row">{{ slotLabel(slotNumber) }}</th>
           <td v-for="date in weekDates(weekStart)" :key="`${date}-${slotNumber}`">
-            <ScheduleCard
-              v-for="item in itemsFor(date, slotNumber)"
-              :key="item.id"
-              :item="item"
-            />
+            <ScheduleCard v-for="item in itemsFor(date, slotNumber)" :key="item.id" :item="item" />
           </td>
         </tr>
       </tbody>

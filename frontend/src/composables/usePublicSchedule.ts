@@ -1,6 +1,11 @@
 import { computed, onMounted, ref, watch } from 'vue'
 
-import { getPublicSchedule, listPublicGroups, listPublicRooms, listPublicTeachers } from '@/api/publicSchedule'
+import {
+  getPublicSchedule,
+  listPublicGroups,
+  listPublicRooms,
+  listPublicTeachers,
+} from '@/api/publicSchedule'
 import { labels } from '@/i18n/publicSchedule'
 import type {
   LookupOption,
@@ -49,7 +54,9 @@ export function usePublicSchedule() {
   })
 
   const items = computed(() => schedule.value?.items ?? [])
-  const hasLookups = computed(() => groups.value.length > 0 || teachers.value.length > 0 || rooms.value.length > 0)
+  const hasLookups = computed(
+    () => groups.value.length > 0 || teachers.value.length > 0 || rooms.value.length > 0,
+  )
 
   onMounted(async () => {
     await loadLookups()

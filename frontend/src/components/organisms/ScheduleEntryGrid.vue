@@ -3,7 +3,12 @@ import { computed } from 'vue'
 
 import { adminCopy } from '@/i18n/admin'
 import { labels } from '@/i18n/publicSchedule'
-import type { AdminScheduleEntry, AdminTimeSlot, LessonCard, WeekParity } from '@/types/adminSchedule'
+import type {
+  AdminScheduleEntry,
+  AdminTimeSlot,
+  LessonCard,
+  WeekParity,
+} from '@/types/adminSchedule'
 
 const props = defineProps<{
   entries: AdminScheduleEntry[]

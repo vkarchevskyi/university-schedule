@@ -37,7 +37,9 @@ export function weekDates(weekStart: string): string[] {
 }
 
 export function formatDisplayDate(value: string): string {
-  return new Intl.DateTimeFormat('uk-UA', { day: '2-digit', month: '2-digit' }).format(parseIsoDate(value))
+  return new Intl.DateTimeFormat('uk-UA', { day: '2-digit', month: '2-digit' }).format(
+    parseIsoDate(value),
+  )
 }
 
 function parseIsoDate(value: string): Date {

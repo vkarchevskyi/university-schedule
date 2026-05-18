@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
-import { SelectRoot, SelectValue, SelectTrigger, SelectContent, SelectItem, SelectItemText, SelectViewport } from 'reka-ui'
+import {
+  SelectRoot,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectViewport,
+} from 'reka-ui'
 
 import { cn } from '@/lib/utils'
 
@@ -19,7 +27,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <SelectRoot :model-value="String(modelValue)" @update:model-value="emit('update:modelValue', String($event))">
+  <SelectRoot
+    :model-value="String(modelValue)"
+    @update:model-value="emit('update:modelValue', String($event))"
+  >
     <SelectTrigger
       v-bind="$attrs"
       :class="

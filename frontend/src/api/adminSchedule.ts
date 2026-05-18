@@ -48,7 +48,10 @@ export function listLessonCards(scheduleId: number): Promise<ResourceCollection<
   return requestJson(`/api/admin/schedules/${scheduleId}/lesson-cards`, { authenticated: true })
 }
 
-export function createScheduleEntry(scheduleId: number, payload: ScheduleEntryPayload): Promise<unknown> {
+export function createScheduleEntry(
+  scheduleId: number,
+  payload: ScheduleEntryPayload,
+): Promise<unknown> {
   return requestJson(`/api/admin/schedules/${scheduleId}/entries`, {
     method: 'POST',
     body: JSON.stringify(payload),

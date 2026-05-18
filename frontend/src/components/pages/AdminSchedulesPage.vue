@@ -6,8 +6,15 @@ import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import { useAdminSchedules } from '@/composables/useAdminSchedules'
 import { adminCopy } from '@/i18n/admin'
 
-const { schedules, selectedSemesterId, isLoading, error, semesterOptions, createDraft, openSchedule } =
-  useAdminSchedules()
+const {
+  schedules,
+  selectedSemesterId,
+  isLoading,
+  error,
+  semesterOptions,
+  createDraft,
+  openSchedule,
+} = useAdminSchedules()
 </script>
 
 <template>
@@ -29,7 +36,11 @@ const { schedules, selectedSemesterId, isLoading, error, semesterOptions, create
             {{ adminCopy.createSchedule }}
           </AppButton>
         </div>
-        <StateMessage v-if="schedules.length === 0" :title="adminCopy.noSchedules" data-testid="no-schedules" />
+        <StateMessage
+          v-if="schedules.length === 0"
+          :title="adminCopy.noSchedules"
+          data-testid="no-schedules"
+        />
         <div v-else class="schedule-list" data-testid="schedule-list">
           <article v-for="schedule in schedules" :key="schedule.id" class="schedule-list__item">
             <div>

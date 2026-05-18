@@ -34,7 +34,11 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const isLoading = ref(true)
 
   const roomOptions = computed(() =>
-    rooms.value.map((room) => ({ id: room.id, label: room.name, description: `${room.type}, ${room.capacity}` })),
+    rooms.value.map((room) => ({
+      id: room.id,
+      label: room.name,
+      description: `${room.type}, ${room.capacity}`,
+    })),
   )
 
   onMounted(loadEditor)
@@ -77,13 +81,20 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
-  async function place(payload: { card: LessonCard; dayOfWeek: number; timeSlotId: number }): Promise<void> {
+  async function place(payload: {
+    card: LessonCard
+    dayOfWeek: number
+    timeSlotId: number
+  }): Promise<void> {
     if (selectedRoomId.value === null) {
       error.value = adminCopy.selectRoom
       return
     }
 
-    await createScheduleEntry(scheduleId, entryPayload(payload.card, payload.dayOfWeek, payload.timeSlotId))
+    await createScheduleEntry(
+      scheduleId,
+      entryPayload(payload.card, payload.dayOfWeek, payload.timeSlotId),
+    )
     await refreshScheduleData()
   }
 
@@ -113,7 +124,11 @@ export function useAdminScheduleEditor(scheduleId: number) {
     message.value = result.valid ? adminCopy.validationPassed : adminCopy.validationFailed
   }
 
-  function entryPayload(card: LessonCard, dayOfWeek: number, timeSlotId: number): ScheduleEntryPayload {
+  function entryPayload(
+    card: LessonCard,
+    dayOfWeek: number,
+    timeSlotId: number,
+  ): ScheduleEntryPayload {
     return {
       teachingLoadIds: [card.teachingLoadId],
       subjectId: card.subject.id,

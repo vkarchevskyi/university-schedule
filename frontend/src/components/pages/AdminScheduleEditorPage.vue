@@ -64,7 +64,12 @@ const {
             @update:model-value="selectedRoomId = Number($event)"
           />
           <StateMessage v-if="cards.length === 0" :title="adminCopy.noCards" />
-          <LessonRequirementCard v-for="card in cards" v-else :key="card.teachingLoadId" :card="card" />
+          <LessonRequirementCard
+            v-for="card in cards"
+            v-else
+            :key="card.teachingLoadId"
+            :card="card"
+          />
         </aside>
         <ScheduleEntryGrid
           :entries="schedule.entries"
