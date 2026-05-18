@@ -1,0 +1,13 @@
+{$SERVER_NAME} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy rest-api:80
+	}
+
+	handle {
+		root * /srv/app
+		try_files {path} /index.html
+		file_server
+	}
+}

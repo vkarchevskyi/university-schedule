@@ -36,6 +36,8 @@ All environment-specific values should come from environment variables or deploy
 - LLM API key.
 - Auth secrets.
 
+The Docker deployment reads these values from an env file passed to Compose. Start from `docker/.env.example`, copy it to a deployment-only env file, and replace all secret placeholders before starting the stack.
+
 ## Release Checklist
 
 - Migrations applied.
@@ -53,6 +55,27 @@ All environment-specific values should come from environment variables or deploy
 - Admin routes reject anonymous users.
 - Invalid schedules cannot be published.
 - Secrets are not committed.
+
+## Docker Compose Deployment
+
+Build and start the full VPS-ready stack from the repository root:
+
+```bash
+docker compose --env-file docker/.env -f docker/compose.yaml up -d --build
+```
+
+The stack includes:
+
+- Caddy public entrypoint with automatic HTTPS when `SERVER_NAME` is a real domain.
+- Vue frontend served as static files.
+- Symfony REST API on FrankenPHP.
+- One-shot Doctrine migration service.
+- Go schedule validation and generation service.
+- PostgreSQL, Redis, and RabbitMQ.
+
+Set `SERVER_NAME` to the public HTTPS domain used for the frontend, API, and Telegram webhook. Caddy routes `/api/*` to Symfony and serves the SPA for all other paths.
+
+The API generates JWT keys on startup into a named Docker volume and skips generation when keys already exist.
 
 ## Monitoring
 
