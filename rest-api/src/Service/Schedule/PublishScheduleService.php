@@ -14,6 +14,7 @@ use App\Service\AbstractEntityService;
 use App\Service\ScheduleValidation\ValidateScheduleService;
 use App\Service\Telegram\PublishScheduleNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class PublishScheduleService extends AbstractEntityService
@@ -24,6 +25,7 @@ final class PublishScheduleService extends AbstractEntityService
         private readonly LogSchedulePublicationService $publicationLogger,
         private readonly PublishScheduleNotificationService $notifications,
         private readonly Security $security,
+        private readonly LoggerInterface $logger,
         EntityManagerInterface $entityManager,
     ) {
         parent::__construct($entityManager);
@@ -47,13 +49,25 @@ final class PublishScheduleService extends AbstractEntityService
         }
 
         $publishedAt = new \DateTimeImmutable();
-        $schedule->setStatus(ScheduleStatus::Published);
-        $schedule->setPublishedAt($publishedAt);
-        $this->publicationLogger->handle($this->currentAdmin(), $schedule, $publishedAt);
-        $this->flush();
-        $this->notifications->handle($schedule);
+        $admin = $this->currentAdmin();
+        $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $admin): ScheduleResource {
+            $schedule->setStatus(ScheduleStatus::Published);
+            $schedule->setPublishedAt($publishedAt);
+            $this->publicationLogger->handle($admin, $schedule, $publishedAt);
 
-        return $this->mapper->map($schedule);
+            return $this->mapper->map($schedule);
+        });
+
+        try {
+            $this->notifications->handle($schedule);
+        } catch (\Throwable $exception) {
+            $this->logger->warning('Failed to publish schedule notification.', [
+                'exception' => $exception,
+                'scheduleId' => $schedule->getId(),
+            ]);
+        }
+
+        return $resource;
     }
 
     private function currentAdmin(): Admin
