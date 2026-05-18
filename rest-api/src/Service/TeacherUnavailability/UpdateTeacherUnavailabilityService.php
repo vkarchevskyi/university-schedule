@@ -11,10 +11,13 @@ use App\Exception\ApiException;
 use App\Resource\Admin\TeacherUnavailabilityResource;
 use App\Resource\Admin\TeacherUnavailabilityResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UpdateTeacherUnavailabilityService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly TeacherUnavailabilityResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

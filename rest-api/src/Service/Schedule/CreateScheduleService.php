@@ -13,11 +13,14 @@ use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleResource;
 use App\Resource\Admin\ScheduleResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class CreateScheduleService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(
         private readonly ScheduleResourceMapper $mapper,
         private readonly Security $security,

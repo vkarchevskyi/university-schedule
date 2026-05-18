@@ -11,10 +11,13 @@ use App\Exception\ApiException;
 use App\Resource\Admin\SemesterResource;
 use App\Resource\Admin\SemesterResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UpdateSemesterService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly SemesterResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

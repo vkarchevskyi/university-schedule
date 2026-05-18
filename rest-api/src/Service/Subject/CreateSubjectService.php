@@ -9,10 +9,13 @@ use App\Entity\Subject;
 use App\Resource\Admin\SubjectResource;
 use App\Resource\Admin\SubjectResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class CreateSubjectService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly SubjectResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

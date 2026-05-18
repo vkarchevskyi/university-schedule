@@ -9,10 +9,13 @@ use App\Entity\Schedule;
 use App\Resource\Admin\ResourceCollection;
 use App\Resource\Admin\ScheduleResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class ListSchedulesService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly ScheduleResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

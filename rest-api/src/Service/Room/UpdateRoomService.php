@@ -9,10 +9,13 @@ use App\Entity\Room;
 use App\Resource\Admin\RoomResource;
 use App\Resource\Admin\RoomResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UpdateRoomService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly RoomResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

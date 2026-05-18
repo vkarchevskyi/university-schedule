@@ -10,10 +10,13 @@ use App\Entity\Semester;
 use App\Resource\Admin\ExamScheduleResourceMapper;
 use App\Resource\Admin\ResourceCollection;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class ListExamSchedulesService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(
         private readonly ExamScheduleResourceMapper $mapper,
         EntityManagerInterface $entityManager,

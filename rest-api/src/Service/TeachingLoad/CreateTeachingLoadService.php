@@ -13,10 +13,13 @@ use App\Entity\TeachingLoad;
 use App\Resource\Admin\TeachingLoadResource;
 use App\Resource\Admin\TeachingLoadResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class CreateTeachingLoadService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly TeachingLoadResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

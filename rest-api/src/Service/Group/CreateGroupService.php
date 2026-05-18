@@ -9,10 +9,13 @@ use App\Entity\Group as StudentGroup;
 use App\Resource\Admin\GroupResource;
 use App\Resource\Admin\GroupResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class CreateGroupService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly GroupResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

@@ -11,10 +11,13 @@ use App\Entity\TeacherSubject;
 use App\Resource\Admin\TeacherSubjectResource;
 use App\Resource\Admin\TeacherSubjectResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class CreateTeacherSubjectService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(private readonly TeacherSubjectResourceMapper $mapper, EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

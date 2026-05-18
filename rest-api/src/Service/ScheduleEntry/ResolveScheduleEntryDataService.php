@@ -15,10 +15,13 @@ use App\Entity\TeachingLoad;
 use App\Entity\TimeSlot;
 use App\Exception\ApiException;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class ResolveScheduleEntryDataService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

@@ -13,10 +13,13 @@ use App\Entity\Teacher;
 use App\Enum\ExamScheduleEntryType;
 use App\Exception\ApiException;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class ResolveExamScheduleEntryDataService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);

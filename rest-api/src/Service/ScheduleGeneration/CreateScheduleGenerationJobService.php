@@ -12,11 +12,14 @@ use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleGenerationJobResource;
 use App\Resource\Admin\ScheduleGenerationJobResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\InputNormalizerTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class CreateScheduleGenerationJobService extends AbstractEntityService
 {
+    use InputNormalizerTrait;
+
     public function __construct(
         private readonly ScheduleGenerationJobResourceMapper $mapper,
         private readonly ScheduleGenerationPublisherInterface $publisher,
