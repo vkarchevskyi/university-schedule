@@ -36,7 +36,13 @@ All environment-specific values should come from environment variables or deploy
 - LLM API key.
 - Auth secrets.
 
-The Docker deployment reads these values from an env file passed to Compose. Start from `docker/.env.example`, copy it to a deployment-only env file, and replace all secret placeholders before starting the stack.
+The Docker deployment uses `docker/.env` for Compose-level orchestration values. Start from `docker/.env.example`, copy it to a deployment-only env file, and replace infrastructure and deployment placeholders before starting the stack.
+
+Service runtime secrets stay in service-local env files:
+
+- `rest-api/.env.local` for Symfony secrets, Telegram credentials, Gemini credentials, and CORS origins.
+- `services/schedule/.env` for worker-specific queue names and generation tuning.
+- `frontend/.env` only when building or running the frontend outside the production Docker image.
 
 ## Release Checklist
 

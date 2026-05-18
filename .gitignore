@@ -1,2 +1,6 @@
 .history
 *.txt
+docker/.env
+frontend/.env
+rest-api/.env.local
+services/schedule/.env
