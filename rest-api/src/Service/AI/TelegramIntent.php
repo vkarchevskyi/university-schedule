@@ -8,13 +8,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 final class TelegramIntent
 {
-    #[Assert\Choice(['get_schedule', 'subscribe', 'unsubscribe', 'help', 'unknown'])]
+    #[Assert\Choice(choices: ['get_schedule', 'subscribe', 'unsubscribe', 'help', 'unknown'])]
     public string $intent = 'unknown';
 
     #[Assert\Range(min: 0, max: 1)]
     public float $confidence = 0.0;
 
-    #[Assert\Choice(['group', 'teacher', 'room', null])]
+    #[Assert\Choice(choices: ['group', 'teacher', 'room', null])]
     public ?string $targetType = null;
 
     public ?string $targetName = null;
@@ -25,7 +25,7 @@ final class TelegramIntent
     #[Assert\Date]
     public ?string $weekStart = null;
 
-    #[Assert\Choice(['today', 'tomorrow', 'week', 'date', null])]
+    #[Assert\Choice(choices: ['today', 'tomorrow', 'week', 'date', null])]
     public ?string $range = null;
 
     public ?string $clarificationQuestion = null;
