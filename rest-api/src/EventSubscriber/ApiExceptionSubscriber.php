@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
+use App\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,31 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
 
         $exception = $event->getThrowable();
         $validation = $exception->getPrevious();
+
+        if ($exception instanceof ApiException) {
+            $event->setResponse(new JsonResponse($exception->getBody(), $exception->getStatusCode()));
+
+            return;
+        }
+
+        if ($exception instanceof \JsonException) {
+            $event->setResponse(new JsonResponse([
+                'type' => 'https://university-schedule.local/problems/validation-error',
+                'title' => 'Validation failed',
+                'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
+                'violations' => [
+                    [
+                        'propertyPath' => 'payload',
+                        'message' => 'Expected valid JSON.',
+                    ],
+                ],
+                'errors' => [
+                    'payload' => 'Expected valid JSON.',
+                ],
+            ], Response::HTTP_UNPROCESSABLE_ENTITY));
+
+            return;
+        }
 
         if ($validation instanceof ValidationFailedException) {
             $event->setResponse($this->validationResponse($validation));

@@ -19,18 +19,12 @@ final class TelegramWebhookController extends AbstractController
     #[Route('/webhook', methods: ['POST'])]
     public function webhook(Request $request, VerifyTelegramWebhookSecretService $secret, HandleTelegramWebhookService $handler): JsonResponse
     {
-        try {
-            $secret->handle($request);
-            $payload = json_decode($request->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $secret->handle($request);
+        $payload = json_decode($request->getContent(), true, flags: JSON_THROW_ON_ERROR);
 
-            $handler->handle($this->objectPayload($payload));
+        $handler->handle($this->objectPayload($payload));
 
-            return $this->json(null, Response::HTTP_NO_CONTENT);
-        } catch (\JsonException) {
-            return $this->json(['errors' => ['payload' => 'Expected valid JSON.']], Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (ApiException $exception) {
-            return $this->json($exception->getBody(), $exception->getStatusCode());
-        }
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     /**

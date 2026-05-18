@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Dto\PublicScheduleQueryDto;
-use App\Exception\ApiException;
 use App\Service\PublicSchedule\GetPublicScheduleService;
 use App\Service\PublicSchedule\ListPublicGroupsService;
 use App\Service\PublicSchedule\ListPublicRoomsService;
@@ -45,10 +44,6 @@ final class PublicScheduleController extends AbstractController
 
     private function respond(callable $operation): JsonResponse
     {
-        try {
-            return $this->json($operation());
-        } catch (ApiException $exception) {
-            return $this->json($exception->getBody(), $exception->getStatusCode());
-        }
+        return $this->json($operation());
     }
 }
