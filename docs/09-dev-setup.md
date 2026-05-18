@@ -19,11 +19,11 @@ docs/db-diagram.uml Database/entity diagram and schema source of truth
 
 ## Current Local Services
 
-Project-level Docker configuration lives in `docker/`. `docker/compose.yaml` defines PostgreSQL, Redis, and RabbitMQ for local development.
+Project-level Docker configuration lives in `docker/`. It can run the full application stack or a development stack with bind-mounted source code.
 
 ## Backend
 
-From `rest-api`:
+From `rest-api` without Docker:
 
 ```bash
 composer install
@@ -31,14 +31,18 @@ php bin/console doctrine:migrations:migrate
 symfony server:start
 ```
 
-From the repository root, start infrastructure first:
+From the repository root, start the Docker development stack:
 
 ```bash
-docker compose -f docker/compose.yaml up -d
+cp docker/.env.example docker/.env
+docker compose --env-file docker/.env -f docker/compose.yaml -f docker/compose.dev.yaml up -d --build
 ```
 
-Useful infrastructure URLs after startup:
+Useful Docker development URLs after startup:
 
+- Frontend: `http://localhost:5173`
+- Symfony API: `http://localhost:8000`
+- Go schedule service: `http://localhost:8081`
 - PostgreSQL: `127.0.0.1:5432`
 - Redis: `127.0.0.1:6379`
 - RabbitMQ AMQP: `127.0.0.1:5672`
@@ -99,6 +103,4 @@ Do not commit real secrets.
 
 ## Remaining Setup Tasks
 
-- Add application containers for Symfony, frontend, and Go worker to a deployment compose file.
-- Add JWT key-generation instructions once the JWT package is installed.
-- Add one-command local orchestration if the separate service commands become tedious.
+- Add VPS-specific secret provisioning and backup automation before production use.
