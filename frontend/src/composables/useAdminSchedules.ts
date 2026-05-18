@@ -16,7 +16,7 @@ export function useAdminSchedules() {
   const semesterOptions = computed(() =>
     semesters.value.map((semester) => ({
       id: semester.id,
-      label: `Семестр ${semester.number}`,
+      label: `${adminCopy.semester} ${semester.number}`,
       description: `${semester.startsAt} - ${semester.endsAt}`,
     })),
   )

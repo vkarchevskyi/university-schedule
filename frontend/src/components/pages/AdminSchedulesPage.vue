@@ -15,12 +15,12 @@ const { schedules, selectedSemesterId, isLoading, error, semesterOptions, create
     <section class="admin-dashboard">
       <h1>{{ adminCopy.schedulesTitle }}</h1>
       <StateMessage v-if="error" tone="error" :title="error" />
-      <StateMessage v-else-if="isLoading" title="Завантаження..." />
+      <StateMessage v-else-if="isLoading" :title="adminCopy.loading" />
       <template v-else>
         <div class="schedule-create">
           <AppSelect
             id="schedule-semester"
-            label="Семестр"
+            :label="adminCopy.semester"
             :model-value="selectedSemesterId ?? ''"
             :options="semesterOptions"
             @update:model-value="selectedSemesterId = Number($event)"

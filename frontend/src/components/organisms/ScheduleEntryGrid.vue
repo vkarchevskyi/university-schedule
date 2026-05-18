@@ -42,7 +42,7 @@ function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
 }
 
 function weekParityLabel(value: WeekParity): string {
-  return value === 'both' ? 'Обидва тижні' : value === 'odd' ? 'Непарний' : 'Парний'
+  return adminCopy.weekParityOptions[value]
 }
 
 function cellKey(dayOfWeek: number, timeSlotId: number): string {

@@ -54,9 +54,9 @@ function save(): void {
     <label class="field" for="entry-week-parity">
       <span class="field__label">{{ adminCopy.weekParity }}</span>
       <select id="entry-week-parity" v-model="weekParity" class="field__control" data-testid="week-parity-select">
-        <option value="both">Обидва тижні</option>
-        <option value="odd">Непарний</option>
-        <option value="even">Парний</option>
+        <option value="both">{{ adminCopy.weekParityOptions.both }}</option>
+        <option value="odd">{{ adminCopy.weekParityOptions.odd }}</option>
+        <option value="even">{{ adminCopy.weekParityOptions.even }}</option>
       </select>
     </label>
     <div class="entry-editor__actions">

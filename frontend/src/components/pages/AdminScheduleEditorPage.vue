@@ -35,7 +35,7 @@ const {
 <template>
   <AdminLayout>
     <StateMessage v-if="error" tone="error" :title="error" data-testid="editor-error" />
-    <StateMessage v-else-if="isLoading" title="Завантаження..." />
+    <StateMessage v-else-if="isLoading" :title="adminCopy.loading" />
     <section v-else-if="schedule" class="schedule-editor-page">
       <header class="schedule-editor-page__header">
         <div>
