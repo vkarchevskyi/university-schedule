@@ -37,9 +37,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     rooms.value.map((room) => ({ id: room.id, label: room.name, description: `${room.type}, ${room.capacity}` })),
   )
 
-  onMounted(load)
+  onMounted(loadEditor)
 
-  async function load(): Promise<void> {
+  async function loadEditor(): Promise<void> {
     isLoading.value = true
     error.value = null
 
@@ -62,6 +62,21 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
+  async function refreshScheduleData(): Promise<void> {
+    error.value = null
+
+    try {
+      const [scheduleResponse, cardsResponse] = await Promise.all([
+        getSchedule(scheduleId),
+        listLessonCards(scheduleId),
+      ])
+      schedule.value = scheduleResponse
+      cards.value = cardsResponse.items
+    } catch {
+      error.value = adminCopy.apiError
+    }
+  }
+
   async function place(payload: { card: LessonCard; dayOfWeek: number; timeSlotId: number }): Promise<void> {
     if (selectedRoomId.value === null) {
       error.value = adminCopy.selectRoom
@@ -69,7 +84,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
 
     await createScheduleEntry(scheduleId, entryPayload(payload.card, payload.dayOfWeek, payload.timeSlotId))
-    await load()
+    await refreshScheduleData()
   }
 
   async function saveEntry(payload: Partial<ScheduleEntryPayload>): Promise<void> {
@@ -79,7 +94,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
 
     await updateScheduleEntry(scheduleId, selectedEntry.value.id, payload)
     selectedEntry.value = null
-    await load()
+    await refreshScheduleData()
   }
 
   async function removeEntry(): Promise<void> {
@@ -89,7 +104,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
 
     await deleteScheduleEntry(scheduleId, selectedEntry.value.id)
     selectedEntry.value = null
-    await load()
+    await refreshScheduleData()
   }
 
   async function validate(): Promise<void> {
