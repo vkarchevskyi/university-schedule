@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Service\Schedule;
 
 use App\Dto\Admin\ScheduleRequestDto;
-use App\Entity\Admin;
 use App\Entity\Schedule;
 use App\Entity\Semester;
+use App\Entity\User;
 use App\Enum\ScheduleStatus;
 use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleResource;
@@ -36,7 +36,7 @@ final class CreateScheduleService extends AbstractEntityService
             ScheduleStatus::Draft,
             $this->scheduleDate($data->validFrom),
             $this->scheduleDate($data->validTo),
-            $this->currentAdmin(),
+            $this->currentUser(),
             new \DateTimeImmutable(),
         );
         $this->save($schedule);
@@ -44,12 +44,12 @@ final class CreateScheduleService extends AbstractEntityService
         return $this->mapper->map($schedule);
     }
 
-    private function currentAdmin(): Admin
+    private function currentUser(): User
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof Admin) {
-            throw ApiException::http(['error' => 'Authenticated admin was not found.'], 401);
+        if (!$user instanceof User) {
+            throw ApiException::http(['error' => 'Authenticated user was not found.'], 401);
         }
 
         return $user;

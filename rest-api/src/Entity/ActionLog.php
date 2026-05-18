@@ -17,9 +17,9 @@ class ActionLog
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Admin::class, inversedBy: 'actionLogs')]
-    #[ORM\JoinColumn(name: 'admin_id', referencedColumnName: 'id', nullable: false)]
-    private Admin $admin;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'actionLogs')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
+    private User $user;
 
     #[ORM\Column(type: Types::STRING)]
     private string $action;
@@ -34,13 +34,13 @@ class ActionLog
     private \DateTimeImmutable $createdAt;
 
     public function __construct(
-        Admin $admin,
+        User $user,
         string $action,
         string $entityType,
         int $entityId,
         \DateTimeImmutable $createdAt,
     ) {
-        $this->admin = $admin;
+        $this->user = $user;
         $this->action = $action;
         $this->entityType = $entityType;
         $this->entityId = $entityId;
@@ -52,9 +52,9 @@ class ActionLog
         return $this->id;
     }
 
-    public function getAdmin(): Admin
+    public function getUser(): User
     {
-        return $this->admin;
+        return $this->user;
     }
 
     public function getAction(): string

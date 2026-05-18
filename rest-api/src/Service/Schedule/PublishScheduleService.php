@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\Schedule;
 
-use App\Entity\Admin;
 use App\Entity\Schedule;
+use App\Entity\User;
 use App\Enum\ScheduleStatus;
 use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleResource;
@@ -49,10 +49,10 @@ final class PublishScheduleService extends AbstractEntityService
         }
 
         $publishedAt = new \DateTimeImmutable();
-        $admin = $this->currentAdmin();
-        $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $admin): ScheduleResource {
+        $user = $this->currentUser();
+        $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $user): ScheduleResource {
             $schedule->publish($publishedAt);
-            $this->publicationLogger->handle($admin, $schedule, $publishedAt);
+            $this->publicationLogger->handle($user, $schedule, $publishedAt);
 
             return $this->mapper->map($schedule);
         });
@@ -69,12 +69,12 @@ final class PublishScheduleService extends AbstractEntityService
         return $resource;
     }
 
-    private function currentAdmin(): Admin
+    private function currentUser(): User
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof Admin) {
-            throw ApiException::http(['error' => 'Authenticated admin was not found.'], 401);
+        if (!$user instanceof User) {
+            throw ApiException::http(['error' => 'Authenticated user was not found.'], 401);
         }
 
         return $user;

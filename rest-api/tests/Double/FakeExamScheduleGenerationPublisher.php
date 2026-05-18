@@ -8,7 +8,7 @@ use App\Service\ExamScheduleGeneration\ExamScheduleGenerationPublisherInterface;
 
 final class FakeExamScheduleGenerationPublisher implements ExamScheduleGenerationPublisherInterface
 {
-    /** @var array{jobId: string, semesterId: int, requestedByAdminId: int}|null */
+    /** @var array{jobId: string, semesterId: int, requestedByUserId: int}|null */
     public static ?array $message = null;
 
     public function publish(array $message): void

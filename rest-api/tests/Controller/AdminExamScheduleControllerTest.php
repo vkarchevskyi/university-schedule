@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
-use App\Entity\Admin;
+use App\Entity\User;
+use App\Enum\UserRole;
 use App\Tests\Double\FakeExamScheduleGenerationPublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -328,7 +329,7 @@ final class AdminExamScheduleControllerTest extends WebTestCase
     {
         $passwordHash = password_hash('correct-password', PASSWORD_BCRYPT);
 
-        $admin = new Admin('Ada', 'Lovelace', 'admin@example.com', $passwordHash, new \DateTimeImmutable());
+        $admin = new User('Ada', 'Lovelace', 'admin@example.com', $passwordHash, new \DateTimeImmutable(), UserRole::Admin);
         $this->entityManager->persist($admin);
         $this->entityManager->flush();
 

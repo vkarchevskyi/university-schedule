@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\AdminRepository;
+use App\Enum\UserRole;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -12,9 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: AdminRepository::class)]
-#[ORM\Table(name: 'admins')]
-class Admin implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'users')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,6 +34,9 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'password_hash', type: Types::STRING)]
     private string $passwordHash;
 
+    #[ORM\Column(type: Types::STRING, enumType: UserRole::class)]
+    private UserRole $role;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -45,7 +49,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $examSchedules;
 
     /** @var Collection<int, ActionLog> */
-    #[ORM\OneToMany(targetEntity: ActionLog::class, mappedBy: 'admin', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ActionLog::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $actionLogs;
 
     public function __construct(
@@ -54,12 +58,14 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         string $email,
         string $passwordHash,
         \DateTimeImmutable $createdAt,
+        UserRole $role = UserRole::User,
     ) {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->passwordHash = $passwordHash;
         $this->createdAt = $createdAt;
+        $this->role = $role;
         $this->schedules = new ArrayCollection();
         $this->examSchedules = new ArrayCollection();
         $this->actionLogs = new ArrayCollection();
@@ -115,6 +121,16 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         $this->passwordHash = $passwordHash;
     }
 
+    public function getRole(): UserRole
+    {
+        return $this->role;
+    }
+
+    public function setRole(UserRole $role): void
+    {
+        $this->role = $role;
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
@@ -123,7 +139,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         if ($this->email === '') {
-            throw new \LogicException('Admin email must not be empty.');
+            throw new \LogicException('User email must not be empty.');
         }
 
         return $this->email;
@@ -132,7 +148,13 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     /** @return list<string> */
     public function getRoles(): array
     {
-        return ['ROLE_ADMIN'];
+        $roles = ['ROLE_USER'];
+
+        if ($this->role === UserRole::Admin) {
+            $roles[] = 'ROLE_ADMIN';
+        }
+
+        return $roles;
     }
 
     public function eraseCredentials(): void {}

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Service\ExamScheduleGeneration;
 
 use App\Dto\Admin\ExamScheduleGenerationRequestDto;
-use App\Entity\Admin;
 use App\Entity\ExamScheduleGenerationJob;
 use App\Entity\Semester;
+use App\Entity\User;
 use App\Exception\ApiException;
 use App\Resource\Admin\ExamScheduleGenerationJobResource;
 use App\Resource\Admin\ExamScheduleGenerationJobResourceMapper;
@@ -32,26 +32,26 @@ final class CreateExamScheduleGenerationJobService extends AbstractEntityService
     public function handle(ExamScheduleGenerationRequestDto $data): ExamScheduleGenerationJobResource
     {
         $semester = $this->getEntity(Semester::class, $this->positiveInt($data->semesterId));
-        $admin = $this->currentAdmin();
-        $job = new ExamScheduleGenerationJob($this->uuid(), $semester, $admin, new \DateTimeImmutable());
+        $user = $this->currentUser();
+        $job = new ExamScheduleGenerationJob($this->uuid(), $semester, $user, new \DateTimeImmutable());
 
         $this->entityManager->persist($job);
         $this->flush();
         $this->publisher->publish([
             'jobId' => $job->getId(),
             'semesterId' => (int) $semester->getId(),
-            'requestedByAdminId' => (int) $admin->getId(),
+            'requestedByUserId' => (int) $user->getId(),
         ]);
 
         return $this->mapper->map($job);
     }
 
-    private function currentAdmin(): Admin
+    private function currentUser(): User
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof Admin) {
-            throw ApiException::http(['error' => 'Authenticated admin was not found.'], 401);
+        if (!$user instanceof User) {
+            throw ApiException::http(['error' => 'Authenticated user was not found.'], 401);
         }
 
         return $user;

@@ -33,9 +33,9 @@ class Schedule
     #[ORM\Column(name: 'valid_to', type: Types::DATE_IMMUTABLE)]
     private \DateTimeImmutable $validTo;
 
-    #[ORM\ManyToOne(targetEntity: Admin::class, inversedBy: 'schedules')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'schedules')]
     #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
-    private Admin $createdBy;
+    private User $createdBy;
 
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
@@ -52,7 +52,7 @@ class Schedule
         ScheduleStatus $status,
         \DateTimeImmutable $validFrom,
         \DateTimeImmutable $validTo,
-        Admin $createdBy,
+        User $createdBy,
         \DateTimeImmutable $createdAt,
         ?\DateTimeImmutable $publishedAt = null,
     ) {
@@ -117,12 +117,12 @@ class Schedule
         $this->validTo = $validTo;
     }
 
-    public function getCreatedBy(): Admin
+    public function getCreatedBy(): User
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(Admin $createdBy): void
+    public function setCreatedBy(User $createdBy): void
     {
         $this->createdBy = $createdBy;
     }

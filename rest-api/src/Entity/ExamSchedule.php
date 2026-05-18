@@ -27,9 +27,9 @@ class ExamSchedule
     #[ORM\Column(type: Types::SMALLINT, enumType: ExamScheduleStatus::class)]
     private ExamScheduleStatus $status;
 
-    #[ORM\ManyToOne(targetEntity: Admin::class, inversedBy: 'examSchedules')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'examSchedules')]
     #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
-    private Admin $createdBy;
+    private User $createdBy;
 
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
@@ -47,7 +47,7 @@ class ExamSchedule
     public function __construct(
         Semester $semester,
         ExamScheduleStatus $status,
-        Admin $createdBy,
+        User $createdBy,
         \DateTimeImmutable $createdAt,
         ?\DateTimeImmutable $publishedAt = null,
         ?\DateTimeImmutable $deletedAt = null,
@@ -86,7 +86,7 @@ class ExamSchedule
         $this->status = $status;
     }
 
-    public function getCreatedBy(): Admin
+    public function getCreatedBy(): User
     {
         return $this->createdBy;
     }
