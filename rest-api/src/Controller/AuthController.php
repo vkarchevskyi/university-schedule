@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Admin;
+use App\Resource\Admin\CurrentAdminResourceMapper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,15 +21,8 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/me', name: 'api_auth_me', methods: ['GET'])]
-    public function me(#[CurrentUser] Admin $admin): JsonResponse
+    public function me(#[CurrentUser] Admin $admin, CurrentAdminResourceMapper $mapper): JsonResponse
     {
-        return $this->json([
-            'admin' => [
-                'id' => $admin->getId(),
-                'firstName' => $admin->getFirstName(),
-                'lastName' => $admin->getLastName(),
-                'email' => $admin->getEmail(),
-            ],
-        ]);
+        return $this->json($mapper->map($admin));
     }
 }
