@@ -9,9 +9,11 @@ import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
-const { admin } = storeToRefs(auth)
+const { user } = storeToRefs(auth)
 
-const adminName = computed(() => (admin.value === null ? '' : `${admin.value.firstName} ${admin.value.lastName}`))
+const adminName = computed(() =>
+  user.value === null ? '' : `${user.value.firstName} ${user.value.lastName}`,
+)
 
 const navItems = [
   { label: adminCopy.nav.schedules, route: { name: 'admin-schedules' } },

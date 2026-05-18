@@ -1,4 +1,4 @@
-const tokenStorageKey = 'university-schedule.admin-token'
+const tokenStorageKey = 'university-schedule.user-token'
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 let unauthorizedHandler: (() => void) | null = null

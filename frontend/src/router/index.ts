@@ -50,7 +50,7 @@ router.beforeEach(async (to) => {
 
   if (to.name === 'admin-login' && auth.token !== null) {
     try {
-      await auth.loadCurrentAdmin()
+      await auth.loadCurrentUser()
       return { name: 'admin-dashboard' }
     } catch {
       return true
@@ -67,7 +67,7 @@ router.beforeEach(async (to) => {
 
   if (auth.token !== null) {
     try {
-      await auth.loadCurrentAdmin()
+      await auth.loadCurrentUser()
       return true
     } catch {
       return { name: 'admin-login' }

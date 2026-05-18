@@ -1,5 +1,5 @@
 import { requestJson } from '@/api/http'
-import type { CurrentAdminResponse, LoginResponse } from '@/types/auth'
+import type { CurrentUserResponse, LoginResponse } from '@/types/auth'
 
 export function loginAdmin(email: string, password: string): Promise<LoginResponse> {
   return requestJson<LoginResponse>('/api/auth/login', {
@@ -8,8 +8,8 @@ export function loginAdmin(email: string, password: string): Promise<LoginRespon
   })
 }
 
-export function getCurrentAdmin(): Promise<CurrentAdminResponse> {
-  return requestJson<CurrentAdminResponse>('/api/auth/me', {
+export function getCurrentUser(): Promise<CurrentUserResponse> {
+  return requestJson<CurrentUserResponse>('/api/auth/me', {
     authenticated: true,
   })
 }

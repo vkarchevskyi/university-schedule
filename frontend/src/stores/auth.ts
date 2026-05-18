@@ -1,21 +1,21 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getCurrentAdmin, loginAdmin } from '@/api/auth'
+import { getCurrentUser, loginAdmin } from '@/api/auth'
 import {
   clearStoredToken,
   getStoredToken,
   setStoredToken,
   setUnauthorizedHandler,
 } from '@/api/http'
-import type { AdminProfile } from '@/types/auth'
+import type { UserProfile } from '@/types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(getStoredToken())
-  const admin = ref<AdminProfile | null>(null)
+  const user = ref<UserProfile | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const isAuthenticated = computed(() => token.value !== null && admin.value !== null)
+  const isAuthenticated = computed(() => token.value !== null && user.value !== null)
 
   setUnauthorizedHandler(() => {
     clearSession()
@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await loginAdmin(email, password)
       token.value = response.token
-      admin.value = response.admin
+      user.value = response.user
       setStoredToken(response.token)
     } catch {
       clearSession()
@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function loadCurrentAdmin(): Promise<void> {
+  async function loadCurrentUser(): Promise<void> {
     if (token.value === null) {
       return
     }
@@ -48,8 +48,8 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await getCurrentAdmin()
-      admin.value = response.admin
+      const response = await getCurrentUser()
+      user.value = response.user
     } catch {
       clearSession()
       throw new Error('unauthenticated')
@@ -64,18 +64,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearSession(): void {
     token.value = null
-    admin.value = null
+    user.value = null
     clearStoredToken()
   }
 
   return {
     token,
-    admin,
+    user,
     isLoading,
     error,
     isAuthenticated,
     login,
     logout,
-    loadCurrentAdmin,
+    loadCurrentUser,
   }
 })
