@@ -4,6 +4,8 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
+defineOptions({ name: 'UiBadge' })
+
 const badgeVariants = cva(
   'inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-colors',
   {

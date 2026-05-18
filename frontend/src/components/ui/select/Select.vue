@@ -12,7 +12,7 @@ import {
 
 import { cn } from '@/lib/utils'
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ name: 'UiSelect', inheritAttrs: false })
 
 defineProps<{
   modelValue: string | number

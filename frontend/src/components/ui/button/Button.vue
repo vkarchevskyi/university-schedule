@@ -4,7 +4,7 @@ import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 import { buttonVariants, type ButtonVariants } from '.'
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ name: 'UiButton', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

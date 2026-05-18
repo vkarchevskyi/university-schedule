@@ -3,7 +3,7 @@ import type { HTMLAttributes } from 'vue'
 
 import { cn } from '@/lib/utils'
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ name: 'UiInput', inheritAttrs: false })
 
 defineProps<{
   class?: HTMLAttributes['class']

@@ -3,6 +3,8 @@ import type { HTMLAttributes } from 'vue'
 
 import { cn } from '@/lib/utils'
 
+defineOptions({ name: 'UiLabel' })
+
 defineProps<{
   class?: HTMLAttributes['class']
 }>()
