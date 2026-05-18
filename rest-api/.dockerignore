@@ -1,0 +1,13 @@
+.git
+.env.local
+.env.*.local
+compose.yaml
+compose.override.yaml
+vendor
+var/cache
+var/log
+var/jwt-test
+coverage
+phpunit.result.cache
+config/jwt/*.pem
+config/jwt/*.pub

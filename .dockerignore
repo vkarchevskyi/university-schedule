@@ -1,0 +1,14 @@
+.git
+**/.env.local
+**/.env.*.local
+**/node_modules
+**/vendor
+**/dist
+**/var/cache
+**/var/log
+**/playwright-report
+**/test-results
+**/.eslintcache
+**/coverage
+rest-api/config/jwt/*.pem
+rest-api/config/jwt/*.pub
