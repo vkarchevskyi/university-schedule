@@ -49,6 +49,20 @@ final class AuthControllerTest extends WebTestCase
         self::assertSame('Ada', $this->stringValue($admin, 'firstName'));
     }
 
+    public function testApiCorsPreflightAllowsFrontendOrigin(): void
+    {
+        $this->client->request('OPTIONS', '/api/auth/login', server: [
+            'HTTP_ORIGIN' => 'http://localhost:5173',
+            'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'POST',
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'content-type',
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Access-Control-Allow-Origin', 'http://localhost:5173');
+        self::assertResponseHeaderSame('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PATCH, DELETE');
+        self::assertResponseHeaderSame('Access-Control-Allow-Headers', 'content-type, authorization');
+    }
+
     public function testAdminCannotLoginWithInvalidCredentials(): void
     {
         $this->createAdmin('admin@example.com', 'correct-password');

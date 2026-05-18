@@ -48,14 +48,24 @@ Useful Docker development URLs after startup:
 - RabbitMQ AMQP: `127.0.0.1:5672`
 - RabbitMQ management UI: `http://127.0.0.1:15672`
 
-Copy `rest-api/.env.example` to `rest-api/.env.local` if needed, but do not commit real secrets.
+`docker/.env` owns Compose-level settings such as ports, image versions, database credentials, RabbitMQ credentials, and `FRONTEND_DEV_API_BASE_URL`.
+
+Service-level runtime env lives beside each service. Copy service examples only when you need local overrides:
+
+```bash
+cp rest-api/.env.example rest-api/.env.local
+cp frontend/.env.example frontend/.env
+cp services/schedule/.env.example services/schedule/.env
+```
+
+Do not commit real secrets or local service env override files.
 
 ## Frontend
 
 From `frontend`:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 pnpm install
 pnpm dev
 ```
@@ -74,7 +84,7 @@ pnpm build
 From `services/schedule`:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 go run .
 ```
 

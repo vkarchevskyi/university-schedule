@@ -17,6 +17,23 @@ cp docker/.env.example docker/.env
 
 Use it by passing `--env-file docker/.env` to Compose commands. Do not commit real secrets.
 
+`docker/.env` is for Compose orchestration and shared infrastructure values only:
+
+- public ports;
+- image versions;
+- database and RabbitMQ bootstrap credentials;
+- public server name;
+- frontend development API URL;
+- deployment-level secrets such as `APP_SECRET` and `JWT_PASSPHRASE`.
+
+Service runtime configuration belongs to the service directory:
+
+- `frontend/.env.example` and optional `frontend/.env`;
+- `rest-api/.env.example`, `rest-api/.env.dev`, and optional `rest-api/.env.local`;
+- `services/schedule/.env.example` and optional `services/schedule/.env`.
+
+Compose loads those service env files with `env_file` and then overrides Docker-network addresses such as `DATABASE_URL`, `RABBITMQ_URL`, and `SCHEDULE_SERVICE_URL`.
+
 Important production values:
 
 - `SERVER_NAME`: public domain for Caddy HTTPS, for example `schedule.example.com`. Use `:80` for local HTTP.
@@ -24,9 +41,12 @@ Important production values:
 - `JWT_PASSPHRASE`
 - `POSTGRES_PASSWORD`
 - `RABBITMQ_DEFAULT_PASS`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_WEBHOOK_SECRET`
-- `GEMINI_API_KEY`
+
+Production service secrets should be placed in service-local env override files:
+
+- `rest-api/.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `CORS_ALLOW_ORIGIN`.
+- `services/schedule/.env`: queue names and scheduling tuning if they differ from defaults.
+- `frontend/.env`: frontend build/runtime variables when running Vite outside the Docker production image.
 
 ## Production-Style Stack
 

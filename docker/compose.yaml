@@ -6,8 +6,6 @@ services:
       context: ..
       dockerfile: docker/frontend/Dockerfile
       target: prod
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
     depends_on:
@@ -25,6 +23,10 @@ services:
       context: ..
       dockerfile: docker/rest-api/Dockerfile
       target: prod
+    env_file:
+      - ../rest-api/.env.example
+      - path: ../rest-api/.env.local
+        required: false
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_SECRET: ${APP_SECRET:-change-me}
@@ -41,10 +43,7 @@ services:
       JWT_SECRET_KEY: /app/config/jwt/private.pem
       JWT_PUBLIC_KEY: /app/config/jwt/public.pem
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:-change-me}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      CORS_ALLOW_ORIGIN: "${CORS_ALLOW_ORIGIN:-^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$}"
     depends_on:
       database:
         condition: service_healthy
@@ -67,6 +66,10 @@ services:
       target: prod
     command: ["php", "bin/console", "doctrine:migrations:migrate", "--no-interaction"]
     restart: "no"
+    env_file:
+      - ../rest-api/.env.example
+      - path: ../rest-api/.env.local
+        required: false
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_SECRET: ${APP_SECRET:-change-me}
@@ -75,8 +78,6 @@ services:
       JWT_SECRET_KEY: /app/config/jwt/private.pem
       JWT_PUBLIC_KEY: /app/config/jwt/public.pem
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:-change-me}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
     depends_on:
       database:
         condition: service_healthy
@@ -89,14 +90,14 @@ services:
       context: ..
       dockerfile: docker/schedule/Dockerfile
       target: prod
+    env_file:
+      - ../services/schedule/.env.example
+      - path: ../services/schedule/.env
+        required: false
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?sslmode=disable"
       RABBITMQ_URL: "amqp://${RABBITMQ_DEFAULT_USER:-app}:${RABBITMQ_DEFAULT_PASS:-!ChangeMe!}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST:-app}"
-      SCHEDULE_GENERATION_QUEUE: ${SCHEDULE_GENERATION_QUEUE:-schedule_generation}
-      EXAM_SCHEDULE_GENERATION_QUEUE: ${EXAM_SCHEDULE_GENERATION_QUEUE:-exam_schedule_generation}
       SCHEDULE_SERVICE_ADDRESS: ":8081"
-      EXAM_CONSULTATION_DAYS_BEFORE: ${EXAM_CONSULTATION_DAYS_BEFORE:-1}
-      EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS: ${EXAM_MIN_DAYS_BETWEEN_GROUP_EXAMS:-1}
     depends_on:
       database:
         condition: service_healthy
