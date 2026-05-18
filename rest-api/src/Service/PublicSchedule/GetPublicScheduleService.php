@@ -17,6 +17,7 @@ use App\Entity\Teacher;
 use App\Entity\TimeSlot;
 use App\Enum\WeekParity;
 use App\Exception\ApiException;
+use App\Repository\ScheduleEntryRepository;
 use App\Repository\ScheduleRepository;
 use App\Resource\Public\PublicScheduleResource;
 use App\Resource\Public\ScheduleGroupResource;
@@ -34,6 +35,7 @@ final readonly class GetPublicScheduleService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ScheduleRepository $schedules,
+        private ScheduleEntryRepository $entries,
     ) {}
 
     public function get(PublicScheduleQueryDto $query): PublicScheduleResource
@@ -50,11 +52,7 @@ final readonly class GetPublicScheduleService
 
         $items = [];
 
-        foreach ($schedule->getEntries() as $entry) {
-            if (!$this->entryMatchesFilter($entry, $query)) {
-                continue;
-            }
-
+        foreach ($this->entries->findPublicEntriesForFilter($schedule, $query->type ?? '', $query->id ?? 0) as $entry) {
             $date = $weekStart->modify(sprintf('+%d days', $entry->getDayOfWeek() - 1));
 
             if ($date < $schedule->getValidFrom() || $date > $schedule->getValidTo()) {
@@ -98,27 +96,6 @@ final readonly class GetPublicScheduleService
     private function emptySchedule(PublicScheduleQueryDto $query): PublicScheduleResource
     {
         return new PublicScheduleResource($query->weekStartDate()->format('Y-m-d'), $query->type ?? '', $query->id ?? 0, []);
-    }
-
-    private function entryMatchesFilter(ScheduleEntry $entry, PublicScheduleQueryDto $query): bool
-    {
-        return match ($query->type) {
-            'group' => $this->entryHasGroup($entry, $query->id),
-            'teacher' => $entry->getTeacher()->getId() === $query->id,
-            'room' => $entry->getRoom()->getId() === $query->id,
-            default => false,
-        };
-    }
-
-    private function entryHasGroup(ScheduleEntry $entry, ?int $groupId): bool
-    {
-        foreach ($entry->getGroups() as $group) {
-            if ($group->getGroup()->getId() === $groupId) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function entryMatchesWeekParity(Schedule $schedule, ScheduleEntry $entry, \DateTimeImmutable $weekStart): bool
