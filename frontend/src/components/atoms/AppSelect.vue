@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 import type { LookupOption } from '@/types/publicSchedule'
 
 defineProps<{
@@ -14,18 +16,13 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <label class="field" :for="id">
-    <span class="field__label">{{ label }}</span>
-    <select
+  <div class="field">
+    <Label :for="id">{{ label }}</Label>
+    <Select
       :id="id"
-      class="field__control"
-      :value="modelValue"
-      @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
-    >
-      <option v-for="option in options" :key="option.id" :value="option.id">
-        {{ option.label }}
-        <template v-if="option.description"> - {{ option.description }}</template>
-      </option>
-    </select>
-  </label>
+      :model-value="modelValue"
+      :options="options"
+      @update:model-value="emit('update:modelValue', $event)"
+    />
+  </div>
 </template>

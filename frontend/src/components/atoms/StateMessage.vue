@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Alert, AlertTitle } from '@/components/ui/alert'
+
 defineProps<{
   tone?: 'neutral' | 'error'
   title: string
@@ -6,8 +8,8 @@ defineProps<{
 </script>
 
 <template>
-  <div class="state-message" :class="`state-message--${tone ?? 'neutral'}`">
-    <p>{{ title }}</p>
+  <Alert :variant="tone === 'error' ? 'destructive' : 'default'">
+    <AlertTitle>{{ title }}</AlertTitle>
     <slot />
-  </div>
+  </Alert>
 </template>

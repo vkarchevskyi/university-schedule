@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge'
+
 defineProps<{
   tone: 'warning' | 'info'
 }>()
 </script>
 
 <template>
-  <span class="status-badge" :class="`status-badge--${tone}`">
+  <Badge :variant="tone">
     <slot />
-  </span>
+  </Badge>
 </template>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button'
+
 withDefaults(
   defineProps<{
     type?: 'button' | 'submit'
@@ -14,7 +16,7 @@ withDefaults(
 </script>
 
 <template>
-  <button class="app-button" :class="`app-button--${variant}`" :type="type" :disabled="disabled">
+  <Button :type="type" :variant="variant === 'primary' ? 'default' : variant" :disabled="disabled">
     <slot />
-  </button>
+  </Button>
 </template>

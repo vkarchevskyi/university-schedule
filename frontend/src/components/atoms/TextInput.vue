@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
 defineProps<{
   id: string
   label: string
@@ -14,16 +17,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <label class="field" :for="id">
-    <span class="field__label">{{ label }}</span>
-    <input
+  <div class="field">
+    <Label :for="id">{{ label }}</Label>
+    <Input
       :id="id"
-      class="field__control"
       :type="type ?? 'text'"
       :value="modelValue"
       :autocomplete="autocomplete"
       :required="required"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
-  </label>
+  </div>
 </template>
