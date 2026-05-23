@@ -8,6 +8,7 @@ import {
   validateExamSchedule,
 } from '@/api/adminExamSchedule'
 import { listGroups, listRooms, listSubjects, listTeachers } from '@/api/adminSchedule'
+import { useAdminI18n } from '@/composables/useI18n'
 import type {
   ExamConflict,
   ExamLookups,
@@ -17,6 +18,7 @@ import type {
 } from '@/types/adminExamSchedule'
 
 export function useAdminExamScheduleEditor(scheduleId: number) {
+  const { t } = useAdminI18n()
   const schedule = ref<ExamSchedule | null>(null)
   const lookups = ref<ExamLookups>({ groups: [], rooms: [], subjects: [], teachers: [] })
   const selectedEntry = ref<ExamScheduleEntry | null>(null)
@@ -47,7 +49,7 @@ export function useAdminExamScheduleEditor(scheduleId: number) {
         teachers: teachers.items,
       }
     } catch {
-      error.value = 'Не вдалося завантажити розклад іспитів.'
+      error.value = t.value.apiError
     } finally {
       isLoading.value = false
     }
@@ -72,7 +74,7 @@ export function useAdminExamScheduleEditor(scheduleId: number) {
   async function validate(): Promise<void> {
     const result = await validateExamSchedule(scheduleId)
     conflicts.value = result.conflicts
-    message.value = result.valid ? 'Розклад іспитів валідний.' : 'Знайдено конфлікти.'
+    message.value = result.valid ? t.value.examScheduleValid : t.value.validationFailed
   }
 
   return {

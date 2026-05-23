@@ -8,11 +8,12 @@ import {
   listSchedules,
   listSemesters,
 } from '@/api/adminSchedule'
-import { adminCopy } from '@/i18n/admin'
+import { useAdminI18n } from '@/composables/useI18n'
 import type { AdminSchedule, AdminSemester, ScheduleGenerationJob } from '@/types/adminSchedule'
 
 export function useAdminSchedules() {
   const router = useRouter()
+  const { t } = useAdminI18n()
   const schedules = ref<AdminSchedule[]>([])
   const semesters = ref<AdminSemester[]>([])
   const selectedSemesterId = ref<number | null>(null)
@@ -23,7 +24,7 @@ export function useAdminSchedules() {
   const semesterOptions = computed(() =>
     semesters.value.map((semester) => ({
       id: semester.id,
-      label: `${adminCopy.semester} ${semester.number}`,
+      label: `${t.value.semester} ${semester.number}`,
       description: `${semester.startsAt} - ${semester.endsAt}`,
     })),
   )
@@ -43,7 +44,7 @@ export function useAdminSchedules() {
       schedules.value = scheduleResponse.items
       selectedSemesterId.value = semesterResponse.items[0]?.id ?? null
     } catch {
-      error.value = adminCopy.apiError
+      error.value = t.value.apiError
     } finally {
       isLoading.value = false
     }

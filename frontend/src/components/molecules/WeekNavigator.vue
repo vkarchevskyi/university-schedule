@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppButton from '@/components/atoms/AppButton.vue'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import { addWeeks, currentWeekStart, formatDisplayDate, weekDates } from '@/utils/date'
 
 const props = defineProps<{
@@ -10,6 +10,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:weekStart': [value: string]
 }>()
+
+const { t: labels } = usePublicScheduleI18n()
 
 function move(weeks: number): void {
   emit('update:weekStart', addWeeks(props.weekStart, weeks))

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { adminCopy } from '@/i18n/admin'
-import { labels } from '@/i18n/publicSchedule'
+import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
   AdminScheduleEntry,
   AdminGroup,
@@ -29,6 +28,9 @@ const emit = defineEmits<{
   move: [payload: { entry: AdminScheduleEntry; dayOfWeek: number; timeSlotId: number }]
   select: [entry: AdminScheduleEntry]
 }>()
+
+const { t } = useAdminI18n()
+const { t: publicLabels } = usePublicScheduleI18n()
 
 const entriesByCell = computed(() => {
   const map = new Map<string, AdminScheduleEntry[]>()
@@ -94,7 +96,7 @@ function hasConflict(entry: AdminScheduleEntry): boolean {
 }
 
 function weekParityLabel(value: WeekParity): string {
-  return adminCopy.weekParityOptions[value]
+  return t.value.weekParityOptions[value]
 }
 
 function cellKey(dayOfWeek: number, timeSlotId: number): string {
@@ -108,7 +110,7 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
       <thead>
         <tr>
           <th class="schedule-grid__time-column" scope="col"></th>
-          <th v-for="(day, index) in labels.days" :key="day" scope="col">
+          <th v-for="(day, index) in publicLabels.days" :key="day" scope="col">
             <span>{{ day }}</span>
             <small>{{ index + 1 }}</small>
           </th>
@@ -135,7 +137,7 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
               @click="emit('select', entry)"
             >
               <strong>{{ entryTitle(entry) }}</strong>
-              <span>{{ labels.lessonTypes[entry.lessonType] ?? entry.lessonType }} · {{ weekParityLabel(entry.weekParity) }}</span>
+              <span>{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} · {{ weekParityLabel(entry.weekParity) }}</span>
               <small>{{ teacherName(entry.teacherId) }}</small>
               <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
             </button>

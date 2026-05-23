@@ -16,6 +16,7 @@ export const publicScheduleLabels = {
     error: 'Не вдалося завантажити розклад.',
     retry: 'Повторити',
     noLookups: 'Немає доступних груп, викладачів або аудиторій.',
+    language: 'Мова',
     cancelled: 'Скасовано',
     override: 'Зміна',
     groups: 'Групи',
@@ -49,6 +50,7 @@ export const publicScheduleLabels = {
     error: 'Could not load the schedule.',
     retry: 'Retry',
     noLookups: 'No groups, teachers, or rooms are available.',
+    language: 'Language',
     cancelled: 'Cancelled',
     override: 'Changed',
     groups: 'Groups',
@@ -68,5 +70,3 @@ export const publicScheduleLabels = {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
   },
 }
-
-export const labels = publicScheduleLabels.uk

@@ -2,22 +2,24 @@
 import { RouterLink } from 'vue-router'
 
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
-import { adminCopy } from '@/i18n/admin'
+import { useAdminI18n } from '@/composables/useI18n'
+
+const { t } = useAdminI18n()
 </script>
 
 <template>
   <AdminLayout>
     <div class="admin-dashboard" data-testid="admin-dashboard">
-      <h1>{{ adminCopy.dashboard }}</h1>
-      <p>{{ adminCopy.dashboardIntro }}</p>
+      <h1>{{ t.dashboard }}</h1>
+      <p>{{ t.dashboardIntro }}</p>
       <div class="admin-dashboard__shortcuts">
-        <RouterLink :to="{ name: 'admin-schedules' }">{{ adminCopy.nav.schedules }}</RouterLink>
-        <RouterLink :to="{ name: 'admin-exam-schedules' }">{{ adminCopy.nav.examSchedules }}</RouterLink>
+        <RouterLink :to="{ name: 'admin-schedules' }">{{ t.nav.schedules }}</RouterLink>
+        <RouterLink :to="{ name: 'admin-exam-schedules' }">{{ t.nav.examSchedules }}</RouterLink>
         <RouterLink :to="{ name: 'admin-entity', params: { entity: 'teaching-loads' } }">
-          {{ adminCopy.nav.teachingLoads }}
+          {{ t.nav.teachingLoads }}
         </RouterLink>
         <RouterLink :to="{ name: 'admin-entity', params: { entity: 'groups' } }">
-          {{ adminCopy.nav.groups }}
+          {{ t.nav.groups }}
         </RouterLink>
       </div>
     </div>
