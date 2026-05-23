@@ -23,6 +23,7 @@ final class CreateScheduleService extends AbstractEntityService
 
     public function __construct(
         private readonly ScheduleResourceMapper $mapper,
+        private readonly ScheduleAuditLoggerService $auditLogger,
         private readonly Security $security,
         EntityManagerInterface $entityManager,
     ) {
@@ -45,6 +46,8 @@ final class CreateScheduleService extends AbstractEntityService
             new \DateTimeImmutable(),
         );
         $this->save($schedule);
+        $this->auditLogger->logScheduleCreated($schedule);
+        $this->flush();
 
         return $this->mapper->map($schedule);
     }

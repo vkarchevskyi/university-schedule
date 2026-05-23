@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Service\Schedule;
 
 use App\Entity\Schedule;
-use App\Entity\User;
 use App\Enum\ScheduleStatus;
 use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleResource;
@@ -15,16 +14,14 @@ use App\Service\ScheduleValidation\ValidateScheduleService;
 use App\Service\Telegram\PublishScheduleNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\SecurityBundle\Security;
 
 final class PublishScheduleService extends AbstractEntityService
 {
     public function __construct(
         private readonly ValidateScheduleService $validator,
         private readonly ScheduleResourceMapper $mapper,
-        private readonly LogSchedulePublicationService $publicationLogger,
+        private readonly ScheduleAuditLoggerService $auditLogger,
         private readonly PublishScheduleNotificationService $notifications,
-        private readonly Security $security,
         private readonly LoggerInterface $logger,
         EntityManagerInterface $entityManager,
     ) {
@@ -49,10 +46,10 @@ final class PublishScheduleService extends AbstractEntityService
         }
 
         $publishedAt = new \DateTimeImmutable();
-        $user = $this->currentUser();
-        $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $user): ScheduleResource {
+        $beforePayload = $this->auditLogger->schedulePayload($schedule);
+        $resource = $this->entityManager->wrapInTransaction(function () use ($schedule, $publishedAt, $beforePayload): ScheduleResource {
             $schedule->publish($publishedAt);
-            $this->publicationLogger->handle($user, $schedule, $publishedAt);
+            $this->auditLogger->logSchedulePublished($schedule, $beforePayload);
 
             return $this->mapper->map($schedule);
         });
@@ -67,16 +64,5 @@ final class PublishScheduleService extends AbstractEntityService
         }
 
         return $resource;
-    }
-
-    private function currentUser(): User
-    {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof User) {
-            throw ApiException::http(['error' => 'Authenticated user was not found.'], 401);
-        }
-
-        return $user;
     }
 }
