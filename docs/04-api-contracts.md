@@ -95,6 +95,8 @@ List responses should support pagination or at least predictable sorting.
 
 Creates a semester teaching-load requirement.
 
+The selected teacher must be linked to the selected subject through `TeacherSubject`; otherwise the API returns a validation error.
+
 Request:
 
 ```json
@@ -374,6 +376,8 @@ Publishing delegates validation to the Go schedule service. A successful publish
 
 Starts asynchronous generation.
 
+Before queueing a job, the API validates that the semester has active teaching-load requirements, at least one room, at least one time slot, and that every active teaching-load teacher is linked to its subject. Invalid input is rejected synchronously with a validation error and no queue message is published.
+
 Request:
 
 ```json
@@ -490,6 +494,8 @@ Soft-deletes an exam schedule entry.
 ### POST `/api/admin/exam-schedules/{id}/validate`
 
 Validates an exam schedule.
+
+An exam's matching consultation must have the same subject, teacher, groups, and configured offset date. The consultation may use a different room from the exam.
 
 Response:
 

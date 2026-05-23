@@ -25,7 +25,7 @@ Exam scheduling is required for the first shipped version.
 - Validate room capacity.
 - Validate teacher-subject compatibility.
 - Validate minimum interval between exams for the same group.
-- Validate that every exam has a matching consultation entry before it.
+- Validate that every exam has a matching consultation entry before it. A matching consultation has the same subject, teacher, groups, and configured offset date; it does not need to use the same room.
 - Make consultation offset and minimum interval configurable.
 - Add automatic exam generation using the same job/worker architecture where practical.
 - Add table-first admin UI for exam management.

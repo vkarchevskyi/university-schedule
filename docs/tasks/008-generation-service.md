@@ -17,6 +17,7 @@ Generation is asynchronous because it can be computationally expensive.
 ## Scope
 
 - Add generation job endpoint in Symfony.
+- Validate generation prerequisites in Symfony before publishing the job: active teaching loads, rooms, time slots, and teacher-subject compatibility.
 - Publish generation requests to RabbitMQ.
 - Implement RabbitMQ consumer in Go.
 - Persist generation job status and result metadata.
@@ -34,6 +35,7 @@ Generation is asynchronous because it can be computationally expensive.
 ## Acceptance Criteria
 
 - Admin can start generation for a semester.
+- Missing active teaching loads, rooms, time slots, or teacher-subject links are rejected before a job is queued.
 - Job status changes from queued to running to complete or failed.
 - Generated result is not automatically published.
 - Generated draft passes hard validation or reports why it cannot.

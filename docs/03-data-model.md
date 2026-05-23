@@ -158,6 +158,8 @@ Implementation decision:
 
 Represents a semester-level requirement for how many lessons of a specific type must be scheduled for a group, subject, and teacher.
 
+The teacher must be linked to the subject through `TeacherSubject` before the teaching-load row can be created or updated.
+
 Example:
 
 - Group: KN-22
@@ -376,6 +378,7 @@ Rules:
 
 - exam schedules and entries use soft deletes
 - exam entries require a matching consultation entry before the exam
+- matching exam consultations use the same subject, teacher, groups, and configured offset date; the room may differ
 - consultation offset is configurable and defaults to one day before the exam
 - minimum days between exams for the same group is configurable
 - teacher, group, room, capacity, and teacher-subject conflicts are validated before saving entries
@@ -425,6 +428,7 @@ Fields:
 - Group, teacher, and room conflicts must be prevented for the same day, time slot, and applicable week parity.
 - Room capacity must be greater than or equal to the total student count of all linked groups.
 - A teacher should teach only subjects linked through `TeacherSubject`.
+- Teaching-load rows should only use teacher and subject pairs linked through `TeacherSubject`.
 - A teacher should not be scheduled during unavailable time ranges.
 - Schedule entries must be inside the semester and schedule validity period.
 - Schedule entries linked to teaching load must match semester, subject, teacher, lesson type, and group requirements.
