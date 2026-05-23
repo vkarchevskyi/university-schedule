@@ -94,18 +94,19 @@ func (worker Worker) Process(ctx context.Context, message JobMessage) error {
 		return err
 	}
 
-	examScheduleID, err := worker.store.CreateDraftExamSchedule(ctx, message, entries)
-	if err != nil {
-		return err
-	}
-
-	return worker.store.MarkCompleted(ctx, message.JobID, Result{
-		ExamScheduleID: examScheduleID,
-		QualityScore:   score,
-		QualityStatus:  status,
+	result := Result{
+		QualityScore:  score,
+		QualityStatus: status,
 		Diagnostics: map[string]any{
 			"generatedEntryCount": len(entries),
 			"minimumQualityScore": minimumQualityScore,
 		},
-	})
+	}
+
+	_, err = worker.store.CompleteJobWithDraftExamSchedule(ctx, message, entries, result)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

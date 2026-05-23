@@ -4,10 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"sort"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+var ErrJobNotFound = errors.New("exam schedule generation job not found")
 
 type PostgresStore struct {
 	db                      *sql.DB
@@ -33,13 +37,19 @@ func (store *PostgresStore) Close() error {
 }
 
 func (store *PostgresStore) MarkRunning(ctx context.Context, jobID string) error {
-	_, err := store.db.ExecContext(ctx, `
+	result, err := store.db.ExecContext(ctx, `
 		UPDATE exam_schedule_generation_jobs
-		SET status = 'running', started_at = NOW()
+		SET status = 'running',
+			error_message = NULL,
+			started_at = NOW(),
+			finished_at = NULL
 		WHERE id = $1
 	`, jobID)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(result, ErrJobNotFound)
 }
 
 func (store *PostgresStore) MarkCompleted(ctx context.Context, jobID string, result Result) error {
@@ -48,28 +58,41 @@ func (store *PostgresStore) MarkCompleted(ctx context.Context, jobID string, res
 		return fmt.Errorf("marshal diagnostics: %w", err)
 	}
 
-	_, err = store.db.ExecContext(ctx, `
+	update, err := store.db.ExecContext(ctx, `
 		UPDATE exam_schedule_generation_jobs
 		SET status = 'completed',
 			generated_exam_schedule_id = $2,
 			quality_score = $3,
 			quality_status = $4,
 			diagnostics = $5,
+			error_message = NULL,
 			finished_at = NOW()
 		WHERE id = $1
 	`, jobID, result.ExamScheduleID, result.QualityScore, result.QualityStatus, string(diagnostics))
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(update, ErrJobNotFound)
 }
 
 func (store *PostgresStore) MarkFailed(ctx context.Context, jobID string, message string) error {
-	_, err := store.db.ExecContext(ctx, `
+	result, err := store.db.ExecContext(ctx, `
 		UPDATE exam_schedule_generation_jobs
-		SET status = 'failed', error_message = $2, finished_at = NOW()
+		SET status = 'failed',
+			generated_exam_schedule_id = NULL,
+			quality_score = NULL,
+			quality_status = NULL,
+			diagnostics = NULL,
+			error_message = $2,
+			finished_at = NOW()
 		WHERE id = $1
 	`, jobID, message)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(result, ErrJobNotFound)
 }
 
 func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (Input, error) {
@@ -116,6 +139,61 @@ func (store *PostgresStore) CreateDraftExamSchedule(ctx context.Context, message
 	}
 	defer tx.Rollback()
 
+	examScheduleID, err := store.createDraftExamSchedule(ctx, tx, message, entries)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("commit generated exam schedule: %w", err)
+	}
+
+	return examScheduleID, nil
+}
+
+func (store *PostgresStore) CompleteJobWithDraftExamSchedule(ctx context.Context, message JobMessage, entries []CandidateEntry, result Result) (int64, error) {
+	diagnostics, err := json.Marshal(result.Diagnostics)
+	if err != nil {
+		return 0, fmt.Errorf("marshal diagnostics: %w", err)
+	}
+
+	tx, err := store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	examScheduleID, err := store.createDraftExamSchedule(ctx, tx, message, entries)
+	if err != nil {
+		return 0, err
+	}
+
+	update, err := tx.ExecContext(ctx, `
+		UPDATE exam_schedule_generation_jobs
+		SET status = 'completed',
+			generated_exam_schedule_id = $2,
+			quality_score = $3,
+			quality_status = $4,
+			diagnostics = $5,
+			error_message = NULL,
+			finished_at = NOW()
+		WHERE id = $1
+	`, message.JobID, examScheduleID, result.QualityScore, result.QualityStatus, string(diagnostics))
+	if err != nil {
+		return 0, err
+	}
+	if err := requireAffected(update, ErrJobNotFound); err != nil {
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("commit generated exam schedule: %w", err)
+	}
+
+	return examScheduleID, nil
+}
+
+func (store *PostgresStore) createDraftExamSchedule(ctx context.Context, tx *sql.Tx, message JobMessage, entries []CandidateEntry) (int64, error) {
 	var examScheduleID int64
 	if err := tx.QueryRowContext(ctx, `
 		INSERT INTO exam_schedules (semester_id, status, created_by, created_at)
@@ -143,10 +221,6 @@ func (store *PostgresStore) CreateDraftExamSchedule(ctx context.Context, message
 				return 0, fmt.Errorf("insert exam schedule entry group: %w", err)
 			}
 		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return 0, fmt.Errorf("commit generated exam schedule: %w", err)
 	}
 
 	return examScheduleID, nil
@@ -178,7 +252,7 @@ func (store *PostgresStore) loadDemands(ctx context.Context, semesterID int64) (
 	}
 	defer rows.Close()
 
-	demands := make([]Demand, 0)
+	demandsByKey := make(map[teacherSubjectKey]Demand)
 	for rows.Next() {
 		var demand Demand
 		var groupID int64
@@ -186,11 +260,14 @@ func (store *PostgresStore) loadDemands(ctx context.Context, semesterID int64) (
 			return nil, fmt.Errorf("scan exam demand: %w", err)
 		}
 
-		demand.GroupIDs = []int64{groupID}
-		demands = append(demands, demand)
+		addDemand(demandsByKey, demand.SubjectID, demand.TeacherID, groupID, demand.StudentCount)
 	}
 
-	return demands, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return sortedDemands(demandsByKey), nil
 }
 
 func (store *PostgresStore) loadRooms(ctx context.Context) ([]Room, error) {
@@ -263,4 +340,47 @@ func (store *PostgresStore) loadTeacherSubjectAssignments(ctx context.Context) (
 	}
 
 	return assignments, rows.Err()
+}
+
+func requireAffected(result sql.Result, notFound error) error {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read affected rows: %w", err)
+	}
+	if affected == 0 {
+		return notFound
+	}
+
+	return nil
+}
+
+func sortedDemands(demandsByKey map[teacherSubjectKey]Demand) []Demand {
+	demands := make([]Demand, 0, len(demandsByKey))
+	for _, demand := range demandsByKey {
+		sort.Slice(demand.GroupIDs, func(left int, right int) bool {
+			return demand.GroupIDs[left] < demand.GroupIDs[right]
+		})
+		demands = append(demands, demand)
+	}
+	sort.Slice(demands, func(left int, right int) bool {
+		if demands[left].SubjectID == demands[right].SubjectID {
+			return demands[left].TeacherID < demands[right].TeacherID
+		}
+
+		return demands[left].SubjectID < demands[right].SubjectID
+	})
+
+	return demands
+}
+
+func addDemand(demandsByKey map[teacherSubjectKey]Demand, subjectID int64, teacherID int64, groupID int64, studentCount int) {
+	key := teacherSubjectKey{TeacherID: teacherID, SubjectID: subjectID}
+	demand := demandsByKey[key]
+	if len(demand.GroupIDs) == 0 {
+		demand.SubjectID = subjectID
+		demand.TeacherID = teacherID
+	}
+	demand.GroupIDs = append(demand.GroupIDs, groupID)
+	demand.StudentCount += studentCount
+	demandsByKey[key] = demand
 }

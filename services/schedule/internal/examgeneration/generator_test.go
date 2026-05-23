@@ -54,6 +54,30 @@ func TestGeneratorEnforcesMinimumDaysBetweenGroupExams(t *testing.T) {
 	}
 }
 
+func TestAddDemandAggregatesGroupsBySubjectAndTeacher(t *testing.T) {
+	demandsByKey := make(map[teacherSubjectKey]Demand)
+
+	addDemand(demandsByKey, 10, 20, 2, 12)
+	addDemand(demandsByKey, 10, 20, 1, 18)
+	addDemand(demandsByKey, 11, 20, 3, 9)
+
+	demands := sortedDemands(demandsByKey)
+	if len(demands) != 2 {
+		t.Fatalf("len(demands) = %d, want 2", len(demands))
+	}
+
+	aggregated := demands[0]
+	if aggregated.SubjectID != 10 || aggregated.TeacherID != 20 {
+		t.Fatalf("first demand = subject %d teacher %d, want subject 10 teacher 20", aggregated.SubjectID, aggregated.TeacherID)
+	}
+	if aggregated.StudentCount != 30 {
+		t.Fatalf("student count = %d, want 30", aggregated.StudentCount)
+	}
+	if len(aggregated.GroupIDs) != 2 || aggregated.GroupIDs[0] != 1 || aggregated.GroupIDs[1] != 2 {
+		t.Fatalf("group ids = %#v, want [1 2]", aggregated.GroupIDs)
+	}
+}
+
 func validInput() Input {
 	return Input{
 		Semester: Semester{
