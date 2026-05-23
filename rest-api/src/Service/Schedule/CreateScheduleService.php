@@ -31,11 +31,16 @@ final class CreateScheduleService extends AbstractEntityService
 
     public function handle(ScheduleRequestDto $data): ScheduleResource
     {
+        $semester = $this->getEntity(Semester::class, $this->positiveInt($data->semesterId));
+        $validFrom = $this->scheduleDate($data->validFrom);
+        $validTo = $this->scheduleDate($data->validTo);
+        $this->validateSchedulePeriod($semester, $validFrom, $validTo);
+
         $schedule = new Schedule(
-            $this->getEntity(Semester::class, $this->positiveInt($data->semesterId)),
+            $semester,
             ScheduleStatus::Draft,
-            $this->scheduleDate($data->validFrom),
-            $this->scheduleDate($data->validTo),
+            $validFrom,
+            $validTo,
             $this->currentUser(),
             new \DateTimeImmutable(),
         );
@@ -68,5 +73,12 @@ final class CreateScheduleService extends AbstractEntityService
         }
 
         return $date;
+    }
+
+    private function validateSchedulePeriod(Semester $semester, \DateTimeImmutable $validFrom, \DateTimeImmutable $validTo): void
+    {
+        if ($validFrom < $semester->getStartsAt() || $validTo > $semester->getEndsAt()) {
+            throw ApiException::validation(['validFrom' => 'Schedule validity period must be within the semester.']);
+        }
     }
 }

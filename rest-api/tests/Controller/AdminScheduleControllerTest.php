@@ -153,6 +153,19 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertArrayHasKey('dayOfWeek', $this->objectValue($payload, 'errors'));
     }
 
+    public function testSchedulePeriodMustStayWithinSemester(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+
+        $result = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-08-31',
+            'validTo' => '2026-12-31',
+        ], 422);
+
+        self::assertArrayHasKey('validFrom', $this->objectValue($result, 'errors'));
+    }
+
     public function testConflictingDraftEntryIsRejected(): void
     {
         $fixtures = $this->createScheduleFixtures();
@@ -178,6 +191,41 @@ final class AdminScheduleControllerTest extends WebTestCase
         $conflict = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
             ...$entryPayload,
             'weekParity' => 'both',
+        ], 422);
+
+        self::assertArrayHasKey('teacherId', $this->objectValue($conflict, 'errors'));
+    }
+
+    public function testOverlappingTimeSlotDraftEntryIsRejected(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $overlappingSlot = $this->requestJson('POST', '/api/admin/time-slots', [
+            'number' => 2,
+            'startsAt' => '09:00:00',
+            'endsAt' => '10:20:00',
+        ], 201);
+        $schedule = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $entryPayload = [
+            'teachingLoadIds' => [$fixtures->teachingLoadId],
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'roomId' => $fixtures->roomId,
+            'timeSlotId' => $fixtures->timeSlotId,
+            'dayOfWeek' => 1,
+            'weekParity' => 'odd',
+            'groupIds' => [$fixtures->groupId],
+        ];
+
+        $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), $entryPayload, 201);
+        $conflict = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
+            ...$entryPayload,
+            'timeSlotId' => $this->intValue($overlappingSlot, 'id'),
         ], 422);
 
         self::assertArrayHasKey('teacherId', $this->objectValue($conflict, 'errors'));

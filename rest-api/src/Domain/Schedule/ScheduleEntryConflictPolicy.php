@@ -7,6 +7,7 @@ namespace App\Domain\Schedule;
 use App\Entity\Group;
 use App\Entity\Schedule;
 use App\Entity\ScheduleEntry;
+use App\Entity\TimeSlot;
 use App\Enum\WeekParity;
 use App\Service\ScheduleEntry\ScheduleEntryData;
 
@@ -19,7 +20,7 @@ final readonly class ScheduleEntryConflictPolicy
                 continue;
             }
 
-            if ($entry->getDayOfWeek() !== $data->dayOfWeek || $entry->getTimeSlot() !== $data->timeSlot) {
+            if ($entry->getDayOfWeek() !== $data->dayOfWeek || !$this->timeRangesOverlap($entry->getTimeSlot(), $data->timeSlot)) {
                 continue;
             }
 
@@ -46,6 +47,11 @@ final readonly class ScheduleEntryConflictPolicy
     private function weekParityOverlaps(WeekParity $left, WeekParity $right): bool
     {
         return $left === WeekParity::Both || $right === WeekParity::Both || $left === $right;
+    }
+
+    private function timeRangesOverlap(TimeSlot $left, TimeSlot $right): bool
+    {
+        return $left->getStartsAt() < $right->getEndsAt() && $right->getStartsAt() < $left->getEndsAt();
     }
 
     /** @param list<Group> $groups */
