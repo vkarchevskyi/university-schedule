@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import SegmentedControl from '@/components/atoms/SegmentedControl.vue'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type { LookupOption, PublicScheduleFilterType } from '@/types/publicSchedule'
 
 defineProps<{
@@ -15,11 +15,7 @@ const emit = defineEmits<{
   'update:selectedId': [value: number]
 }>()
 
-const typeOptions = [
-  { value: 'group' as const, label: labels.types.group },
-  { value: 'teacher' as const, label: labels.types.teacher },
-  { value: 'room' as const, label: labels.types.room },
-]
+const { t: labels } = usePublicScheduleI18n()
 </script>
 
 <template>
@@ -28,7 +24,11 @@ const typeOptions = [
       data-testid="entity-type"
       :label="labels.entityType"
       :model-value="type"
-      :options="typeOptions"
+      :options="[
+        { value: 'group', label: labels.types.group },
+        { value: 'teacher', label: labels.types.teacher },
+        { value: 'room', label: labels.types.room },
+      ]"
       @update:model-value="emit('update:type', $event)"
     />
     <AppSelect

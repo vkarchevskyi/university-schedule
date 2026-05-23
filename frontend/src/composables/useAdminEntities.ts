@@ -2,6 +2,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import { createEntity, deleteEntity, listEntities, updateEntity } from '@/api/adminEntities'
 import { ApiError } from '@/api/http'
+import { useAdminI18n } from '@/composables/useI18n'
 import type {
   AdminEntity,
   EntityConfig,
@@ -11,6 +12,7 @@ import type {
 } from '@/types/adminEntities'
 
 export function useAdminEntities(config: EntityConfig) {
+  const { t } = useAdminI18n()
   const items = ref<AdminEntity[]>([])
   const lookups = ref<EntityLookups>({})
   const editing = ref<AdminEntity | null>(null)
@@ -33,7 +35,7 @@ export function useAdminEntities(config: EntityConfig) {
       const [listResponse] = await Promise.all([listEntities(config.endpoint), loadLookups()])
       items.value = listResponse.items
     } catch {
-      error.value = 'Не вдалося завантажити дані.'
+      error.value = t.value.apiError
     } finally {
       isLoading.value = false
     }
@@ -96,7 +98,7 @@ export function useAdminEntities(config: EntityConfig) {
           exception.violations.map((violation) => [violation.propertyPath, violation.message]),
         )
       } else {
-        error.value = 'Не вдалося зберегти запис.'
+        error.value = t.value.apiError
       }
     } finally {
       isSaving.value = false

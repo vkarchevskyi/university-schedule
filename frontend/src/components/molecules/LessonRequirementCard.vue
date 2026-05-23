@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { adminCopy } from '@/i18n/admin'
-import { labels } from '@/i18n/publicSchedule'
+import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import type { LessonCard } from '@/types/adminSchedule'
 
 defineProps<{
   card: LessonCard
 }>()
+
+const { t } = useAdminI18n()
+const { t: labels } = usePublicScheduleI18n()
 
 function teacherName(card: LessonCard): string {
   return `${card.teacher.firstName} ${card.teacher.lastName}`
@@ -24,15 +26,15 @@ function teacherName(card: LessonCard): string {
     <small>{{ card.group.name }} · {{ teacherName(card) }}</small>
     <dl>
       <div>
-        <dt>{{ adminCopy.required }}</dt>
+        <dt>{{ t.required }}</dt>
         <dd>{{ card.requiredLessonCount }}</dd>
       </div>
       <div>
-        <dt>{{ adminCopy.scheduled }}</dt>
+        <dt>{{ t.scheduled }}</dt>
         <dd>{{ card.scheduledLessonCount }}</dd>
       </div>
       <div>
-        <dt>{{ adminCopy.remaining }}</dt>
+        <dt>{{ t.remaining }}</dt>
         <dd>{{ card.remainingLessonCount }}</dd>
       </div>
     </dl>

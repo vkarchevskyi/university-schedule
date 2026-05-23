@@ -14,7 +14,7 @@ import {
   updateScheduleEntry,
   validateSchedule,
 } from '@/api/adminSchedule'
-import { adminCopy } from '@/i18n/admin'
+import { useAdminI18n } from '@/composables/useI18n'
 import type {
   AdminRoom,
   AdminSchedule,
@@ -29,6 +29,7 @@ import type {
 } from '@/types/adminSchedule'
 
 export function useAdminScheduleEditor(scheduleId: number) {
+  const { t } = useAdminI18n()
   const schedule = ref<AdminSchedule | null>(null)
   const cards = ref<LessonCard[]>([])
   const rooms = ref<AdminRoom[]>([])
@@ -84,7 +85,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       subjects.value = subjectResponse.items
       selectedRoomId.value = roomResponse.items[0]?.id ?? null
     } catch {
-      error.value = adminCopy.apiError
+      error.value = t.value.apiError
     } finally {
       isLoading.value = false
     }
@@ -101,7 +102,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       schedule.value = scheduleResponse
       cards.value = cardsResponse.items
     } catch {
-      error.value = adminCopy.apiError
+      error.value = t.value.apiError
     }
   }
 
@@ -111,7 +112,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     timeSlotId: number
   }): Promise<void> {
     if (selectedRoomId.value === null) {
-      error.value = adminCopy.selectRoom
+      error.value = t.value.selectRoom
       return
     }
 
@@ -155,7 +156,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   async function validate(): Promise<void> {
     const result = await validateSchedule(scheduleId)
     conflicts.value = result.conflicts
-    message.value = result.valid ? adminCopy.validationPassed : adminCopy.validationFailed
+    message.value = result.valid ? t.value.validationPassed : t.value.validationFailed
   }
 
   async function publish(): Promise<void> {
@@ -163,12 +164,12 @@ export function useAdminScheduleEditor(scheduleId: number) {
     conflicts.value = result.conflicts
 
     if (!result.valid) {
-      message.value = adminCopy.cannotPublishInvalid
+      message.value = t.value.cannotPublishInvalid
       return
     }
 
     schedule.value = await publishSchedule(scheduleId)
-    message.value = adminCopy.published
+    message.value = t.value.published
   }
 
   function entryPayload(

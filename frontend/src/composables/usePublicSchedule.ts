@@ -6,7 +6,7 @@ import {
   listPublicRooms,
   listPublicTeachers,
 } from '@/api/publicSchedule'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
   LookupOption,
   PublicGroup,
@@ -18,6 +18,7 @@ import type {
 import { currentWeekStart } from '@/utils/date'
 
 export function usePublicSchedule() {
+  const { t: labels } = usePublicScheduleI18n()
   const filterType = ref<PublicScheduleFilterType>('group')
   const selectedId = ref<number | null>(null)
   const weekStart = ref(currentWeekStart())
@@ -87,7 +88,7 @@ export function usePublicSchedule() {
       selectedId.value = lookupOptions.value[0]?.id ?? null
       await loadSchedule()
     } catch {
-      error.value = labels.error
+      error.value = labels.value.error
     } finally {
       isLoadingLookups.value = false
     }
@@ -105,7 +106,7 @@ export function usePublicSchedule() {
     try {
       schedule.value = await getPublicSchedule(filterType.value, selectedId.value, weekStart.value)
     } catch {
-      error.value = labels.error
+      error.value = labels.value.error
     } finally {
       isLoadingSchedule.value = false
     }

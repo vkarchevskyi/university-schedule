@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import StatusBadge from '@/components/atoms/StatusBadge.vue'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type { ScheduleItem } from '@/types/publicSchedule'
 
 defineProps<{
   item: ScheduleItem
 }>()
 
+const { t: labels } = usePublicScheduleI18n()
+
 function teacherName(item: ScheduleItem): string {
   return `${item.teacher.firstName} ${item.teacher.lastName}`
 }
 
 function lessonTypeLabel(type: string): string {
-  const lessonTypes: Record<string, string> = labels.lessonTypes
+  const lessonTypes: Record<string, string> = labels.value.lessonTypes
 
   return lessonTypes[type] ?? type
 }

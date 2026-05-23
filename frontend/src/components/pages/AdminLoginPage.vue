@@ -3,11 +3,13 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import LoginForm from '@/components/molecules/LoginForm.vue'
-import { adminCopy } from '@/i18n/admin'
+import LanguageSwitcher from '@/components/molecules/LanguageSwitcher.vue'
+import { useAdminI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const { t } = useAdminI18n()
 
 onMounted(async () => {
   if (auth.isAuthenticated) {
@@ -29,9 +31,10 @@ async function login(payload: { email: string; password: string }): Promise<void
   <main class="login-page">
     <section class="login-panel">
       <div>
-        <h1>{{ adminCopy.loginTitle }}</h1>
-        <p>{{ adminCopy.loginSubtitle }}</p>
+        <h1>{{ t.loginTitle }}</h1>
+        <p>{{ t.loginSubtitle }}</p>
       </div>
+      <LanguageSwitcher :label="t.language" />
       <LoginForm :is-loading="auth.isLoading" :error="auth.error" @submit="login" />
     </section>
   </main>

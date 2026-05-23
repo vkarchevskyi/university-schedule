@@ -3,16 +3,19 @@ import { useRouter } from 'vue-router'
 
 import {
   createExamSchedule,
+  deleteExamSchedule,
   generateExamSchedule,
   getExamGenerationJob,
   listExamSchedules,
 } from '@/api/adminExamSchedule'
 import { listSemesters } from '@/api/adminSchedule'
+import { useAdminI18n } from '@/composables/useI18n'
 import type { AdminSemester } from '@/types/adminSchedule'
 import type { ExamGenerationJob, ExamSchedule } from '@/types/adminExamSchedule'
 
 export function useAdminExamSchedules() {
   const router = useRouter()
+  const { t } = useAdminI18n()
   const schedules = ref<ExamSchedule[]>([])
   const semesters = ref<AdminSemester[]>([])
   const selectedSemesterId = ref<number | null>(null)
@@ -35,7 +38,7 @@ export function useAdminExamSchedules() {
       schedules.value = scheduleResponse.items
       selectedSemesterId.value = semesterResponse.items[0]?.id ?? null
     } catch {
-      error.value = 'Не вдалося завантажити іспити.'
+      error.value = t.value.apiError
     } finally {
       isLoading.value = false
     }
@@ -77,6 +80,11 @@ export function useAdminExamSchedules() {
     await router.push({ name: 'admin-exam-schedule-editor', params: { id } })
   }
 
+  async function removeSchedule(id: number): Promise<void> {
+    await deleteExamSchedule(id)
+    await load()
+  }
+
   return {
     schedules,
     semesters,
@@ -87,5 +95,6 @@ export function useAdminExamSchedules() {
     createDraft,
     startGeneration,
     openSchedule,
+    removeSchedule,
   }
 }

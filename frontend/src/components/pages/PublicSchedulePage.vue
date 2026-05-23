@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import AppButton from '@/components/atoms/AppButton.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import LanguageSwitcher from '@/components/molecules/LanguageSwitcher.vue'
 import DesktopScheduleGrid from '@/components/organisms/DesktopScheduleGrid.vue'
 import MobileScheduleList from '@/components/organisms/MobileScheduleList.vue'
 import PublicScheduleToolbar from '@/components/organisms/PublicScheduleToolbar.vue'
 import { usePublicSchedule } from '@/composables/usePublicSchedule'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
+
+const { t: labels } = usePublicScheduleI18n()
 
 const {
   filterType,
@@ -28,6 +31,7 @@ const {
         <h1>{{ labels.title }}</h1>
         <p>{{ labels.subtitle }}</p>
       </div>
+      <LanguageSwitcher :label="labels.language" />
     </header>
 
     <StateMessage v-if="isLoadingLookups" :title="labels.loadingLookups" />

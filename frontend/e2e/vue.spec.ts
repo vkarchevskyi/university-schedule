@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
+let lastExamEntryPayload: ExamEntryPayload | null = null
+
 test.beforeEach(async ({ page }) => {
+  lastExamEntryPayload = null
   await page.route('**/api/public/groups', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
@@ -42,6 +45,21 @@ test('loads the default group schedule', async ({ page }) => {
   await expect(desktopSchedule).toBeVisible()
   await expect(desktopSchedule.getByTestId('schedule-card')).toContainText('Алгоритми')
   await expect(desktopSchedule.getByTestId('schedule-card')).toContainText('КН-22')
+})
+
+test('switches locale on public and admin screens', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/')
+  await page.getByTestId('language-switcher').click()
+  await expect(page.getByRole('heading', { name: 'Class Schedule' })).toBeVisible()
+
+  await page.goto('/admin')
+  await expect(page.getByTestId('admin-dashboard')).toContainText('Admin Dashboard')
 })
 
 test('switches schedule type and reloads with correct query params', async ({ page }) => {
@@ -234,12 +252,30 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
 
   await page.getByTestId('validate-schedule').click()
 
-  await expect(page.getByTestId('validation-result')).toContainText('Потрібно вибрати іншу аудиторію.')
+  await expect(page.getByTestId('conflict-panel')).toContainText('Потрібно вибрати іншу аудиторію.')
 
   await page.getByTestId('schedule-entry').click()
   await page.getByTestId('delete-entry').click()
+  await page.getByTestId('confirm-cancel').click()
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(1)
+  await page.getByTestId('delete-entry').click()
+  await page.getByTestId('confirm-submit').click()
 
   await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
+test('publishes a valid schedule after validation passes', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { valid: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await page.getByTestId('publish-schedule').click()
+
+  await expect(page.getByTestId('validation-result')).toContainText('Розклад опубліковано.')
 })
 
 test('creates a group through the shared admin CRUD page', async ({ page }) => {
@@ -263,6 +299,30 @@ test('creates a group through the shared admin CRUD page', async ({ page }) => {
   await page.getByRole('button', { name: 'Зберегти' }).click()
 
   await expect(page.getByTestId('entity-table')).toContainText('КН-23')
+})
+
+test('renders entity validation errors and confirms delete', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminEntityManagement(page, { failCreate: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/entities/groups')
+  await page.getByTestId('create-entity').click()
+  await page.getByLabel('Назва').fill('КН-23')
+  await page.getByLabel('Спеціальність').fill("Комп'ютерні науки")
+  await page.getByLabel('Курс').fill('3')
+  await page.getByLabel('Кількість студентів').fill('21')
+  await page.getByRole('button', { name: 'Зберегти' }).click()
+
+  await expect(page.getByTestId('entity-validation-summary')).toContainText('Назва обовʼязкова.')
+
+  await page.getByRole('button', { name: 'Закрити' }).click()
+  await page.getByTestId('delete-entity').click()
+  await page.getByTestId('confirm-cancel').click()
+  await expect(page.getByTestId('entity-table')).toContainText('КН-22')
 })
 
 test('generates a draft schedule and opens the generated result', async ({ page }) => {
@@ -309,7 +369,27 @@ test('creates, validates, edits, and deletes an exam schedule entry', async ({ p
   await expect(page.getByTestId('exam-validation-result')).toContainText('Розклад іспитів валідний.')
 
   await page.getByTestId('delete-exam-entry').click()
+  await page.getByTestId('confirm-submit').click()
   await expect(page.getByTestId('exam-entry-table')).not.toContainText('2026-12-20')
+})
+
+test('creates an exam entry for multiple groups', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page)
+  await mockAdminExamScheduleManagement(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/exam-schedules/21')
+  await page.getByLabel('КН-23').check()
+  await page.getByLabel('Дата').fill('2026-12-22')
+  await page.getByLabel('Початок').fill('12:00')
+  await page.getByTestId('save-exam-entry').click()
+
+  await expect(page.getByTestId('exam-entry-table')).toContainText('2026-12-22')
+  await expect.poll(() => lastExamEntryPayload?.groupIds ?? []).toEqual([1, 2])
 })
 
 test('generates an exam draft and opens the generated result', async ({ page }) => {
@@ -328,6 +408,21 @@ test('generates an exam draft and opens the generated result', async ({ page }) 
   await page.getByTestId('open-generated-exam-schedule').click()
 
   await expect(page).toHaveURL(/\/admin\/exam-schedules\/22$/)
+})
+
+test('shows failed generation job diagnostics', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { generationStatus: 'failed' })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules')
+  await page.getByTestId('generate-schedule').click()
+
+  await expect(page.getByTestId('generation-job')).toContainText('failed')
+  await expect(page.getByTestId('generation-job')).toContainText('Недостатньо аудиторій.')
 })
 
 async function mockSchedule(
@@ -372,7 +467,10 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
   })
 }
 
-async function mockAdminScheduleManagement(page: Page): Promise<void> {
+async function mockAdminScheduleManagement(
+  page: Page,
+  options: { valid?: boolean; generationStatus?: 'completed' | 'failed' } = {},
+): Promise<void> {
   let entries: AdminScheduleEntry[] = []
 
   await page.route('**/api/admin/semesters', async (route) => {
@@ -392,7 +490,7 @@ async function mockAdminScheduleManagement(page: Page): Promise<void> {
   await page.route('**/api/admin/groups', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ items: [adminGroup] }),
+      body: JSON.stringify({ items: [adminGroup, secondAdminGroup] }),
     })
   })
 
@@ -473,10 +571,23 @@ async function mockAdminScheduleManagement(page: Page): Promise<void> {
   await page.route(/\/api\/admin\/schedules\/\d+\/validate$/, async (route) => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({
-        valid: false,
-        conflicts: [{ type: 'room_conflict', message: 'Потрібно вибрати іншу аудиторію.', entryIds: [77] }],
-      }),
+      body: JSON.stringify(
+        options.valid === true
+          ? { valid: true, conflicts: [] }
+          : {
+              valid: false,
+              conflicts: [
+                { type: 'room_conflict', message: 'Потрібно вибрати іншу аудиторію.', entryIds: [77] },
+              ],
+            },
+      ),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/\d+\/publish$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ...adminSchedule(12, entries), status: 'published' }),
     })
   })
 
@@ -490,7 +601,7 @@ async function mockAdminScheduleManagement(page: Page): Promise<void> {
   await page.route('**/api/admin/generation-jobs/schedule-job-1', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(scheduleGenerationJob('completed')),
+      body: JSON.stringify(scheduleGenerationJob(options.generationStatus ?? 'completed')),
     })
   })
 
@@ -503,11 +614,26 @@ async function mockAdminScheduleManagement(page: Page): Promise<void> {
   })
 }
 
-async function mockAdminEntityManagement(page: Page): Promise<void> {
+async function mockAdminEntityManagement(
+  page: Page,
+  options: { failCreate?: boolean } = {},
+): Promise<void> {
   let groups = [adminGroup]
 
   await page.route('**/api/admin/groups', async (route) => {
     if (route.request().method() === 'POST') {
+      if (options.failCreate === true) {
+        await route.fulfill({
+          status: 422,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            title: 'Validation failed',
+            violations: [{ propertyPath: 'name', message: 'Назва обовʼязкова.' }],
+          }),
+        })
+        return
+      }
+
       const payload = (await route.request().postDataJSON()) as typeof adminGroup
       groups = [...groups, { id: 2, ...payload }]
       await route.fulfill({
@@ -551,6 +677,7 @@ async function mockAdminExamScheduleManagement(page: Page): Promise<void> {
 
   await page.route(/\/api\/admin\/exam-schedules\/\d+\/entries$/, async (route) => {
     const payload = (await route.request().postDataJSON()) as ExamEntryPayload
+    lastExamEntryPayload = payload
     entries = [{ id: 88, scheduleId: 21, ...payload }]
     await route.fulfill({
       contentType: 'application/json',
@@ -713,6 +840,14 @@ const adminGroup = {
   studentCount: 24,
 }
 
+const secondAdminGroup = {
+  id: 2,
+  name: 'КН-23',
+  speciality: "Комп'ютерні науки",
+  course: 3,
+  studentCount: 21,
+}
+
 const adminTeacher = {
   id: 7,
   firstName: 'Іван',
@@ -732,13 +867,13 @@ const adminTimeSlot = {
   endsAt: '10:00:00',
 }
 
-function scheduleGenerationJob(status: 'running' | 'completed') {
+function scheduleGenerationJob(status: 'running' | 'completed' | 'failed') {
   return {
     id: 'schedule-job-1',
     status,
     qualityScore: status === 'completed' ? 86 : null,
-    diagnostics: status === 'completed' ? ['Чернетку створено.'] : [],
-    errorMessage: null,
+    diagnostics: status === 'completed' ? ['Чернетку створено.'] : ['Недостатньо аудиторій.'],
+    errorMessage: status === 'failed' ? 'Недостатньо аудиторій.' : null,
     generatedScheduleId: status === 'completed' ? 14 : null,
   }
 }

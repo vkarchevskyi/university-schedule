@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ScheduleCard from '@/components/molecules/ScheduleCard.vue'
-import { labels } from '@/i18n/publicSchedule'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type { ScheduleItem } from '@/types/publicSchedule'
 import { formatDisplayDate, weekDates } from '@/utils/date'
 
@@ -8,6 +8,8 @@ const props = defineProps<{
   weekStart: string
   items: ScheduleItem[]
 }>()
+
+const { t: labels } = usePublicScheduleI18n()
 
 function itemsFor(date: string): ScheduleItem[] {
   return props.items

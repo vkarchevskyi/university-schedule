@@ -3,7 +3,8 @@ import { computed, ref, watch } from 'vue'
 
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
-import { adminCopy } from '@/i18n/admin'
+import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
+import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
   AdminGroup,
   AdminRoom,
@@ -33,6 +34,9 @@ const emit = defineEmits<{
   save: [payload: Partial<ScheduleEntryPayload>]
   delete: []
 }>()
+
+const { t } = useAdminI18n()
+const { t: publicLabels } = usePublicScheduleI18n()
 
 const roomId = ref<number | null>(null)
 const subjectId = ref<number | null>(null)
@@ -155,84 +159,89 @@ function save(): void {
 
 <template>
   <aside class="entry-editor" data-testid="entry-editor">
-    <h2>{{ entry ? adminCopy.scheduleEditor : 'Нове заняття' }}</h2>
+    <h2>{{ entry ? t.scheduleEditor : t.add }}</h2>
     <AppSelect
       id="entry-teaching-load"
-      label="Картка заняття"
+      :label="t.lessonCards"
       :model-value="teachingLoadId ?? ''"
       :options="teachingLoadOptions"
       @update:model-value="teachingLoadId = Number($event)"
     />
     <AppSelect
       id="entry-subject"
-      label="Предмет"
+      :label="t.subject"
       :model-value="subjectId ?? ''"
       :options="subjectOptions"
       @update:model-value="subjectId = Number($event)"
     />
     <AppSelect
       id="entry-teacher"
-      label="Викладач"
+      :label="t.teacher"
       :model-value="teacherId ?? ''"
       :options="teacherOptions"
       @update:model-value="teacherId = Number($event)"
     />
     <AppSelect
       id="entry-group"
-      label="Група"
+      :label="t.group"
       :model-value="groupId ?? ''"
       :options="groupOptions"
       @update:model-value="groupId = Number($event)"
     />
     <AppSelect
       id="entry-room"
-      :label="adminCopy.room"
+      :label="t.room"
       :model-value="roomId ?? ''"
       :options="roomOptions"
       @update:model-value="roomId = Number($event)"
     />
     <AppSelect
       id="entry-time-slot"
-      label="Пара"
+      :label="t.nav.timeSlots"
       :model-value="timeSlotId ?? ''"
       :options="timeSlotOptions"
       @update:model-value="timeSlotId = Number($event)"
     />
     <label class="field" for="entry-day">
-      <span class="field__label">День</span>
+      <span class="field__label">{{ t.day }}</span>
       <select id="entry-day" v-model.number="dayOfWeek" class="field__control">
         <option v-for="day in 7" :key="day" :value="day">{{ day }}</option>
       </select>
     </label>
     <label class="field" for="entry-lesson-type">
-      <span class="field__label">Тип заняття</span>
+      <span class="field__label">{{ t.lessonType }}</span>
       <select id="entry-lesson-type" v-model="lessonType" class="field__control">
-        <option value="lecture">Лекція</option>
-        <option value="laboratory">Лабораторна</option>
-        <option value="seminar">Семінар</option>
-        <option value="practical">Практична</option>
+        <option value="lecture">{{ publicLabels.lessonTypes.lecture }}</option>
+        <option value="laboratory">{{ publicLabels.lessonTypes.laboratory }}</option>
+        <option value="seminar">{{ publicLabels.lessonTypes.seminar }}</option>
+        <option value="practical">{{ publicLabels.lessonTypes.practical }}</option>
       </select>
     </label>
     <label class="field" for="entry-week-parity">
-      <span class="field__label">{{ adminCopy.weekParity }}</span>
+      <span class="field__label">{{ t.weekParity }}</span>
       <select
         id="entry-week-parity"
         v-model="weekParity"
         class="field__control"
         data-testid="week-parity-select"
       >
-        <option value="both">{{ adminCopy.weekParityOptions.both }}</option>
-        <option value="odd">{{ adminCopy.weekParityOptions.odd }}</option>
-        <option value="even">{{ adminCopy.weekParityOptions.even }}</option>
+        <option value="both">{{ t.weekParityOptions.both }}</option>
+        <option value="odd">{{ t.weekParityOptions.odd }}</option>
+        <option value="even">{{ t.weekParityOptions.even }}</option>
       </select>
     </label>
     <div class="entry-editor__actions">
       <AppButton variant="primary" data-testid="save-entry" @click="save">{{
-        entry ? adminCopy.saveEntry : 'Додати'
+        entry ? t.saveEntry : t.add
       }}</AppButton>
-      <AppButton v-if="entry" variant="ghost" data-testid="delete-entry" @click="emit('delete')">{{
-        adminCopy.deleteEntry
-      }}</AppButton>
+      <ConfirmActionButton
+        v-if="entry"
+        :message="t.deleteConfirm"
+        testid="delete-entry"
+        @confirm="emit('delete')"
+      >
+        {{ t.deleteEntry }}
+      </ConfirmActionButton>
     </div>
   </aside>
 </template>
