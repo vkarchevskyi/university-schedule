@@ -14,6 +14,7 @@ use App\Exception\ApiException;
 use App\Resource\Admin\ScheduleEntryResource;
 use App\Resource\Admin\ScheduleEntryResourceMapper;
 use App\Service\AbstractEntityService;
+use App\Service\Schedule\ScheduleAuditLoggerService;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class CreateScheduleEntryService extends AbstractEntityService
@@ -22,6 +23,7 @@ final class CreateScheduleEntryService extends AbstractEntityService
         private readonly ResolveScheduleEntryDataService $resolver,
         private readonly ValidateScheduleEntryConflictService $conflicts,
         private readonly ScheduleEntryResourceMapper $mapper,
+        private readonly ScheduleAuditLoggerService $auditLogger,
         EntityManagerInterface $entityManager,
     ) {
         parent::__construct($entityManager);
@@ -46,6 +48,8 @@ final class CreateScheduleEntryService extends AbstractEntityService
         $schedule->addEntry($entry);
         $this->attachRelations($entry, $resolved);
         $this->save($entry);
+        $this->auditLogger->logEntryCreated($entry);
+        $this->flush();
 
         return $this->mapper->map($entry);
     }

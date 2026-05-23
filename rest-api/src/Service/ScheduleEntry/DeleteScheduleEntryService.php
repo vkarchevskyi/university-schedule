@@ -9,12 +9,15 @@ use App\Entity\ScheduleEntry;
 use App\Enum\ScheduleStatus;
 use App\Exception\ApiException;
 use App\Service\AbstractEntityService;
+use App\Service\Schedule\ScheduleAuditLoggerService;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DeleteScheduleEntryService extends AbstractEntityService
 {
-    public function __construct(EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private readonly ScheduleAuditLoggerService $auditLogger,
+        EntityManagerInterface $entityManager,
+    ) {
         parent::__construct($entityManager);
     }
 
@@ -32,6 +35,8 @@ final class DeleteScheduleEntryService extends AbstractEntityService
             throw ApiException::notFound();
         }
 
+        $beforePayload = $this->auditLogger->entryPayload($entry);
+        $this->auditLogger->logEntryDeleted($entry, $beforePayload);
         $this->delete($entry);
     }
 }

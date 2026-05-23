@@ -45,6 +45,10 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(401);
 
+        $this->client->request('GET', '/api/admin/action-logs');
+
+        self::assertResponseStatusCodeSame(401);
+
         $this->client->jsonRequest('POST', '/api/admin/schedules', [
             'semesterId' => 1,
             'validFrom' => '2026-09-01',
@@ -92,6 +96,11 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         self::assertSame('draft', $this->stringValue($schedule, 'status'));
         self::assertSame([], $this->listValue($schedule, 'entries'));
+        $createdScheduleLog = $this->actionLog('schedule.created');
+        self::assertSame('schedule', $createdScheduleLog->getEntityType());
+        self::assertSame($this->intValue($schedule, 'id'), $createdScheduleLog->getEntityId());
+        self::assertNull($createdScheduleLog->getBeforePayload());
+        self::assertSame('draft', $createdScheduleLog->getAfterPayload()['status'] ?? null);
 
         $entry = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
             'teachingLoadIds' => [$fixtures->teachingLoadId],
@@ -106,6 +115,11 @@ final class AdminScheduleControllerTest extends WebTestCase
         ], 201);
 
         self::assertSame('both', $this->stringValue($entry, 'weekParity'));
+        $createdEntryLog = $this->actionLog('schedule.entry.created');
+        self::assertSame('schedule_entry', $createdEntryLog->getEntityType());
+        self::assertSame($this->intValue($entry, 'id'), $createdEntryLog->getEntityId());
+        self::assertNull($createdEntryLog->getBeforePayload());
+        self::assertSame([$fixtures->groupId], $createdEntryLog->getAfterPayload()['groupIds'] ?? null);
 
         $cards = $this->requestJson('GET', sprintf('/api/admin/schedules/%d/lesson-cards', $this->intValue($schedule, 'id')));
         $card = $this->objectAt($this->listValue($cards, 'items'), 0);
@@ -119,6 +133,9 @@ final class AdminScheduleControllerTest extends WebTestCase
         ]);
 
         self::assertSame('odd', $this->stringValue($updated, 'weekParity'));
+        $updatedEntryLog = $this->actionLog('schedule.entry.updated');
+        self::assertSame('both', $updatedEntryLog->getBeforePayload()['weekParity'] ?? null);
+        self::assertSame('odd', $updatedEntryLog->getAfterPayload()['weekParity'] ?? null);
 
         $publicSchedule = $this->requestJson('GET', sprintf('/api/public/schedule?type=group&id=%d&weekStart=2026-09-07', $fixtures->groupId), authenticated: false);
         self::assertSame([], $this->listValue($publicSchedule, 'items'));
@@ -127,6 +144,30 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         $storedSchedule = $this->requestJson('GET', sprintf('/api/admin/schedules/%d', $this->intValue($schedule, 'id')));
         self::assertSame([], $this->listValue($storedSchedule, 'entries'));
+        $deletedEntryLog = $this->actionLog('schedule.entry.deleted');
+        self::assertSame('odd', $deletedEntryLog->getBeforePayload()['weekParity'] ?? null);
+        self::assertNull($deletedEntryLog->getAfterPayload());
+    }
+
+    public function testAdminCanListActionLogs(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $logs = $this->requestJson('GET', '/api/admin/action-logs');
+        $log = $this->objectAt($this->listValue($logs, 'items'), 0);
+        $user = $this->objectValue($log, 'user');
+        $afterPayload = $this->objectValue($log, 'afterPayload');
+
+        self::assertSame('schedule.created', $this->stringValue($log, 'action'));
+        self::assertSame($this->intValue($schedule, 'id'), $this->intValue($log, 'entityId'));
+        self::assertSame('Ada', $this->stringValue($user, 'firstName'));
+        self::assertSame('admin@example.com', $this->stringValue($user, 'email'));
+        self::assertSame('draft', $this->stringValue($afterPayload, 'status'));
     }
 
     public function testInvalidScheduleEntryPayloadReturnsValidationError(): void
@@ -260,6 +301,8 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         $logs = $this->entityManager->getRepository(ActionLog::class)->findBy(['action' => 'schedule.published']);
         self::assertCount(1, $logs);
+        self::assertSame('draft', $logs[0]->getBeforePayload()['status'] ?? null);
+        self::assertSame('published', $logs[0]->getAfterPayload()['status'] ?? null);
         self::assertNotSame([], FakeTelegramNotificationPublisher::$messages);
         self::assertSame('schedule_published', FakeTelegramNotificationPublisher::$messages[0]['eventType']);
     }
@@ -355,6 +398,17 @@ final class AdminScheduleControllerTest extends WebTestCase
         $this->client->request($method, $uri, server: ['HTTP_AUTHORIZATION' => sprintf('Bearer %s', $this->token)]);
 
         self::assertResponseStatusCodeSame(204);
+    }
+
+    private function actionLog(string $action): ActionLog
+    {
+        $log = $this->entityManager->getRepository(ActionLog::class)->findOneBy(['action' => $action]);
+
+        if (!$log instanceof ActionLog) {
+            throw new \RuntimeException(sprintf('Expected action log "%s" to exist.', $action));
+        }
+
+        return $log;
     }
 
     private function createScheduleFixtures(): AdminScheduleFixtures

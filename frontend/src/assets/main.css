@@ -594,6 +594,32 @@ select {
   font-size: 13px;
 }
 
+.action-log-page {
+  max-width: 1180px;
+}
+
+.action-log-table {
+  min-width: 1100px;
+}
+
+.action-log-table td span {
+  display: block;
+  margin-top: 3px;
+  color: #60717c;
+  font-size: 12px;
+}
+
+.action-log-table pre {
+  max-width: 260px;
+  max-height: 180px;
+  overflow: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .schedule-editor-page {
   display: grid;
   gap: 16px;

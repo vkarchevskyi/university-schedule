@@ -21,6 +21,7 @@ const navItems = computed(() => [
   { label: t.value.nav.dashboard, route: { name: 'admin-dashboard' } },
   { label: t.value.nav.schedules, route: { name: 'admin-schedules' } },
   { label: t.value.nav.examSchedules, route: { name: 'admin-exam-schedules' } },
+  { label: t.value.nav.actionLog, route: { name: 'admin-action-log' } },
   { label: t.value.nav.groups, route: { name: 'admin-entity', params: { entity: 'groups' } } },
   { label: t.value.nav.teachers, route: { name: 'admin-entity', params: { entity: 'teachers' } } },
   { label: t.value.nav.subjects, route: { name: 'admin-entity', params: { entity: 'subjects' } } },
