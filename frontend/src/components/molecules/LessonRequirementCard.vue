@@ -14,10 +14,10 @@ function teacherName(card: LessonCard): string {
 
 <template>
   <article
-    class="lesson-requirement-card"
-    draggable="true"
+    :class="['lesson-requirement-card', { 'lesson-requirement-card--done': card.remainingLessonCount <= 0 }]"
+    :draggable="card.remainingLessonCount > 0"
     data-testid="lesson-card"
-    @dragstart="$event.dataTransfer?.setData('application/json', JSON.stringify(card))"
+    @dragstart="card.remainingLessonCount > 0 && $event.dataTransfer?.setData('application/json', JSON.stringify(card))"
   >
     <strong>{{ card.subject.name }}</strong>
     <span>{{ labels.lessonTypes[card.lessonType] ?? card.lessonType }}</span>

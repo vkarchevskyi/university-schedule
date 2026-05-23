@@ -4,9 +4,13 @@ import {
   createScheduleEntry,
   deleteScheduleEntry,
   getSchedule,
+  listGroups,
   listLessonCards,
   listRooms,
+  listSubjects,
+  listTeachers,
   listTimeSlots,
+  publishSchedule,
   updateScheduleEntry,
   validateSchedule,
 } from '@/api/adminSchedule'
@@ -15,6 +19,9 @@ import type {
   AdminRoom,
   AdminSchedule,
   AdminScheduleEntry,
+  AdminGroup,
+  AdminSubject,
+  AdminTeacher,
   AdminTimeSlot,
   LessonCard,
   ScheduleEntryPayload,
@@ -25,6 +32,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const schedule = ref<AdminSchedule | null>(null)
   const cards = ref<LessonCard[]>([])
   const rooms = ref<AdminRoom[]>([])
+  const groups = ref<AdminGroup[]>([])
+  const teachers = ref<AdminTeacher[]>([])
+  const subjects = ref<AdminSubject[]>([])
   const timeSlots = ref<AdminTimeSlot[]>([])
   const selectedRoomId = ref<number | null>(null)
   const selectedEntry = ref<AdminScheduleEntry | null>(null)
@@ -48,16 +58,30 @@ export function useAdminScheduleEditor(scheduleId: number) {
     error.value = null
 
     try {
-      const [scheduleResponse, cardsResponse, roomResponse, slotResponse] = await Promise.all([
+      const [
+        scheduleResponse,
+        cardsResponse,
+        roomResponse,
+        slotResponse,
+        groupResponse,
+        teacherResponse,
+        subjectResponse,
+      ] = await Promise.all([
         getSchedule(scheduleId),
         listLessonCards(scheduleId),
         listRooms(),
         listTimeSlots(),
+        listGroups(),
+        listTeachers(),
+        listSubjects(),
       ])
       schedule.value = scheduleResponse
       cards.value = cardsResponse.items
       rooms.value = roomResponse.items
       timeSlots.value = slotResponse.items
+      groups.value = groupResponse.items
+      teachers.value = teacherResponse.items
+      subjects.value = subjectResponse.items
       selectedRoomId.value = roomResponse.items[0]?.id ?? null
     } catch {
       error.value = adminCopy.apiError
@@ -108,6 +132,16 @@ export function useAdminScheduleEditor(scheduleId: number) {
     await refreshScheduleData()
   }
 
+  async function createEntry(payload: ScheduleEntryPayload): Promise<void> {
+    await createScheduleEntry(scheduleId, payload)
+    await refreshScheduleData()
+  }
+
+  async function moveEntry(entry: AdminScheduleEntry, dayOfWeek: number, timeSlotId: number): Promise<void> {
+    await updateScheduleEntry(scheduleId, entry.id, { dayOfWeek, timeSlotId })
+    await refreshScheduleData()
+  }
+
   async function removeEntry(): Promise<void> {
     if (selectedEntry.value === null) {
       return
@@ -122,6 +156,19 @@ export function useAdminScheduleEditor(scheduleId: number) {
     const result = await validateSchedule(scheduleId)
     conflicts.value = result.conflicts
     message.value = result.valid ? adminCopy.validationPassed : adminCopy.validationFailed
+  }
+
+  async function publish(): Promise<void> {
+    const result = await validateSchedule(scheduleId)
+    conflicts.value = result.conflicts
+
+    if (!result.valid) {
+      message.value = adminCopy.cannotPublishInvalid
+      return
+    }
+
+    schedule.value = await publishSchedule(scheduleId)
+    message.value = adminCopy.published
   }
 
   function entryPayload(
@@ -146,6 +193,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     schedule,
     cards,
     rooms,
+    groups,
+    teachers,
+    subjects,
     timeSlots,
     selectedRoomId,
     selectedEntry,
@@ -155,8 +205,11 @@ export function useAdminScheduleEditor(scheduleId: number) {
     isLoading,
     roomOptions,
     place,
+    createEntry,
+    moveEntry,
     saveEntry,
     removeEntry,
     validate,
+    publish,
   }
 }

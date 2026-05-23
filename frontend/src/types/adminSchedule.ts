@@ -24,6 +24,26 @@ export interface AdminRoom {
   capacity: number
 }
 
+export interface AdminGroup {
+  id: number
+  name: string
+  speciality: string
+  course: number
+  studentCount: number
+}
+
+export interface AdminTeacher {
+  id: number
+  firstName: string
+  lastName: string
+  department: string
+}
+
+export interface AdminSubject {
+  id: number
+  name: string
+}
+
 export interface AdminTimeSlot {
   id: number
   number: number
@@ -80,6 +100,21 @@ export interface ScheduleValidationConflict {
 export interface ScheduleValidationResult {
   valid: boolean
   conflicts: ScheduleValidationConflict[]
+}
+
+export interface ScheduleGenerationJob {
+  id: string
+  semesterId: number
+  requestedBy: number
+  status: 'queued' | 'running' | 'completed' | 'failed'
+  generatedScheduleId: number | null
+  qualityScore: number | null
+  qualityStatus: string | null
+  errorMessage: string | null
+  diagnostics: Record<string, unknown> | null
+  createdAt: string
+  startedAt: string | null
+  finishedAt: string | null
 }
 
 export interface ScheduleEntryPayload {
