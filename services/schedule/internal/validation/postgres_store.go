@@ -27,7 +27,8 @@ func (store *PostgresStore) Close() error {
 }
 
 func (store *PostgresStore) LoadSchedule(ctx context.Context, scheduleID int64) (Schedule, error) {
-	if err := store.ensureScheduleExists(ctx, scheduleID); err != nil {
+	schedule, err := store.loadScheduleInfo(ctx, scheduleID)
+	if err != nil {
 		return Schedule{}, err
 	}
 
@@ -59,26 +60,26 @@ func (store *PostgresStore) LoadSchedule(ctx context.Context, scheduleID int64) 
 		return Schedule{}, err
 	}
 
-	return Schedule{
-		ID:                         scheduleID,
-		Entries:                    values(entries),
-		TeachingLoads:              teachingLoads,
-		TeacherSubjectAssignments:  assignments,
-		TeacherUnavailabilityRules: unavailability,
-	}, nil
+	schedule.Entries = values(entries)
+	schedule.TeachingLoads = teachingLoads
+	schedule.TeacherSubjectAssignments = assignments
+	schedule.TeacherUnavailabilityRules = unavailability
+
+	return schedule, nil
 }
 
-func (store *PostgresStore) ensureScheduleExists(ctx context.Context, scheduleID int64) error {
-	var id int64
+func (store *PostgresStore) loadScheduleInfo(ctx context.Context, scheduleID int64) (Schedule, error) {
+	var schedule Schedule
 	if err := store.db.QueryRowContext(ctx, `
-		SELECT id
-		FROM schedules
-		WHERE id = $1
-	`, scheduleID).Scan(&id); err != nil {
-		return fmt.Errorf("load schedule: %w", err)
+		SELECT s.id, ss.starts_at::text, ss.ends_at::text, s.valid_from::text, s.valid_to::text
+		FROM schedules s
+		INNER JOIN semesters ss ON ss.id = s.semester_id
+		WHERE s.id = $1
+	`, scheduleID).Scan(&schedule.ID, &schedule.SemesterStartsAt, &schedule.SemesterEndsAt, &schedule.ValidFrom, &schedule.ValidTo); err != nil {
+		return Schedule{}, fmt.Errorf("load schedule: %w", err)
 	}
 
-	return nil
+	return schedule, nil
 }
 
 func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (map[int64]ScheduleEntry, error) {

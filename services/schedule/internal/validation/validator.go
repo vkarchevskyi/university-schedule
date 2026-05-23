@@ -13,6 +13,10 @@ type ScheduleValidationRequest struct {
 
 type Schedule struct {
 	ID                         int64                   `json:"id"`
+	SemesterStartsAt           string                  `json:"semesterStartsAt"`
+	SemesterEndsAt             string                  `json:"semesterEndsAt"`
+	ValidFrom                  string                  `json:"validFrom"`
+	ValidTo                    string                  `json:"validTo"`
 	Entries                    []ScheduleEntry         `json:"entries"`
 	TeachingLoads              []TeachingLoad          `json:"teachingLoads"`
 	TeacherSubjectAssignments  []TeacherSubject        `json:"teacherSubjectAssignments"`
@@ -80,6 +84,7 @@ func (Validator) Validate(schedule Schedule) ValidationResult {
 	conflicts = append(conflicts, validateCapacity(schedule.Entries)...)
 	conflicts = append(conflicts, validateTeacherSubjects(schedule)...)
 	conflicts = append(conflicts, validateTeacherUnavailability(schedule)...)
+	conflicts = append(conflicts, validateSchedulePeriod(schedule)...)
 	conflicts = append(conflicts, validateTeachingLoads(schedule)...)
 
 	return ValidationResult{
@@ -93,7 +98,7 @@ func validateEntryConflicts(entries []ScheduleEntry) []Conflict {
 
 	for leftIndex, left := range entries {
 		for _, right := range entries[leftIndex+1:] {
-			if left.DayOfWeek != right.DayOfWeek || left.TimeSlotID != right.TimeSlotID || !weekParityOverlaps(left.WeekParity, right.WeekParity) {
+			if left.DayOfWeek != right.DayOfWeek || !weekParityOverlaps(left.WeekParity, right.WeekParity) || !entryTimeRangesOverlap(left, right) {
 				continue
 			}
 
@@ -114,6 +119,16 @@ func validateEntryConflicts(entries []ScheduleEntry) []Conflict {
 	}
 
 	return conflicts
+}
+
+func entryTimeRangesOverlap(left ScheduleEntry, right ScheduleEntry) bool {
+	leftStart, leftEnd, leftOK := ParseRange(left.TimeSlotStartsAt, left.TimeSlotEndsAt)
+	rightStart, rightEnd, rightOK := ParseRange(right.TimeSlotStartsAt, right.TimeSlotEndsAt)
+	if !leftOK || !rightOK {
+		return left.TimeSlotID == right.TimeSlotID
+	}
+
+	return TimeRangesOverlap(leftStart, leftEnd, rightStart, rightEnd)
 }
 
 func validateCapacity(entries []ScheduleEntry) []Conflict {
@@ -180,18 +195,62 @@ func validateTeacherUnavailability(schedule Schedule) []Conflict {
 	return conflicts
 }
 
+func validateSchedulePeriod(schedule Schedule) []Conflict {
+	if schedule.SemesterStartsAt == "" && schedule.SemesterEndsAt == "" && schedule.ValidFrom == "" && schedule.ValidTo == "" {
+		return nil
+	}
+
+	semesterStart, startErr := time.Parse("2006-01-02", schedule.SemesterStartsAt)
+	semesterEnd, endErr := time.Parse("2006-01-02", schedule.SemesterEndsAt)
+	validFrom, validFromErr := time.Parse("2006-01-02", schedule.ValidFrom)
+	validTo, validToErr := time.Parse("2006-01-02", schedule.ValidTo)
+
+	if startErr != nil || endErr != nil || validFromErr != nil || validToErr != nil {
+		return []Conflict{{Type: "invalid_schedule_period", Message: "Schedule has an invalid date range."}}
+	}
+
+	if validTo.Before(validFrom) || validFrom.Before(semesterStart) || validTo.After(semesterEnd) {
+		return []Conflict{{Type: "schedule_period_outside_semester", Message: "Schedule validity period must be within the semester."}}
+	}
+
+	return nil
+}
+
 func validateTeachingLoads(schedule Schedule) []Conflict {
 	scheduledCounts := make(map[int64]int)
+	teachingLoadsByID := make(map[int64]TeachingLoad, len(schedule.TeachingLoads))
+	conflicts := make([]Conflict, 0)
+
+	for _, teachingLoad := range schedule.TeachingLoads {
+		teachingLoadsByID[teachingLoad.ID] = teachingLoad
+	}
 
 	for _, entry := range schedule.Entries {
 		count := lessonCount(entry.WeekParity)
 
 		for _, teachingLoadID := range entry.TeachingLoadIDs {
+			teachingLoad, exists := teachingLoadsByID[teachingLoadID]
+			if !exists {
+				conflicts = append(conflicts, Conflict{
+					Type:     "teaching_load_mismatch",
+					Message:  fmt.Sprintf("Schedule entry references unknown teaching load %d.", teachingLoadID),
+					EntryIDs: []int64{entry.ID},
+				})
+				continue
+			}
+
+			if !entryMatchesTeachingLoad(entry, teachingLoad) {
+				conflicts = append(conflicts, Conflict{
+					Type:     "teaching_load_mismatch",
+					Message:  fmt.Sprintf("Schedule entry does not match teaching load %d.", teachingLoad.ID),
+					EntryIDs: []int64{entry.ID},
+				})
+				continue
+			}
+
 			scheduledCounts[teachingLoadID] += count
 		}
 	}
-
-	conflicts := make([]Conflict, 0)
 
 	for _, teachingLoad := range schedule.TeachingLoads {
 		scheduledCount := scheduledCounts[teachingLoad.ID]
@@ -214,6 +273,13 @@ func validateTeachingLoads(schedule Schedule) []Conflict {
 	}
 
 	return conflicts
+}
+
+func entryMatchesTeachingLoad(entry ScheduleEntry, teachingLoad TeachingLoad) bool {
+	return entry.SubjectID == teachingLoad.SubjectID &&
+		entry.TeacherID == teachingLoad.TeacherID &&
+		entry.LessonType == teachingLoad.LessonType &&
+		slices.Contains(entry.GroupIDs, teachingLoad.GroupID)
 }
 
 func entryIDsForTeachingLoad(entries []ScheduleEntry, teachingLoadID int64) []int64 {
