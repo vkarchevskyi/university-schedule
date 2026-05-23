@@ -127,7 +127,7 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 					candidate[index].RoomID = room.ID
 					candidate[index].RoomCapacity = room.Capacity
 
-					if conflictsWithOthers(candidate[index], candidate, index) {
+					if conflictsWithOthers(candidate[index], candidate, index) || violatesTeacherUnavailability(candidate[index], input.Unavailable) {
 						continue
 					}
 
@@ -168,7 +168,7 @@ func (generator Generator) place(load TeachingLoad, weekParity int, entries []Ca
 					WeekParity:       weekParity,
 					StudentCount:     load.StudentCount,
 				}
-				if !conflicts(entry, entries) {
+				if !conflicts(entry, entries) && !violatesTeacherUnavailability(entry, input.Unavailable) {
 					return entry, true
 				}
 			}
@@ -200,6 +200,29 @@ func conflictsWithOthers(candidate CandidateEntry, entries []CandidateEntry, can
 			continue
 		}
 		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID || candidate.GroupID == entry.GroupID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func violatesTeacherUnavailability(candidate CandidateEntry, rules []validation.TeacherUnavailability) bool {
+	start, end, ok := validation.ParseRange(candidate.TimeSlotStartsAt, candidate.TimeSlotEndsAt)
+	if !ok {
+		return true
+	}
+
+	for _, rule := range rules {
+		if rule.TeacherID != candidate.TeacherID || rule.DayOfWeek != candidate.DayOfWeek {
+			continue
+		}
+
+		unavailableFrom, unavailableTo, ok := validation.ParseRange(rule.UnavailableFrom, rule.UnavailableTo)
+		if !ok {
+			return true
+		}
+		if validation.TimeRangesOverlap(start, end, unavailableFrom, unavailableTo) {
 			return true
 		}
 	}
@@ -279,29 +302,9 @@ func validationTeachingLoads(loads []TeachingLoad) []validation.TeachingLoad {
 }
 
 func lessonTypeName(value int) string {
-	switch value {
-	case 1:
-		return "lecture"
-	case 2:
-		return "laboratory"
-	case 3:
-		return "seminar"
-	case 4:
-		return "practical"
-	default:
-		return "unknown"
-	}
+	return validation.LessonTypeName(value)
 }
 
 func weekParityName(value int) string {
-	switch value {
-	case 1:
-		return "odd"
-	case 2:
-		return "even"
-	case 3:
-		return "both"
-	default:
-		return "unknown"
-	}
+	return validation.WeekParityName(value)
 }
