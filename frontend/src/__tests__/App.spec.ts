@@ -3,9 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createScheduleEntry, deleteScheduleEntry } from '@/api/adminSchedule'
+import { ApiError, requestJson } from '@/api/http'
 import PublicSchedulePage from '@/components/pages/PublicSchedulePage.vue'
-import { requestJson } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
+import { useLocaleStore } from '@/stores/locale'
 import { addWeeks, currentWeekStart, mondayOfWeek, toIsoDate } from '@/utils/date'
 
 describe('App', () => {
@@ -15,6 +16,7 @@ describe('App', () => {
   })
 
   it('renders the public schedule page', async () => {
+    setActivePinia(createPinia())
     vi.stubGlobal('fetch', mockFetch())
 
     const wrapper = mount(PublicSchedulePage)
@@ -127,6 +129,39 @@ describe('App', () => {
       method: 'DELETE',
       authorization: 'Bearer jwt-token',
     })
+  })
+
+  it('switches locale and persists the selected language', () => {
+    setActivePinia(createPinia())
+
+    const locale = useLocaleStore()
+    expect(locale.locale).toBe('uk')
+
+    locale.setLocale('en')
+
+    expect(locale.locale).toBe('en')
+    expect(locale.languageLabel).toBe('EN')
+    expect(window.localStorage.getItem('university-schedule.locale')).toBe('en')
+  })
+
+  it('maps API validation problems into ApiError violations', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            title: 'Validation failed',
+            violations: [{ propertyPath: 'name', message: 'This value should not be blank.' }],
+          }),
+          { status: 422, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    )
+
+    await expect(requestJson('/api/admin/groups', { method: 'POST' })).rejects.toMatchObject({
+      status: 422,
+      violations: [{ propertyPath: 'name', message: 'This value should not be blank.' }],
+    } satisfies Partial<ApiError>)
   })
 })
 
