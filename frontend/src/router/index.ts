@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import AdminActionLogPage from '@/components/pages/AdminActionLogPage.vue'
 import AdminDashboardPage from '@/components/pages/AdminDashboardPage.vue'
 import AdminEntityPage from '@/components/pages/AdminEntityPage.vue'
 import AdminExamScheduleEditorPage from '@/components/pages/AdminExamScheduleEditorPage.vue'
@@ -57,6 +58,12 @@ const router = createRouter({
       path: '/admin/exam-schedules/:id',
       name: 'admin-exam-schedule-editor',
       component: AdminExamScheduleEditorPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/action-log',
+      name: 'admin-action-log',
+      component: AdminActionLogPage,
       meta: { requiresAuth: true },
     },
   ],

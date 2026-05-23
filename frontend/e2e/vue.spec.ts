@@ -199,6 +199,23 @@ test('loads persisted admin token on protected routes', async ({ page }) => {
   await expect(page.getByTestId('admin-name')).toHaveText('Ada Lovelace')
 })
 
+test('opens the admin action log', async ({ page }) => {
+  await mockSuccessfulAuth(page)
+  await mockAdminActionLogs(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/action-log')
+
+  await expect(page.getByRole('link', { name: 'Журнал дій' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Журнал дій' })).toBeVisible()
+  await expect(page.getByTestId('action-log-table')).toContainText('Ada Lovelace')
+  await expect(page.getByTestId('action-log-table')).toContainText('schedule.entry.updated')
+  await expect(page.getByTestId('action-log-table')).toContainText('2026-05-23T09:30:00+00:00')
+  await expect(page.getByTestId('action-log-table')).toContainText('"weekParity": "odd"')
+})
+
 test('opens schedule management and creates a draft schedule', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -610,6 +627,36 @@ async function mockAdminScheduleManagement(
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify(adminSchedule(id, entries)),
+    })
+  })
+}
+
+async function mockAdminActionLogs(page: Page): Promise<void> {
+  await page.route('**/api/admin/action-logs', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          {
+            id: 1,
+            action: 'schedule.entry.updated',
+            entityType: 'schedule_entry',
+            entityId: 77,
+            createdAt: '2026-05-23T09:30:00+00:00',
+            user: userResponse,
+            beforePayload: {
+              id: 77,
+              scheduleId: 12,
+              weekParity: 'both',
+            },
+            afterPayload: {
+              id: 77,
+              scheduleId: 12,
+              weekParity: 'odd',
+            },
+          },
+        ],
+      }),
     })
   })
 }
