@@ -4,11 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
+
+var ErrJobNotFound = errors.New("schedule generation job not found")
 
 type PostgresStore struct {
 	db *sql.DB
@@ -28,13 +31,19 @@ func (store *PostgresStore) Close() error {
 }
 
 func (store *PostgresStore) MarkRunning(ctx context.Context, jobID string) error {
-	_, err := store.db.ExecContext(ctx, `
+	result, err := store.db.ExecContext(ctx, `
 		UPDATE schedule_generation_jobs
-		SET status = 'running', started_at = NOW()
+		SET status = 'running',
+			error_message = NULL,
+			started_at = NOW(),
+			finished_at = NULL
 		WHERE id = $1
 	`, jobID)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(result, ErrJobNotFound)
 }
 
 func (store *PostgresStore) MarkCompleted(ctx context.Context, jobID string, result Result) error {
@@ -43,28 +52,41 @@ func (store *PostgresStore) MarkCompleted(ctx context.Context, jobID string, res
 		return fmt.Errorf("marshal diagnostics: %w", err)
 	}
 
-	_, err = store.db.ExecContext(ctx, `
+	update, err := store.db.ExecContext(ctx, `
 		UPDATE schedule_generation_jobs
 		SET status = 'completed',
 			generated_schedule_id = $2,
 			quality_score = $3,
 			quality_status = $4,
 			diagnostics = $5,
+			error_message = NULL,
 			finished_at = NOW()
 		WHERE id = $1
 	`, jobID, result.ScheduleID, result.QualityScore, result.QualityStatus, string(diagnostics))
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(update, ErrJobNotFound)
 }
 
 func (store *PostgresStore) MarkFailed(ctx context.Context, jobID string, message string) error {
-	_, err := store.db.ExecContext(ctx, `
+	result, err := store.db.ExecContext(ctx, `
 		UPDATE schedule_generation_jobs
-		SET status = 'failed', error_message = $2, finished_at = NOW()
+		SET status = 'failed',
+			generated_schedule_id = NULL,
+			quality_score = NULL,
+			quality_status = NULL,
+			diagnostics = NULL,
+			error_message = $2,
+			finished_at = NOW()
 		WHERE id = $1
 	`, jobID, message)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return requireAffected(result, ErrJobNotFound)
 }
 
 func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (Input, error) {
@@ -97,9 +119,28 @@ func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (In
 }
 
 func (store *PostgresStore) CreateDraftSchedule(ctx context.Context, message JobMessage, entries []CandidateEntry) (int64, error) {
-	semester, err := store.loadSemester(ctx, message.SemesterID)
+	tx, err := store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	scheduleID, err := store.createDraftSchedule(ctx, tx, message, entries)
 	if err != nil {
 		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("commit generated schedule: %w", err)
+	}
+
+	return scheduleID, nil
+}
+
+func (store *PostgresStore) CompleteJobWithDraftSchedule(ctx context.Context, message JobMessage, entries []CandidateEntry, result Result) (int64, error) {
+	diagnostics, err := json.Marshal(result.Diagnostics)
+	if err != nil {
+		return 0, fmt.Errorf("marshal diagnostics: %w", err)
 	}
 
 	tx, err := store.db.BeginTx(ctx, nil)
@@ -107,6 +148,46 @@ func (store *PostgresStore) CreateDraftSchedule(ctx context.Context, message Job
 		return 0, fmt.Errorf("begin transaction: %w", err)
 	}
 	defer tx.Rollback()
+
+	scheduleID, err := store.createDraftSchedule(ctx, tx, message, entries)
+	if err != nil {
+		return 0, err
+	}
+
+	update, err := tx.ExecContext(ctx, `
+		UPDATE schedule_generation_jobs
+		SET status = 'completed',
+			generated_schedule_id = $2,
+			quality_score = $3,
+			quality_status = $4,
+			diagnostics = $5,
+			error_message = NULL,
+			finished_at = NOW()
+		WHERE id = $1
+	`, message.JobID, scheduleID, result.QualityScore, result.QualityStatus, string(diagnostics))
+	if err != nil {
+		return 0, err
+	}
+	if err := requireAffected(update, ErrJobNotFound); err != nil {
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("commit generated schedule: %w", err)
+	}
+
+	return scheduleID, nil
+}
+
+func (store *PostgresStore) createDraftSchedule(ctx context.Context, tx *sql.Tx, message JobMessage, entries []CandidateEntry) (int64, error) {
+	var semester Semester
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id, starts_at::text, ends_at::text
+		FROM semesters
+		WHERE id = $1
+	`, message.SemesterID).Scan(&semester.ID, &semester.StartsAt, &semester.EndsAt); err != nil {
+		return 0, fmt.Errorf("load semester: %w", err)
+	}
 
 	var scheduleID int64
 	if err := tx.QueryRowContext(ctx, `
@@ -140,10 +221,6 @@ func (store *PostgresStore) CreateDraftSchedule(ctx context.Context, message Job
 		`, entryID, entry.TeachingLoadID); err != nil {
 			return 0, fmt.Errorf("insert schedule entry teaching load: %w", err)
 		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return 0, fmt.Errorf("commit generated schedule: %w", err)
 	}
 
 	return scheduleID, nil
@@ -282,4 +359,16 @@ func (store *PostgresStore) loadTeacherUnavailability(ctx context.Context) ([]va
 	}
 
 	return unavailable, rows.Err()
+}
+
+func requireAffected(result sql.Result, notFound error) error {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read affected rows: %w", err)
+	}
+	if affected == 0 {
+		return notFound
+	}
+
+	return nil
 }
