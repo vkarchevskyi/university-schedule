@@ -33,18 +33,34 @@ class ActionLog
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
+    /** @var array<string, mixed>|null */
+    #[ORM\Column(name: 'before_payload', type: Types::JSON, nullable: true)]
+    private ?array $beforePayload;
+
+    /** @var array<string, mixed>|null */
+    #[ORM\Column(name: 'after_payload', type: Types::JSON, nullable: true)]
+    private ?array $afterPayload;
+
+    /**
+     * @param array<string, mixed>|null $beforePayload
+     * @param array<string, mixed>|null $afterPayload
+     */
     public function __construct(
         User $user,
         string $action,
         string $entityType,
         int $entityId,
         \DateTimeImmutable $createdAt,
+        ?array $beforePayload = null,
+        ?array $afterPayload = null,
     ) {
         $this->user = $user;
         $this->action = $action;
         $this->entityType = $entityType;
         $this->entityId = $entityId;
         $this->createdAt = $createdAt;
+        $this->beforePayload = $beforePayload;
+        $this->afterPayload = $afterPayload;
     }
 
     public function getId(): ?int
@@ -75,5 +91,17 @@ class ActionLog
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getBeforePayload(): ?array
+    {
+        return $this->beforePayload;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getAfterPayload(): ?array
+    {
+        return $this->afterPayload;
     }
 }
