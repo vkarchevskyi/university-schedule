@@ -46,7 +46,7 @@ const emit = defineEmits<{
       position="popper"
       :class="
         cn(
-          'z-50 min-w-[var(--reka-select-trigger-width)] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md',
+          'z-50 min-w-(--reka-select-trigger-width) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md',
         )
       "
     >
@@ -55,7 +55,7 @@ const emit = defineEmits<{
           v-for="option in options"
           :key="option.id"
           :value="String(option.id)"
-          class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+          class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
         >
           <SelectItemText>
             {{ option.label }}
