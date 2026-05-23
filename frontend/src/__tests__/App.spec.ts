@@ -2,9 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { createScheduleEntry, deleteScheduleEntry } from '@/api/adminSchedule'
 import { ApiError, requestJson } from '@/api/http'
+import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import PublicSchedulePage from '@/components/pages/PublicSchedulePage.vue'
+import { entityConfigByKey } from '@/config/adminEntities'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { addWeeks, currentWeekStart, mondayOfWeek, toIsoDate } from '@/utils/date'
@@ -142,6 +145,69 @@ describe('App', () => {
     expect(locale.locale).toBe('en')
     expect(locale.languageLabel).toBe('EN')
     expect(window.localStorage.getItem('university-schedule.locale')).toBe('en')
+  })
+
+  it('exposes teacher subject and unavailability admin entity configs', () => {
+    const teacherSubjects = entityConfigByKey('teacher-subjects')
+    const teacherUnavailability = entityConfigByKey('teacher-unavailability')
+
+    expect(teacherSubjects).toMatchObject({
+      endpoint: '/api/admin/teacher-subjects',
+      fields: [
+        { key: 'teacherId', type: 'select', lookup: 'teachers', required: true },
+        { key: 'subjectId', type: 'select', lookup: 'subjects', required: true },
+      ],
+    })
+    expect(teacherUnavailability).toMatchObject({
+      endpoint: '/api/admin/teacher-unavailability',
+      fields: [
+        { key: 'teacherId', type: 'select', lookup: 'teachers', required: true },
+        { key: 'dayOfWeek', type: 'select', required: true },
+        { key: 'unavailableFrom', type: 'time', required: true },
+        { key: 'unavailableTo', type: 'time', required: true },
+      ],
+    })
+    expect(teacherUnavailability?.fields[1]?.options).toHaveLength(7)
+  })
+
+  it('renders teacher workflow links in admin navigation', async () => {
+    const pinia = createPinia()
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/admin', name: 'admin-dashboard', component: { template: '<div />' } },
+        { path: '/admin/schedules', name: 'admin-schedules', component: { template: '<div />' } },
+        {
+          path: '/admin/exam-schedules',
+          name: 'admin-exam-schedules',
+          component: { template: '<div />' },
+        },
+        {
+          path: '/admin/action-log',
+          name: 'admin-action-log',
+          component: { template: '<div />' },
+        },
+        {
+          path: '/admin/entities/:entity',
+          name: 'admin-entity',
+          component: { template: '<div />' },
+        },
+      ],
+    })
+    setActivePinia(pinia)
+    await router.push('/admin')
+    await router.isReady()
+
+    const wrapper = mount(AdminLayout, {
+      global: {
+        plugins: [pinia, router],
+      },
+    })
+
+    expect(wrapper.text()).toContain('Предмети викладачів')
+    expect(wrapper.text()).toContain('Недоступність викладачів')
+    expect(wrapper.html()).toContain('/admin/entities/teacher-subjects')
+    expect(wrapper.html()).toContain('/admin/entities/teacher-unavailability')
   })
 
   it('maps API validation problems into ApiError violations', async () => {
