@@ -97,6 +97,98 @@ func TestValidatorAcceptsCompleteSchedule(t *testing.T) {
 	}
 }
 
+func TestValidatorDetectsOverlappingTimeRanges(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID:               1,
+				SubjectID:        10,
+				TeacherID:        20,
+				LessonType:       "laboratory",
+				RoomID:           30,
+				RoomCapacity:     20,
+				TimeSlotID:       40,
+				TimeSlotStartsAt: "08:30:00",
+				TimeSlotEndsAt:   "09:50:00",
+				DayOfWeek:        1,
+				WeekParity:       "odd",
+				GroupIDs:         []int64{50},
+				StudentCount:     12,
+				TeachingLoadIDs:  []int64{60},
+			},
+			{
+				ID:               2,
+				SubjectID:        10,
+				TeacherID:        20,
+				LessonType:       "laboratory",
+				RoomID:           31,
+				RoomCapacity:     20,
+				TimeSlotID:       41,
+				TimeSlotStartsAt: "09:00:00",
+				TimeSlotEndsAt:   "10:20:00",
+				DayOfWeek:        1,
+				WeekParity:       "odd",
+				GroupIDs:         []int64{51},
+				StudentCount:     12,
+				TeachingLoadIDs:  []int64{61},
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 10, TeacherID: 20, LessonType: "laboratory", RequiredLessonCount: 1},
+			{ID: 61, GroupID: 51, SubjectID: 10, TeacherID: 20, LessonType: "laboratory", RequiredLessonCount: 1},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{{TeacherID: 20, SubjectID: 10}},
+	})
+
+	assertConflictType(t, result, "teacher_conflict")
+}
+
+func TestValidatorDetectsTeachingLoadMismatch(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID:               1,
+				SubjectID:        10,
+				TeacherID:        20,
+				LessonType:       "laboratory",
+				RoomID:           30,
+				RoomCapacity:     20,
+				TimeSlotID:       40,
+				TimeSlotStartsAt: "08:30:00",
+				TimeSlotEndsAt:   "09:50:00",
+				DayOfWeek:        1,
+				WeekParity:       "odd",
+				GroupIDs:         []int64{50},
+				StudentCount:     12,
+				TeachingLoadIDs:  []int64{60},
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 99, TeacherID: 20, LessonType: "laboratory", RequiredLessonCount: 1},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{{TeacherID: 20, SubjectID: 10}},
+	})
+
+	assertConflictType(t, result, "teaching_load_mismatch")
+}
+
+func TestValidatorDetectsSchedulePeriodOutsideSemester(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		SemesterStartsAt: "2026-09-01",
+		SemesterEndsAt:   "2026-12-31",
+		ValidFrom:        "2026-08-31",
+		ValidTo:          "2026-12-31",
+	})
+
+	assertConflictType(t, result, "schedule_period_outside_semester")
+}
+
 func TestValuesSortsEntriesByID(t *testing.T) {
 	entries := values(map[int64]ScheduleEntry{
 		3: {ID: 3},
