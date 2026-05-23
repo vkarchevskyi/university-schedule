@@ -4,12 +4,17 @@ import { useRoute } from 'vue-router'
 
 import AppButton from '@/components/atoms/AppButton.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import CheckboxGroupField from '@/components/molecules/CheckboxGroupField.vue'
+import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
+import ConflictPanel from '@/components/molecules/ConflictPanel.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import { useAdminExamScheduleEditor } from '@/composables/useAdminExamScheduleEditor'
+import { useAdminI18n } from '@/composables/useI18n'
 import type { ExamScheduleEntryPayload } from '@/types/adminExamSchedule'
 
 const route = useRoute()
 const scheduleId = Number(route.params.id)
+const { t } = useAdminI18n()
 const { schedule, lookups, selectedEntry, conflicts, message, error, isLoading, save, remove, validate } =
   useAdminExamScheduleEditor(scheduleId)
 
@@ -30,7 +35,7 @@ watch(selectedEntry, (entry) => {
   form.subjectId = entry?.subjectId ?? lookups.value.subjects[0]?.id ?? 0
   form.teacherId = entry?.teacherId ?? lookups.value.teachers[0]?.id ?? 0
   form.roomId = entry?.roomId ?? lookups.value.rooms[0]?.id ?? 0
-  form.groupIds = [entry?.groupIds[0] ?? lookups.value.groups[0]?.id ?? 0].filter(Boolean)
+  form.groupIds = entry?.groupIds ?? [lookups.value.groups[0]?.id ?? 0].filter(Boolean)
   form.entryDate = entry?.entryDate ?? ''
   form.startsAt = entry?.startsAt ?? ''
 })
@@ -70,52 +75,54 @@ function nameById<T extends { id: number; name?: string; firstName?: string; las
 <template>
   <AdminLayout>
     <StateMessage v-if="error" tone="error" :title="error" />
-    <StateMessage v-else-if="isLoading" title="Завантаження..." />
+    <StateMessage v-else-if="isLoading" :title="t.loading" />
     <section v-else-if="schedule" class="exam-editor-page">
       <header class="admin-page-header">
         <div>
-          <h1>Розклад іспитів #{{ schedule.id }}</h1>
-          <p>Семестр #{{ schedule.semesterId }}</p>
+          <h1>{{ t.examScheduleEditor }} #{{ schedule.id }}</h1>
+          <p>{{ t.semester }} #{{ schedule.semesterId }}</p>
         </div>
         <AppButton variant="primary" data-testid="validate-exam-schedule" @click="validate">
-          Перевірити
+          {{ t.validate }}
         </AppButton>
       </header>
 
       <StateMessage v-if="message" :title="message" data-testid="exam-validation-result">
-        <ul>
-          <li v-for="conflict in conflicts" :key="`${conflict.type}-${conflict.message}`">
-            {{ conflict.message }}
-          </li>
-        </ul>
       </StateMessage>
+      <ConflictPanel :conflicts="conflicts" />
 
       <div class="exam-editor-layout">
         <div class="admin-table-wrap">
           <table class="admin-table" data-testid="exam-entry-table">
             <thead>
               <tr>
-                <th>Дата</th>
-                <th>Час</th>
-                <th>Тип</th>
-                <th>Предмет</th>
-                <th>Викладач</th>
-                <th>Аудиторія</th>
-                <th>Дії</th>
+                <th>{{ t.date }}</th>
+                <th>{{ t.startsAt }}</th>
+                <th>{{ t.examType }}</th>
+                <th>{{ t.subject }}</th>
+                <th>{{ t.teacher }}</th>
+                <th>{{ t.room }}</th>
+                <th>{{ t.actions }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="entry in schedule.entries" :key="entry.id" :class="{ 'row-conflict': conflictEntryIds.includes(entry.id) }">
                 <td>{{ entry.entryDate }}</td>
                 <td>{{ entry.startsAt }}</td>
-                <td>{{ entry.type }}</td>
+                <td>{{ t.examTypeOptions[entry.type] }}</td>
                 <td>{{ nameById(lookups.subjects, entry.subjectId) }}</td>
                 <td>{{ nameById(lookups.teachers, entry.teacherId) }}</td>
                 <td>{{ nameById(lookups.rooms, entry.roomId) }}</td>
                 <td>
                   <div class="table-actions">
-                    <AppButton data-testid="edit-exam-entry" @click="selectedEntry = entry">Редагувати</AppButton>
-                    <AppButton variant="ghost" data-testid="delete-exam-entry" @click="remove(entry)">Видалити</AppButton>
+                    <AppButton data-testid="edit-exam-entry" @click="selectedEntry = entry">{{ t.edit }}</AppButton>
+                    <ConfirmActionButton
+                      :message="t.deleteConfirm"
+                      testid="delete-exam-entry"
+                      @confirm="remove(entry)"
+                    >
+                      {{ t.delete }}
+                    </ConfirmActionButton>
                   </div>
                 </td>
               </tr>
@@ -124,47 +131,46 @@ function nameById<T extends { id: number; name?: string; firstName?: string; las
         </div>
 
         <form class="entry-editor" data-testid="exam-entry-form" @submit.prevent="submit">
-          <h2>{{ selectedEntry ? 'Редагувати іспит' : 'Новий іспит' }}</h2>
+          <h2>{{ selectedEntry ? t.editExamEntry : t.newExamEntry }}</h2>
           <label class="field">
-            <span class="field__label">Тип</span>
+            <span class="field__label">{{ t.examType }}</span>
             <select v-model="form.type" class="field__control">
-              <option value="consultation">Консультація</option>
-              <option value="exam">Іспит</option>
+              <option value="consultation">{{ t.examTypeOptions.consultation }}</option>
+              <option value="exam">{{ t.examTypeOptions.exam }}</option>
             </select>
           </label>
           <label class="field">
-            <span class="field__label">Предмет</span>
+            <span class="field__label">{{ t.subject }}</span>
             <select v-model.number="form.subjectId" class="field__control">
               <option v-for="subject in lookups.subjects" :key="subject.id" :value="subject.id">{{ subject.name }}</option>
             </select>
           </label>
           <label class="field">
-            <span class="field__label">Викладач</span>
+            <span class="field__label">{{ t.teacher }}</span>
             <select v-model.number="form.teacherId" class="field__control">
               <option v-for="teacher in lookups.teachers" :key="teacher.id" :value="teacher.id">{{ teacher.firstName }} {{ teacher.lastName }}</option>
             </select>
           </label>
+          <CheckboxGroupField
+            v-model="form.groupIds"
+            :label="t.groups"
+            :options="lookups.groups.map((group) => ({ id: group.id, label: group.name }))"
+          />
           <label class="field">
-            <span class="field__label">Група</span>
-            <select v-model.number="form.groupIds[0]" class="field__control">
-              <option v-for="group in lookups.groups" :key="group.id" :value="group.id">{{ group.name }}</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="field__label">Аудиторія</span>
+            <span class="field__label">{{ t.room }}</span>
             <select v-model.number="form.roomId" class="field__control">
               <option v-for="room in lookups.rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
             </select>
           </label>
           <label class="field">
-            <span class="field__label">Дата</span>
+            <span class="field__label">{{ t.date }}</span>
             <input v-model="form.entryDate" required type="date" class="field__control" />
           </label>
           <label class="field">
-            <span class="field__label">Початок</span>
+            <span class="field__label">{{ t.startsAt }}</span>
             <input v-model="form.startsAt" required type="time" class="field__control" />
           </label>
-          <AppButton type="submit" variant="primary" data-testid="save-exam-entry">Зберегти</AppButton>
+          <AppButton type="submit" variant="primary" data-testid="save-exam-entry">{{ t.save }}</AppButton>
         </form>
       </div>
     </section>

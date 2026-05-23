@@ -5,15 +5,17 @@ import { useRoute } from 'vue-router'
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import ConflictPanel from '@/components/molecules/ConflictPanel.vue'
 import LessonRequirementCard from '@/components/molecules/LessonRequirementCard.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import ScheduleEntryEditor from '@/components/organisms/ScheduleEntryEditor.vue'
 import ScheduleEntryGrid from '@/components/organisms/ScheduleEntryGrid.vue'
 import { useAdminScheduleEditor } from '@/composables/useAdminScheduleEditor'
-import { adminCopy } from '@/i18n/admin'
+import { useAdminI18n } from '@/composables/useI18n'
 
 const route = useRoute()
 const scheduleId = Number(route.params.id)
+const { t } = useAdminI18n()
 const {
   schedule,
   cards,
@@ -44,38 +46,34 @@ const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => co
 <template>
   <AdminLayout>
     <StateMessage v-if="error" tone="error" :title="error" data-testid="editor-error" />
-    <StateMessage v-else-if="isLoading" :title="adminCopy.loading" />
+    <StateMessage v-else-if="isLoading" :title="t.loading" />
     <section v-else-if="schedule" class="schedule-editor-page">
       <header class="schedule-editor-page__header">
         <div>
-          <h1>{{ adminCopy.scheduleEditor }} #{{ schedule.id }}</h1>
+          <h1>{{ t.scheduleEditor }} #{{ schedule.id }}</h1>
           <p>{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
         </div>
         <AppButton variant="primary" data-testid="validate-schedule" @click="validate">
-          {{ adminCopy.validate }}
+          {{ t.validate }}
         </AppButton>
         <AppButton data-testid="publish-schedule" @click="publish">
-          {{ adminCopy.publish }}
+          {{ t.publish }}
         </AppButton>
       </header>
       <StateMessage v-if="message" :title="message" data-testid="validation-result">
-        <ul v-if="conflicts.length > 0">
-          <li v-for="conflict in conflicts" :key="`${conflict.type}-${conflict.message}`">
-            {{ conflict.message }}
-          </li>
-        </ul>
       </StateMessage>
+      <ConflictPanel :conflicts="conflicts" />
       <div class="schedule-editor-layout">
         <aside class="lesson-card-panel">
-          <h2>{{ adminCopy.lessonCards }}</h2>
+          <h2>{{ t.lessonCards }}</h2>
           <AppSelect
             id="placement-room"
-            :label="adminCopy.room"
+            :label="t.room"
             :model-value="selectedRoomId ?? ''"
             :options="roomOptions"
             @update:model-value="selectedRoomId = Number($event)"
           />
-          <StateMessage v-if="cards.length === 0" :title="adminCopy.noCards" />
+          <StateMessage v-if="cards.length === 0" :title="t.noCards" />
           <LessonRequirementCard
             v-for="card in cards"
             v-else
