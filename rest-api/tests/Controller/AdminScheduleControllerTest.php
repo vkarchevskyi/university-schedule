@@ -307,6 +307,29 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertSame($this->stringValue($job, 'id'), $this->stringValue($storedJob, 'id'));
     }
 
+    public function testScheduleGenerationRequiresActiveTeachingLoadsBeforeQueueing(): void
+    {
+        $academicYear = $this->requestJson('POST', '/api/admin/academic-years', [
+            'name' => '2027/2028',
+            'startsAt' => '2027-09-01',
+            'endsAt' => '2028-06-30',
+        ], 201);
+        $semester = $this->requestJson('POST', '/api/admin/semesters', [
+            'academicYearId' => $this->intValue($academicYear, 'id'),
+            'number' => 1,
+            'startsAt' => '2027-09-01',
+            'endsAt' => '2027-12-31',
+            'firstWeekParity' => 'odd',
+        ], 201);
+
+        $result = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $this->intValue($semester, 'id'),
+        ], 422);
+
+        self::assertArrayHasKey('semesterId', $this->objectValue($result, 'errors'));
+        self::assertNull(FakeScheduleGenerationPublisher::$message);
+    }
+
     /**
      * @param array<string, mixed> $payload
      *
@@ -361,6 +384,10 @@ final class AdminScheduleControllerTest extends WebTestCase
         ], 201);
         $subject = $this->requestJson('POST', '/api/admin/subjects', [
             'name' => 'Programming',
+        ], 201);
+        $this->requestJson('POST', '/api/admin/teacher-subjects', [
+            'teacherId' => $this->intValue($teacher, 'id'),
+            'subjectId' => $this->intValue($subject, 'id'),
         ], 201);
         $room = $this->requestJson('POST', '/api/admin/rooms', [
             'name' => 'Lab 1',

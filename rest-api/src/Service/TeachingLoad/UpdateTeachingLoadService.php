@@ -9,7 +9,9 @@ use App\Entity\Group as StudentGroup;
 use App\Entity\Semester;
 use App\Entity\Subject;
 use App\Entity\Teacher;
+use App\Entity\TeacherSubject;
 use App\Entity\TeachingLoad;
+use App\Exception\ApiException;
 use App\Resource\Admin\TeachingLoadResource;
 use App\Resource\Admin\TeachingLoadResourceMapper;
 use App\Service\AbstractEntityService;
@@ -48,9 +50,22 @@ final class UpdateTeachingLoadService extends AbstractEntityService
             $teachingLoad->setRequiredLessonCount($this->positiveInt($data->requiredLessonCount));
         }
 
+        $this->validateTeacherSubject($teachingLoad->getTeacher(), $teachingLoad->getSubject());
         $teachingLoad->setUpdatedAt(new \DateTimeImmutable());
         $this->flush();
 
         return $this->mapper->map($teachingLoad);
+    }
+
+    private function validateTeacherSubject(Teacher $teacher, Subject $subject): void
+    {
+        $assignment = $this->entityManager->getRepository(TeacherSubject::class)->findOneBy([
+            'teacher' => $teacher,
+            'subject' => $subject,
+        ]);
+
+        if (!$assignment instanceof TeacherSubject) {
+            throw ApiException::validation(['teacherId' => 'Teacher is not assigned to this subject.']);
+        }
     }
 }

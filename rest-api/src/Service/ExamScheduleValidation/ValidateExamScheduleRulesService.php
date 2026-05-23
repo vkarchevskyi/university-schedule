@@ -173,7 +173,6 @@ final readonly class ValidateExamScheduleRulesService
             if (
                 $entry->getSubject() === $exam->getSubject()
                 && $entry->getTeacher() === $exam->getTeacher()
-                && $entry->getRoom() === $exam->getRoom()
                 && $entry->getEntryDate()->format('Y-m-d') === $expectedDate
                 && $this->groupIds($entry) === $examGroupIds
             ) {
