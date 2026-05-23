@@ -8,6 +8,16 @@ function lookupLabel(value: unknown): string {
   return text(value)
 }
 
+const weekdayOptions = [
+  { value: 1, label: 'Понеділок' },
+  { value: 2, label: 'Вівторок' },
+  { value: 3, label: 'Середа' },
+  { value: 4, label: 'Четвер' },
+  { value: 5, label: "П'ятниця" },
+  { value: 6, label: 'Субота' },
+  { value: 7, label: 'Неділя' },
+]
+
 export const entityConfigs: EntityConfig[] = [
   {
     key: 'groups',
@@ -50,6 +60,44 @@ export const entityConfigs: EntityConfig[] = [
     endpoint: '/api/admin/subjects',
     fields: [{ key: 'name', label: 'Назва', type: 'text', required: true }],
     columns: [{ key: 'name', label: 'Назва' }],
+  },
+  {
+    key: 'teacher-subjects',
+    title: 'Предмети викладачів',
+    routeName: 'admin-teacher-subjects',
+    endpoint: '/api/admin/teacher-subjects',
+    fields: [
+      { key: 'teacherId', label: 'Викладач', type: 'select', lookup: 'teachers', required: true },
+      { key: 'subjectId', label: 'Предмет', type: 'select', lookup: 'subjects', required: true },
+    ],
+    columns: [
+      { key: 'teacherId', label: 'Викладач' },
+      { key: 'subjectId', label: 'Предмет' },
+    ],
+  },
+  {
+    key: 'teacher-unavailability',
+    title: 'Недоступність викладачів',
+    routeName: 'admin-teacher-unavailability',
+    endpoint: '/api/admin/teacher-unavailability',
+    fields: [
+      { key: 'teacherId', label: 'Викладач', type: 'select', lookup: 'teachers', required: true },
+      {
+        key: 'dayOfWeek',
+        label: 'День',
+        type: 'select',
+        required: true,
+        options: weekdayOptions,
+      },
+      { key: 'unavailableFrom', label: 'Недоступний з', type: 'time', required: true },
+      { key: 'unavailableTo', label: 'Недоступний до', type: 'time', required: true },
+    ],
+    columns: [
+      { key: 'teacherId', label: 'Викладач' },
+      { key: 'dayOfWeek', label: 'День' },
+      { key: 'unavailableFrom', label: 'Недоступний з' },
+      { key: 'unavailableTo', label: 'Недоступний до' },
+    ],
   },
   {
     key: 'rooms',

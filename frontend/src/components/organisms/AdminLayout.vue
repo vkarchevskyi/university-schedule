@@ -25,6 +25,14 @@ const navItems = computed(() => [
   { label: t.value.nav.groups, route: { name: 'admin-entity', params: { entity: 'groups' } } },
   { label: t.value.nav.teachers, route: { name: 'admin-entity', params: { entity: 'teachers' } } },
   { label: t.value.nav.subjects, route: { name: 'admin-entity', params: { entity: 'subjects' } } },
+  {
+    label: t.value.nav.teacherSubjects,
+    route: { name: 'admin-entity', params: { entity: 'teacher-subjects' } },
+  },
+  {
+    label: t.value.nav.teacherUnavailability,
+    route: { name: 'admin-entity', params: { entity: 'teacher-unavailability' } },
+  },
   { label: t.value.nav.rooms, route: { name: 'admin-entity', params: { entity: 'rooms' } } },
   { label: t.value.nav.timeSlots, route: { name: 'admin-entity', params: { entity: 'time-slots' } } },
   {
