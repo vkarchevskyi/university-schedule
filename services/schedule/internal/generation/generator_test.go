@@ -77,3 +77,27 @@ func TestGeneratorAvoidsTeacherUnavailability(t *testing.T) {
 		t.Fatalf("entry day = %d, want generator to avoid unavailable day", entries[0].DayOfWeek)
 	}
 }
+
+func TestGeneratorFailsLowQualitySchedule(t *testing.T) {
+	generator := NewGenerator(validation.NewValidator())
+
+	_, score, status, err := generator.Generate(Input{
+		TeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 10, StudentCount: 20},
+		},
+		Rooms: []Room{{ID: 1, Capacity: 30}},
+		TimeSlots: []TimeSlot{
+			{ID: 6, StartsAt: "18:00:00", EndsAt: "19:20:00"},
+		},
+		Assignments: []validation.TeacherSubject{{TeacherID: 1, SubjectID: 1}},
+	})
+	if err == nil {
+		t.Fatal("Generate() error = nil, want low quality error")
+	}
+	if status != "low_quality" {
+		t.Fatalf("status = %q, want low_quality", status)
+	}
+	if score >= minimumQualityScore {
+		t.Fatalf("score = %d, want below %d", score, minimumQualityScore)
+	}
+}

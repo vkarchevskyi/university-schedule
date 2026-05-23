@@ -60,10 +60,11 @@ func (generator Generator) Generate(input Input) ([]CandidateEntry, int, string,
 	}
 
 	score := qualityScore(entries)
-	status := "acceptable"
 	if score < minimumQualityScore {
-		status = "low_quality"
+		return entries, score, "low_quality", fmt.Errorf("generated exam schedule quality score %d is below minimum %d", score, minimumQualityScore)
 	}
+
+	status := "acceptable"
 
 	return entries, score, status, nil
 }

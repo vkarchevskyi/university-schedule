@@ -54,6 +54,45 @@ func TestGeneratorEnforcesMinimumDaysBetweenGroupExams(t *testing.T) {
 	}
 }
 
+func TestGeneratorFailsLowQualityExamSchedule(t *testing.T) {
+	input := validInput()
+	input.Demands = nil
+	input.Rooms = []Room{
+		{ID: 1, Capacity: 30},
+		{ID: 2, Capacity: 30},
+		{ID: 3, Capacity: 30},
+		{ID: 4, Capacity: 30},
+	}
+	input.TimeSlots = []TimeSlot{
+		{ID: 1, StartsAt: "09:00:00"},
+		{ID: 2, StartsAt: "10:30:00"},
+		{ID: 3, StartsAt: "12:00:00"},
+		{ID: 4, StartsAt: "13:30:00"},
+	}
+	input.TeacherSubjectAssignments = make(map[teacherSubjectKey]bool)
+	for index := 1; index <= 8; index++ {
+		demand := Demand{
+			SubjectID:    int64(index),
+			TeacherID:    int64(index),
+			GroupIDs:     []int64{int64(index)},
+			StudentCount: 24,
+		}
+		input.Demands = append(input.Demands, demand)
+		input.TeacherSubjectAssignments[teacherSubjectKey{TeacherID: demand.TeacherID, SubjectID: demand.SubjectID}] = true
+	}
+
+	_, score, status, err := NewGenerator().Generate(input)
+	if err == nil {
+		t.Fatal("Generate() error = nil, want low quality error")
+	}
+	if status != "low_quality" {
+		t.Fatalf("status = %q, want low_quality", status)
+	}
+	if score >= minimumQualityScore {
+		t.Fatalf("score = %d, want below %d", score, minimumQualityScore)
+	}
+}
+
 func TestAddDemandAggregatesGroupsBySubjectAndTeacher(t *testing.T) {
 	demandsByKey := make(map[teacherSubjectKey]Demand)
 
