@@ -97,6 +97,24 @@ func TestValidatorAcceptsCompleteSchedule(t *testing.T) {
 	}
 }
 
+func TestValuesSortsEntriesByID(t *testing.T) {
+	entries := values(map[int64]ScheduleEntry{
+		3: {ID: 3},
+		1: {ID: 1},
+		2: {ID: 2},
+	})
+
+	if len(entries) != 3 {
+		t.Fatalf("len(entries) = %d, want 3", len(entries))
+	}
+	for index, entry := range entries {
+		want := int64(index + 1)
+		if entry.ID != want {
+			t.Fatalf("entries[%d].ID = %d, want %d", index, entry.ID, want)
+		}
+	}
+}
+
 func assertConflictType(t *testing.T, result ValidationResult, conflictType string) {
 	t.Helper()
 

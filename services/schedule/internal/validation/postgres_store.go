@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -26,6 +27,10 @@ func (store *PostgresStore) Close() error {
 }
 
 func (store *PostgresStore) LoadSchedule(ctx context.Context, scheduleID int64) (Schedule, error) {
+	if err := store.ensureScheduleExists(ctx, scheduleID); err != nil {
+		return Schedule{}, err
+	}
+
 	entries, err := store.loadEntries(ctx, scheduleID)
 	if err != nil {
 		return Schedule{}, err
@@ -61,6 +66,19 @@ func (store *PostgresStore) LoadSchedule(ctx context.Context, scheduleID int64) 
 		TeacherSubjectAssignments:  assignments,
 		TeacherUnavailabilityRules: unavailability,
 	}, nil
+}
+
+func (store *PostgresStore) ensureScheduleExists(ctx context.Context, scheduleID int64) error {
+	var id int64
+	if err := store.db.QueryRowContext(ctx, `
+		SELECT id
+		FROM schedules
+		WHERE id = $1
+	`, scheduleID).Scan(&id); err != nil {
+		return fmt.Errorf("load schedule: %w", err)
+	}
+
+	return nil
 }
 
 func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (map[int64]ScheduleEntry, error) {
@@ -277,11 +295,22 @@ func values(entries map[int64]ScheduleEntry) []ScheduleEntry {
 	for _, entry := range entries {
 		result = append(result, entry)
 	}
+	sort.Slice(result, func(left int, right int) bool {
+		return result[left].ID < result[right].ID
+	})
 
 	return result
 }
 
 func lessonTypeName(value int) string {
+	return LessonTypeName(value)
+}
+
+func weekParityName(value int) string {
+	return WeekParityName(value)
+}
+
+func LessonTypeName(value int) string {
 	switch value {
 	case 1:
 		return "lecture"
@@ -296,7 +325,7 @@ func lessonTypeName(value int) string {
 	}
 }
 
-func weekParityName(value int) string {
+func WeekParityName(value int) string {
 	switch value {
 	case 1:
 		return "odd"

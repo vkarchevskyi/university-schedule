@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -36,24 +38,7 @@ func main() {
 		writer.WriteHeader(http.StatusNoContent)
 	})
 
-	router.Post("/validate-schedule", func(writer http.ResponseWriter, request *http.Request) {
-		var payload validation.ScheduleValidationRequest
-		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
-			http.Error(writer, "invalid validation request", http.StatusBadRequest)
-			return
-		}
-
-		schedule, ok := requestSchedule(request, payload, store)
-		if !ok {
-			writer.WriteHeader(http.StatusServiceUnavailable)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(writer).Encode(validator.Validate(schedule)); err != nil {
-			log.Printf("encode validation response: %v", err)
-		}
-	})
+	router.Post("/validate-schedule", validateScheduleHandler(validator, store))
 
 	address := os.Getenv("SCHEDULE_SERVICE_ADDRESS")
 	if address == "" {
@@ -150,13 +135,38 @@ func intEnv(name string, fallback int) int {
 	return parsed
 }
 
-func requestSchedule(request *http.Request, payload validation.ScheduleValidationRequest, store *validation.PostgresStore) (validation.Schedule, bool) {
+func validateScheduleHandler(validator validation.Validator, store *validation.PostgresStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		var payload validation.ScheduleValidationRequest
+		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
+			http.Error(writer, "invalid validation request", http.StatusBadRequest)
+			return
+		}
+
+		schedule, status := requestSchedule(request, payload, store)
+		if status != http.StatusOK {
+			writer.WriteHeader(status)
+			return
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(writer).Encode(validator.Validate(schedule)); err != nil {
+			log.Printf("encode validation response: %v", err)
+		}
+	}
+}
+
+func requestSchedule(request *http.Request, payload validation.ScheduleValidationRequest, store *validation.PostgresStore) (validation.Schedule, int) {
 	if payload.Schedule != nil {
-		return *payload.Schedule, true
+		return *payload.Schedule, http.StatusOK
 	}
 
-	if payload.ScheduleID == 0 || store == nil {
-		return validation.Schedule{}, false
+	if payload.ScheduleID == 0 {
+		return validation.Schedule{}, http.StatusBadRequest
+	}
+
+	if store == nil {
+		return validation.Schedule{}, http.StatusServiceUnavailable
 	}
 
 	ctx, cancel := context.WithTimeout(request.Context(), 5*time.Second)
@@ -164,9 +174,12 @@ func requestSchedule(request *http.Request, payload validation.ScheduleValidatio
 
 	schedule, err := store.LoadSchedule(ctx, payload.ScheduleID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return validation.Schedule{}, http.StatusNotFound
+		}
 		log.Printf("load schedule %d: %v", payload.ScheduleID, err)
-		return validation.Schedule{}, false
+		return validation.Schedule{}, http.StatusServiceUnavailable
 	}
 
-	return schedule, true
+	return schedule, http.StatusOK
 }

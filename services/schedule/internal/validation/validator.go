@@ -154,7 +154,7 @@ func validateTeacherUnavailability(schedule Schedule) []Conflict {
 	conflicts := make([]Conflict, 0)
 
 	for _, entry := range schedule.Entries {
-		start, end, ok := parseRange(entry.TimeSlotStartsAt, entry.TimeSlotEndsAt)
+		start, end, ok := ParseRange(entry.TimeSlotStartsAt, entry.TimeSlotEndsAt)
 		if !ok {
 			conflicts = append(conflicts, Conflict{"invalid_time_slot", "Schedule entry has an invalid time slot range.", []int64{entry.ID}})
 			continue
@@ -165,13 +165,13 @@ func validateTeacherUnavailability(schedule Schedule) []Conflict {
 				continue
 			}
 
-			unavailableFrom, unavailableTo, ok := parseRange(rule.UnavailableFrom, rule.UnavailableTo)
+			unavailableFrom, unavailableTo, ok := ParseRange(rule.UnavailableFrom, rule.UnavailableTo)
 			if !ok {
 				conflicts = append(conflicts, Conflict{"invalid_teacher_unavailability", "Teacher unavailability has an invalid time range.", []int64{entry.ID}})
 				continue
 			}
 
-			if timeRangesOverlap(start, end, unavailableFrom, unavailableTo) {
+			if TimeRangesOverlap(start, end, unavailableFrom, unavailableTo) {
 				conflicts = append(conflicts, Conflict{"teacher_unavailability_conflict", "Teacher is unavailable at this time.", []int64{entry.ID}})
 			}
 		}
@@ -256,7 +256,7 @@ func hasInt64Overlap(left []int64, right []int64) bool {
 	return false
 }
 
-func parseRange(start string, end string) (time.Time, time.Time, bool) {
+func ParseRange(start string, end string) (time.Time, time.Time, bool) {
 	startTime, startErr := time.Parse("15:04:05", start)
 	endTime, endErr := time.Parse("15:04:05", end)
 
@@ -267,6 +267,6 @@ func parseRange(start string, end string) (time.Time, time.Time, bool) {
 	return startTime, endTime, true
 }
 
-func timeRangesOverlap(leftStart time.Time, leftEnd time.Time, rightStart time.Time, rightEnd time.Time) bool {
+func TimeRangesOverlap(leftStart time.Time, leftEnd time.Time, rightStart time.Time, rightEnd time.Time) bool {
 	return leftStart.Before(rightEnd) && rightStart.Before(leftEnd)
 }
