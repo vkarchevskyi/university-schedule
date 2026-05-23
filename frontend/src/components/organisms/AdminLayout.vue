@@ -16,14 +16,23 @@ const adminName = computed(() =>
 )
 
 const navItems = [
+  { label: adminCopy.nav.dashboard, route: { name: 'admin-dashboard' } },
   { label: adminCopy.nav.schedules, route: { name: 'admin-schedules' } },
-  { label: adminCopy.nav.groups },
-  { label: adminCopy.nav.teachers },
-  { label: adminCopy.nav.subjects },
-  { label: adminCopy.nav.rooms },
-  { label: adminCopy.nav.timeSlots },
-  { label: adminCopy.nav.generationJobs },
-  { label: adminCopy.nav.examSchedules },
+  { label: adminCopy.nav.examSchedules, route: { name: 'admin-exam-schedules' } },
+  { label: adminCopy.nav.groups, route: { name: 'admin-entity', params: { entity: 'groups' } } },
+  { label: adminCopy.nav.teachers, route: { name: 'admin-entity', params: { entity: 'teachers' } } },
+  { label: adminCopy.nav.subjects, route: { name: 'admin-entity', params: { entity: 'subjects' } } },
+  { label: adminCopy.nav.rooms, route: { name: 'admin-entity', params: { entity: 'rooms' } } },
+  { label: adminCopy.nav.timeSlots, route: { name: 'admin-entity', params: { entity: 'time-slots' } } },
+  {
+    label: adminCopy.nav.academicYears,
+    route: { name: 'admin-entity', params: { entity: 'academic-years' } },
+  },
+  { label: adminCopy.nav.semesters, route: { name: 'admin-entity', params: { entity: 'semesters' } } },
+  {
+    label: adminCopy.nav.teachingLoads,
+    route: { name: 'admin-entity', params: { entity: 'teaching-loads' } },
+  },
 ]
 
 async function logout(): Promise<void> {
@@ -40,7 +49,7 @@ async function logout(): Promise<void> {
         <RouterLink
           v-for="item in navItems"
           :key="item.label"
-          :to="item.route ?? { name: 'admin-dashboard' }"
+          :to="item.route"
         >
           {{ item.label }}
         </RouterLink>

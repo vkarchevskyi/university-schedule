@@ -3,6 +3,21 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 let unauthorizedHandler: (() => void) | null = null
 
+export interface ApiViolation {
+  propertyPath: string
+  message: string
+}
+
+export class ApiError extends Error {
+  public constructor(
+    public readonly status: number,
+    message: string,
+    public readonly violations: ApiViolation[] = [],
+  ) {
+    super(message)
+  }
+}
+
 export function setUnauthorizedHandler(handler: () => void): void {
   unauthorizedHandler = handler
 }
@@ -59,7 +74,22 @@ export async function requestJson<T>(
   }
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`)
+    let message = `Request failed with status ${response.status}`
+    let violations: ApiViolation[] = []
+
+    try {
+      const payload = (await response.json()) as {
+        title?: string
+        detail?: string
+        violations?: ApiViolation[]
+      }
+      message = payload.detail ?? payload.title ?? message
+      violations = payload.violations ?? []
+    } catch {
+      // Keep the generic transport message when the response is not JSON.
+    }
+
+    throw new ApiError(response.status, message, violations)
   }
 
   if (response.status === 204) {

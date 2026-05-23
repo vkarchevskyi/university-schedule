@@ -3,10 +3,14 @@ import type {
   AdminRoom,
   AdminSchedule,
   AdminSemester,
+  AdminGroup,
+  AdminSubject,
+  AdminTeacher,
   AdminTimeSlot,
   LessonCard,
   ResourceCollection,
   ScheduleEntryPayload,
+  ScheduleGenerationJob,
   ScheduleValidationResult,
 } from '@/types/adminSchedule'
 
@@ -20,6 +24,18 @@ export function listRooms(): Promise<ResourceCollection<AdminRoom>> {
 
 export function listTimeSlots(): Promise<ResourceCollection<AdminTimeSlot>> {
   return requestJson('/api/admin/time-slots', { authenticated: true })
+}
+
+export function listGroups(): Promise<ResourceCollection<AdminGroup>> {
+  return requestJson('/api/admin/groups', { authenticated: true })
+}
+
+export function listTeachers(): Promise<ResourceCollection<AdminTeacher>> {
+  return requestJson('/api/admin/teachers', { authenticated: true })
+}
+
+export function listSubjects(): Promise<ResourceCollection<AdminSubject>> {
+  return requestJson('/api/admin/subjects', { authenticated: true })
 }
 
 export function listSchedules(semesterId?: number): Promise<ResourceCollection<AdminSchedule>> {
@@ -83,4 +99,23 @@ export function validateSchedule(scheduleId: number): Promise<ScheduleValidation
     method: 'POST',
     authenticated: true,
   })
+}
+
+export function publishSchedule(scheduleId: number): Promise<AdminSchedule> {
+  return requestJson(`/api/admin/schedules/${scheduleId}/publish`, {
+    method: 'POST',
+    authenticated: true,
+  })
+}
+
+export function generateSchedule(semesterId: number): Promise<ScheduleGenerationJob> {
+  return requestJson('/api/admin/schedules/generate', {
+    method: 'POST',
+    body: JSON.stringify({ semesterId }),
+    authenticated: true,
+  })
+}
+
+export function getGenerationJob(jobId: string): Promise<ScheduleGenerationJob> {
+  return requestJson(`/api/admin/generation-jobs/${jobId}`, { authenticated: true })
 }

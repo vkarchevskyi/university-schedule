@@ -12,7 +12,9 @@ const {
   isLoading,
   error,
   semesterOptions,
+  generationJob,
   createDraft,
+  startGeneration,
   openSchedule,
 } = useAdminSchedules()
 </script>
@@ -35,7 +37,23 @@ const {
           <AppButton variant="primary" data-testid="create-schedule" @click="createDraft">
             {{ adminCopy.createSchedule }}
           </AppButton>
+          <AppButton data-testid="generate-schedule" @click="startGeneration">
+            {{ adminCopy.generateSchedule }}
+          </AppButton>
         </div>
+        <StateMessage v-if="generationJob" :title="`${adminCopy.generationStatus}: ${generationJob.status}`" data-testid="generation-job">
+          <p v-if="generationJob.qualityScore !== null">
+            {{ adminCopy.qualityScore }}: {{ generationJob.qualityScore }}
+          </p>
+          <p v-if="generationJob.errorMessage">{{ generationJob.errorMessage }}</p>
+          <AppButton
+            v-if="generationJob.generatedScheduleId !== null"
+            data-testid="open-generated-schedule"
+            @click="openSchedule(generationJob.generatedScheduleId)"
+          >
+            {{ adminCopy.openGeneratedSchedule }}
+          </AppButton>
+        </StateMessage>
         <StateMessage
           v-if="schedules.length === 0"
           :title="adminCopy.noSchedules"
@@ -44,7 +62,7 @@ const {
         <div v-else class="schedule-list" data-testid="schedule-list">
           <article v-for="schedule in schedules" :key="schedule.id" class="schedule-list__item">
             <div>
-              <strong>#{{ schedule.id }} · {{ schedule.status }}</strong>
+              <strong>#{{ schedule.id }} · {{ adminCopy.scheduleStatuses[schedule.status] ?? schedule.status }}</strong>
               <span>{{ schedule.validFrom }} - {{ schedule.validTo }}</span>
             </div>
             <AppButton

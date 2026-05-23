@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AppButton from '@/components/atoms/AppButton.vue'
@@ -17,6 +18,9 @@ const {
   schedule,
   cards,
   rooms,
+  groups,
+  teachers,
+  subjects,
   timeSlots,
   selectedRoomId,
   selectedEntry,
@@ -26,10 +30,15 @@ const {
   isLoading,
   roomOptions,
   place,
+  createEntry,
+  moveEntry,
   saveEntry,
   removeEntry,
   validate,
+  publish,
 } = useAdminScheduleEditor(scheduleId)
+
+const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => conflict.entryIds))
 </script>
 
 <template>
@@ -44,6 +53,9 @@ const {
         </div>
         <AppButton variant="primary" data-testid="validate-schedule" @click="validate">
           {{ adminCopy.validate }}
+        </AppButton>
+        <AppButton data-testid="publish-schedule" @click="publish">
+          {{ adminCopy.publish }}
         </AppButton>
       </header>
       <StateMessage v-if="message" :title="message" data-testid="validation-result">
@@ -73,13 +85,25 @@ const {
         </aside>
         <ScheduleEntryGrid
           :entries="schedule.entries"
+          :groups="groups"
+          :rooms="rooms"
+          :subjects="subjects"
+          :teachers="teachers"
           :time-slots="timeSlots"
+          :conflict-entry-ids="conflictEntryIds"
           @place="place"
+          @move="moveEntry($event.entry, $event.dayOfWeek, $event.timeSlotId)"
           @select="selectedEntry = $event"
         />
         <ScheduleEntryEditor
           :entry="selectedEntry"
+          :groups="groups"
+          :lesson-cards="cards"
           :rooms="rooms"
+          :subjects="subjects"
+          :teachers="teachers"
+          :time-slots="timeSlots"
+          @create="createEntry"
           @save="saveEntry"
           @delete="removeEntry"
         />

@@ -1,9 +1,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { createSchedule, listSchedules, listSemesters } from '@/api/adminSchedule'
+import {
+  createSchedule,
+  generateSchedule,
+  getGenerationJob,
+  listSchedules,
+  listSemesters,
+} from '@/api/adminSchedule'
 import { adminCopy } from '@/i18n/admin'
-import type { AdminSchedule, AdminSemester } from '@/types/adminSchedule'
+import type { AdminSchedule, AdminSemester, ScheduleGenerationJob } from '@/types/adminSchedule'
 
 export function useAdminSchedules() {
   const router = useRouter()
@@ -12,6 +18,7 @@ export function useAdminSchedules() {
   const selectedSemesterId = ref<number | null>(null)
   const isLoading = ref(true)
   const error = ref<string | null>(null)
+  const generationJob = ref<ScheduleGenerationJob | null>(null)
 
   const semesterOptions = computed(() =>
     semesters.value.map((semester) => ({
@@ -57,6 +64,33 @@ export function useAdminSchedules() {
     await router.push({ name: 'admin-schedule-editor', params: { id: schedule.id } })
   }
 
+  async function startGeneration(): Promise<void> {
+    if (selectedSemesterId.value === null) {
+      return
+    }
+
+    generationJob.value = await generateSchedule(selectedSemesterId.value)
+    await pollGeneration(generationJob.value.id)
+  }
+
+  async function pollGeneration(jobId: string): Promise<void> {
+    const terminal = new Set(['completed', 'failed'])
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const job = await getGenerationJob(jobId)
+      generationJob.value = job
+
+      if (terminal.has(job.status)) {
+        if (job.generatedScheduleId !== null) {
+          await load()
+        }
+        return
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 1000))
+    }
+  }
+
   async function openSchedule(id: number): Promise<void> {
     await router.push({ name: 'admin-schedule-editor', params: { id } })
   }
@@ -66,8 +100,10 @@ export function useAdminSchedules() {
     selectedSemesterId,
     isLoading,
     error,
+    generationJob,
     semesterOptions,
     createDraft,
+    startGeneration,
     openSchedule,
   }
 }

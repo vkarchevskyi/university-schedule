@@ -5,6 +5,10 @@ import { adminCopy } from '@/i18n/admin'
 import { labels } from '@/i18n/publicSchedule'
 import type {
   AdminScheduleEntry,
+  AdminGroup,
+  AdminRoom,
+  AdminSubject,
+  AdminTeacher,
   AdminTimeSlot,
   LessonCard,
   WeekParity,
@@ -12,11 +16,17 @@ import type {
 
 const props = defineProps<{
   entries: AdminScheduleEntry[]
+  groups: AdminGroup[]
+  rooms: AdminRoom[]
+  subjects: AdminSubject[]
+  teachers: AdminTeacher[]
   timeSlots: AdminTimeSlot[]
+  conflictEntryIds?: number[]
 }>()
 
 const emit = defineEmits<{
   place: [payload: { card: LessonCard; dayOfWeek: number; timeSlotId: number }]
+  move: [payload: { entry: AdminScheduleEntry; dayOfWeek: number; timeSlotId: number }]
   select: [entry: AdminScheduleEntry]
 }>()
 
@@ -38,12 +48,49 @@ function entriesFor(dayOfWeek: number, timeSlotId: number): AdminScheduleEntry[]
 }
 
 function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
-  const raw = event.dataTransfer?.getData('application/json')
-  if (!raw) {
+  const rawEntry = event.dataTransfer?.getData('application/x-schedule-entry')
+  if (rawEntry) {
+    emit('move', { entry: JSON.parse(rawEntry) as AdminScheduleEntry, dayOfWeek, timeSlotId })
     return
   }
 
-  emit('place', { card: JSON.parse(raw) as LessonCard, dayOfWeek, timeSlotId })
+  const rawCard = event.dataTransfer?.getData('application/json')
+  if (!rawCard) {
+    return
+  }
+
+  emit('place', { card: JSON.parse(rawCard) as LessonCard, dayOfWeek, timeSlotId })
+}
+
+function dragEntry(event: DragEvent, entry: AdminScheduleEntry): void {
+  event.dataTransfer?.setData('application/x-schedule-entry', JSON.stringify(entry))
+}
+
+function entryTitle(entry: AdminScheduleEntry): string {
+  return subjectName(entry.subjectId)
+}
+
+function subjectName(id: number): string {
+  return props.subjects.find((subject) => subject.id === id)?.name ?? `#${id}`
+}
+
+function teacherName(id: number): string {
+  const teacher = props.teachers.find((item) => item.id === id)
+  return teacher === undefined ? `#${id}` : `${teacher.firstName} ${teacher.lastName}`
+}
+
+function roomName(id: number): string {
+  return props.rooms.find((room) => room.id === id)?.name ?? `#${id}`
+}
+
+function groupNames(ids: number[]): string {
+  return ids
+    .map((id) => props.groups.find((group) => group.id === id)?.name ?? `#${id}`)
+    .join(', ')
+}
+
+function hasConflict(entry: AdminScheduleEntry): boolean {
+  return props.conflictEntryIds?.includes(entry.id) ?? false
 }
 
 function weekParityLabel(value: WeekParity): string {
@@ -81,13 +128,16 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
               v-for="entry in entriesFor(day, slot.id)"
               :key="entry.id"
               type="button"
-              class="editor-entry"
+              :class="['editor-entry', { 'editor-entry--conflict': hasConflict(entry) }]"
               data-testid="schedule-entry"
+              draggable="true"
+              @dragstart="dragEntry($event, entry)"
               @click="emit('select', entry)"
             >
-              <strong>{{ labels.lessonTypes[entry.lessonType] ?? entry.lessonType }}</strong>
-              <span>{{ weekParityLabel(entry.weekParity) }}</span>
-              <small>{{ adminCopy.room }} #{{ entry.roomId }}</small>
+              <strong>{{ entryTitle(entry) }}</strong>
+              <span>{{ labels.lessonTypes[entry.lessonType] ?? entry.lessonType }} · {{ weekParityLabel(entry.weekParity) }}</span>
+              <small>{{ teacherName(entry.teacherId) }}</small>
+              <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
             </button>
           </td>
         </tr>
