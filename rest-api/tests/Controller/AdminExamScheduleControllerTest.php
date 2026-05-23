@@ -140,6 +140,41 @@ final class AdminExamScheduleControllerTest extends WebTestCase
         self::assertSame('consultation_missing', $this->stringValue($conflict, 'type'));
     }
 
+    public function testExamConsultationCanUseDifferentRoomFromExam(): void
+    {
+        $fixtures = $this->createFixtures();
+        $examRoom = $this->requestJson('POST', '/api/admin/rooms', [
+            'name' => 'Assembly Hall',
+            'type' => 'lecture',
+            'capacity' => 120,
+        ], 201);
+        $schedule = $this->requestJson('POST', '/api/admin/exam-schedules', [
+            'semesterId' => $fixtures->semesterId,
+        ], 201);
+
+        $this->requestJson('POST', sprintf('/api/admin/exam-schedules/%d/entries', $this->intValue($schedule, 'id')), [
+            'type' => 'consultation',
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'roomId' => $fixtures->roomId,
+            'groupIds' => [$fixtures->groupId],
+            'entryDate' => '2026-12-20',
+            'startsAt' => '09:00:00',
+        ], 201);
+
+        $exam = $this->requestJson('POST', sprintf('/api/admin/exam-schedules/%d/entries', $this->intValue($schedule, 'id')), [
+            'type' => 'exam',
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'roomId' => $this->intValue($examRoom, 'id'),
+            'groupIds' => [$fixtures->groupId],
+            'entryDate' => '2026-12-21',
+            'startsAt' => '09:00:00',
+        ], 201);
+
+        self::assertSame($this->intValue($examRoom, 'id'), $this->intValue($exam, 'roomId'));
+    }
+
     public function testExamEntryConflictIsRejected(): void
     {
         $fixtures = $this->createFixtures();

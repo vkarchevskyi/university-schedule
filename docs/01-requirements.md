@@ -21,6 +21,7 @@
 - Administrators can manage subjects.
 - Subjects can be associated with teachers and schedule entries.
 - Administrators can manage teaching-load requirements for a semester.
+- Teaching-load requirements must use teacher and subject pairs that are associated with each other.
 - Teaching-load requirements define how many lessons of each lesson type a group must receive for a subject with a teacher during a semester.
 - Lesson types include lecture, laboratory work, seminar, and other configured types if added later.
 - Administrators can manage academic years and semesters.
@@ -39,6 +40,7 @@
 - The system validates conflicts before saving or publishing.
 - The system validates whether scheduled entries satisfy required lesson counts for each teaching-load requirement.
 - The system can request automatic schedule generation for a selected semester.
+- Automatic schedule generation requests are accepted only when the selected semester has active teaching-load requirements and the supporting rooms, time slots, and teacher-subject associations required by the generator.
 - Automatic schedule generation is required for the first shipped version.
 - Generated schedules are reviewed and confirmed by an administrator before becoming official.
 

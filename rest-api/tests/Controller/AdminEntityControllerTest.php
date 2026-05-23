@@ -166,6 +166,44 @@ final class AdminEntityControllerTest extends WebTestCase
         $this->requestNoContent('DELETE', '/api/admin/teaching-loads/' . $this->intValue($teachingLoad, 'id'));
     }
 
+    public function testTeachingLoadRequiresTeacherAssignedToSubject(): void
+    {
+        $fixtures = $this->createTeachingLoadFixtures(assignTeacherSubject: false);
+
+        $result = $this->requestJson('POST', '/api/admin/teaching-loads', [
+            'semesterId' => $fixtures->semesterId,
+            'groupId' => $fixtures->groupId,
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'requiredLessonCount' => 8,
+        ], 422);
+
+        self::assertArrayHasKey('teacherId', $this->objectValue($result, 'errors'));
+    }
+
+    public function testTeachingLoadUpdateRequiresTeacherAssignedToSubject(): void
+    {
+        $fixtures = $this->createTeachingLoadFixtures();
+        $teachingLoad = $this->requestJson('POST', '/api/admin/teaching-loads', [
+            'semesterId' => $fixtures->semesterId,
+            'groupId' => $fixtures->groupId,
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'requiredLessonCount' => 8,
+        ], 201);
+        $secondSubject = $this->requestJson('POST', '/api/admin/subjects', [
+            'name' => 'Databases',
+        ], 201);
+
+        $result = $this->requestJson('PATCH', '/api/admin/teaching-loads/' . $this->intValue($teachingLoad, 'id'), [
+            'subjectId' => $this->intValue($secondSubject, 'id'),
+        ], 422);
+
+        self::assertArrayHasKey('teacherId', $this->objectValue($result, 'errors'));
+    }
+
     /**
      * @param array<string, mixed> $payload
      *
@@ -193,6 +231,50 @@ final class AdminEntityControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
     }
 
+    private function createTeachingLoadFixtures(bool $assignTeacherSubject = true): AdminEntityTeachingLoadFixtures
+    {
+        $academicYear = $this->requestJson('POST', '/api/admin/academic-years', [
+            'name' => sprintf('Fixtures %s', $assignTeacherSubject ? 'assigned' : 'unassigned'),
+            'startsAt' => '2026-09-01',
+            'endsAt' => '2027-06-30',
+        ], 201);
+        $semester = $this->requestJson('POST', '/api/admin/semesters', [
+            'academicYearId' => $this->intValue($academicYear, 'id'),
+            'number' => 1,
+            'startsAt' => '2026-09-01',
+            'endsAt' => '2026-12-31',
+            'firstWeekParity' => 'odd',
+        ], 201);
+        $group = $this->requestJson('POST', '/api/admin/groups', [
+            'name' => sprintf('KN-%s', $assignTeacherSubject ? 'A' : 'B'),
+            'speciality' => 'Computer Science',
+            'course' => 4,
+            'studentCount' => 24,
+        ], 201);
+        $teacher = $this->requestJson('POST', '/api/admin/teachers', [
+            'firstName' => 'John',
+            'lastName' => sprintf('Doe-%s', $assignTeacherSubject ? 'A' : 'B'),
+            'department' => 'Computer Science',
+        ], 201);
+        $subject = $this->requestJson('POST', '/api/admin/subjects', [
+            'name' => sprintf('Programming-%s', $assignTeacherSubject ? 'A' : 'B'),
+        ], 201);
+
+        if ($assignTeacherSubject) {
+            $this->requestJson('POST', '/api/admin/teacher-subjects', [
+                'teacherId' => $this->intValue($teacher, 'id'),
+                'subjectId' => $this->intValue($subject, 'id'),
+            ], 201);
+        }
+
+        return new AdminEntityTeachingLoadFixtures(
+            $this->intValue($semester, 'id'),
+            $this->intValue($group, 'id'),
+            $this->intValue($teacher, 'id'),
+            $this->intValue($subject, 'id'),
+        );
+    }
+
     private function login(): string
     {
         $passwordHash = password_hash('correct-password', PASSWORD_BCRYPT);
@@ -212,4 +294,14 @@ final class AdminEntityControllerTest extends WebTestCase
 
         return $this->stringValue($payload, 'token');
     }
+}
+
+final readonly class AdminEntityTeachingLoadFixtures
+{
+    public function __construct(
+        public int $semesterId,
+        public int $groupId,
+        public int $teacherId,
+        public int $subjectId,
+    ) {}
 }

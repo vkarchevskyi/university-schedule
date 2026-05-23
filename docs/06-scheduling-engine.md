@@ -56,7 +56,7 @@ Soft constraints should produce a score and explanation so administrators can un
 ## Generation Workflow
 
 1. API creates generation job for a semester.
-2. API validates that required entities and teaching-load requirements exist.
+2. API validates that active teaching-load requirements, rooms, time slots, and teacher-subject links exist.
 3. API sends message to RabbitMQ.
 4. Go worker loads input data.
 5. Go worker generates a candidate schedule using CSP for feasible construction and Tabu search for optimization.
@@ -103,6 +103,7 @@ Use cases:
 - If both Symfony and Go need validation, define shared test fixtures and expected results.
 - Generated schedules should be drafts until confirmed by an administrator.
 - Treat teaching-load rows as the demand side of the problem and schedule entries as the placement side.
+- Reject generation requests before queueing when the demand side is incomplete or contains teacher-subject mismatches.
 - Week parity affects how many actual lesson occurrences a schedule entry contributes toward a teaching-load requirement.
 - Use a common initial minimum quality threshold for generated drafts, then tune it with real data. A practical first threshold is that all hard constraints must pass and the soft-constraint score should be at least 80 out of 100 before presenting the draft as acceptable. Scores below that can still be saved for diagnostics but should be marked as low quality.
 

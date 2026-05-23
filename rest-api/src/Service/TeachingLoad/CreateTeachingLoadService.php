@@ -9,7 +9,9 @@ use App\Entity\Group as StudentGroup;
 use App\Entity\Semester;
 use App\Entity\Subject;
 use App\Entity\Teacher;
+use App\Entity\TeacherSubject;
 use App\Entity\TeachingLoad;
+use App\Exception\ApiException;
 use App\Resource\Admin\TeachingLoadResource;
 use App\Resource\Admin\TeachingLoadResourceMapper;
 use App\Service\AbstractEntityService;
@@ -28,11 +30,15 @@ final class CreateTeachingLoadService extends AbstractEntityService
     public function handle(TeachingLoadRequestDto $data): TeachingLoadResource
     {
         $now = new \DateTimeImmutable();
+        $subject = $this->getEntity(Subject::class, $this->positiveInt($data->subjectId));
+        $teacher = $this->getEntity(Teacher::class, $this->positiveInt($data->teacherId));
+        $this->validateTeacherSubject($teacher, $subject);
+
         $teachingLoad = new TeachingLoad(
             $this->getEntity(Semester::class, $this->positiveInt($data->semesterId)),
             $this->getEntity(StudentGroup::class, $this->positiveInt($data->groupId)),
-            $this->getEntity(Subject::class, $this->positiveInt($data->subjectId)),
-            $this->getEntity(Teacher::class, $this->positiveInt($data->teacherId)),
+            $subject,
+            $teacher,
             $this->lessonType($data->lessonType),
             $this->positiveInt($data->requiredLessonCount),
             $now,
@@ -41,5 +47,17 @@ final class CreateTeachingLoadService extends AbstractEntityService
         $this->save($teachingLoad);
 
         return $this->mapper->map($teachingLoad);
+    }
+
+    private function validateTeacherSubject(Teacher $teacher, Subject $subject): void
+    {
+        $assignment = $this->entityManager->getRepository(TeacherSubject::class)->findOneBy([
+            'teacher' => $teacher,
+            'subject' => $subject,
+        ]);
+
+        if (!$assignment instanceof TeacherSubject) {
+            throw ApiException::validation(['teacherId' => 'Teacher is not assigned to this subject.']);
+        }
     }
 }
