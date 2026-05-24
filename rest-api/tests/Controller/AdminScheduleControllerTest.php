@@ -49,6 +49,10 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(401);
 
+        $this->client->jsonRequest('POST', '/api/admin/notifications/ws-ticket');
+
+        self::assertResponseStatusCodeSame(401);
+
         $this->client->jsonRequest('POST', '/api/admin/schedules', [
             'semesterId' => 1,
             'validFrom' => '2026-09-01',
@@ -56,6 +60,14 @@ final class AdminScheduleControllerTest extends WebTestCase
         ]);
 
         self::assertResponseStatusCodeSame(401);
+    }
+
+    public function testAdminCanCreateWebSocketTicket(): void
+    {
+        $ticket = $this->requestJson('POST', '/api/admin/notifications/ws-ticket');
+
+        self::assertNotSame('', $this->stringValue($ticket, 'ticket'));
+        self::assertNotSame('', $this->stringValue($ticket, 'expiresAt'));
     }
 
     public function testAdminCanListSchedulesWithOptionalSemesterFilter(): void

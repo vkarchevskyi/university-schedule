@@ -13,6 +13,7 @@ parameters:
     telegram_notifications_queue_default: 'telegram_notifications'
     telegram_bot_token_default: ''
     telegram_webhook_secret_default: ''
+    websocket_ticket_secret_default: '%env(APP_SECRET)%'
     redis_url_default: 'redis://localhost'
     gemini_model_default: 'gemini-2.5-flash'
     exam_consultation_days_before_default: 1
@@ -68,6 +69,10 @@ services:
     App\Service\Telegram\VerifyTelegramWebhookSecretService:
         arguments:
             $webhookSecret: '%env(default:telegram_webhook_secret_default:TELEGRAM_WEBHOOK_SECRET)%'
+
+    App\Service\Notification\CreateWebSocketTicketService:
+        arguments:
+            $secret: '%env(default:websocket_ticket_secret_default:WEBSOCKET_TICKET_SECRET)%'
 
     App\Service\Telegram\AmqpTelegramNotificationPublisher:
         arguments:
