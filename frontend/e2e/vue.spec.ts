@@ -216,6 +216,48 @@ test('opens the admin action log', async ({ page }) => {
   await expect(page.getByTestId('action-log-table')).toContainText('"weekParity": "odd"')
 })
 
+test('opens generation job history and generated drafts', async ({ page }) => {
+  await mockSuccessfulAuth(page)
+  await mockAdminGenerationJobs(page)
+  await mockAdminScheduleManagement(page)
+  await mockAdminExamScheduleManagement(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin')
+  await page.getByRole('link', { name: 'Завдання генерації' }).click()
+
+  await expect(page).toHaveURL(/\/admin\/generation-jobs$/)
+  await expect(page.getByRole('heading', { name: 'Завдання генерації' })).toBeVisible()
+  await expect(page.getByTestId('schedule-generation-job-table')).toContainText('Розклад')
+  await expect(page.getByTestId('schedule-generation-job-table')).toContainText('2026-05-23T09:30:00+00:00')
+  await expect(page.getByTestId('schedule-generation-job-table')).toContainText('#14')
+  await expect(page.getByTestId('exam-generation-job-table')).toContainText('Іспити')
+  await expect(page.getByTestId('exam-generation-job-table')).toContainText('2026-05-23T09:35:00+00:00')
+  await expect(page.getByTestId('exam-generation-job-table')).toContainText('#22')
+
+  await page.getByTestId('open-schedule-generation-result').click()
+  await expect(page).toHaveURL(/\/admin\/schedules\/14$/)
+
+  await page.goto('/admin/generation-jobs')
+  await page.getByTestId('open-exam-generation-result').click()
+  await expect(page).toHaveURL(/\/admin\/exam-schedules\/22$/)
+})
+
+test('shows empty generation job history sections', async ({ page }) => {
+  await mockSuccessfulAuth(page)
+  await mockAdminGenerationJobs(page, { empty: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/generation-jobs')
+
+  await expect(page.getByTestId('no-schedule-generation-jobs')).toContainText('Завдань генерації ще немає.')
+  await expect(page.getByTestId('no-exam-generation-jobs')).toContainText('Завдань генерації ще немає.')
+})
+
 test('opens schedule management and creates a draft schedule', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -660,6 +702,63 @@ async function mockAdminActionLogs(page: Page): Promise<void> {
             },
           },
         ],
+      }),
+    })
+  })
+}
+
+async function mockAdminGenerationJobs(
+  page: Page,
+  options: { empty?: boolean } = {},
+): Promise<void> {
+  await page.route(/\/api\/admin\/generation-jobs$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: options.empty
+          ? []
+          : [
+              {
+                id: 'schedule-job-history',
+                semesterId: 1,
+                requestedBy: 1,
+                status: 'completed',
+                generatedScheduleId: 14,
+                qualityScore: 86,
+                qualityStatus: 'acceptable',
+                errorMessage: null,
+                diagnostics: { generatedEntryCount: 24 },
+                createdAt: '2026-05-23T09:30:00+00:00',
+                startedAt: '2026-05-23T09:30:01+00:00',
+                finishedAt: '2026-05-23T09:30:03+00:00',
+              },
+            ],
+      }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/exam-schedule-generation-jobs$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: options.empty
+          ? []
+          : [
+              {
+                id: 'exam-job-history',
+                semesterId: 1,
+                requestedBy: 1,
+                status: 'completed',
+                generatedExamScheduleId: 22,
+                qualityScore: 91,
+                qualityStatus: 'acceptable',
+                errorMessage: null,
+                diagnostics: { generatedEntryCount: 18 },
+                createdAt: '2026-05-23T09:35:00+00:00',
+                startedAt: '2026-05-23T09:35:01+00:00',
+                finishedAt: '2026-05-23T09:35:03+00:00',
+              },
+            ],
       }),
     })
   })

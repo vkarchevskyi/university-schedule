@@ -119,3 +119,7 @@ export function generateSchedule(semesterId: number): Promise<ScheduleGeneration
 export function getGenerationJob(jobId: string): Promise<ScheduleGenerationJob> {
   return requestJson(`/api/admin/generation-jobs/${jobId}`, { authenticated: true })
 }
+
+export function listGenerationJobs(): Promise<ResourceCollection<ScheduleGenerationJob>> {
+  return requestJson('/api/admin/generation-jobs', { authenticated: true })
+}
