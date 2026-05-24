@@ -34,7 +34,7 @@ export function clearStoredToken(): void {
   window.localStorage.removeItem(tokenStorageKey)
 }
 
-function buildApiUrl(path: string): string {
+export function buildApiUrl(path: string): string {
   const normalizedBaseUrl = apiBaseUrl.replace(/\/+$/, '')
   const normalizedPath = path.replace(/^\/+/, '')
 
@@ -43,6 +43,17 @@ function buildApiUrl(path: string): string {
   }
 
   return `${normalizedBaseUrl}/${normalizedPath}`
+}
+
+export function buildWebSocketUrl(path: string, query: Record<string, string> = {}): string {
+  const url = new URL(buildApiUrl(path))
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+
+  for (const [key, value] of Object.entries(query)) {
+    url.searchParams.set(key, value)
+  }
+
+  return url.toString()
 }
 
 export async function requestJson<T>(
