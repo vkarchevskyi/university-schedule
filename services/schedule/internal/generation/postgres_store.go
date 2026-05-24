@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
@@ -87,6 +88,73 @@ func (store *PostgresStore) MarkFailed(ctx context.Context, jobID string, messag
 	}
 
 	return requireAffected(result, ErrJobNotFound)
+}
+
+func (store *PostgresStore) LoadJob(ctx context.Context, jobID string) (JobResource, error) {
+	var job JobResource
+	var generatedScheduleID sql.NullInt64
+	var qualityScore sql.NullInt64
+	var qualityStatus sql.NullString
+	var errorMessage sql.NullString
+	var diagnostics []byte
+	var createdAt time.Time
+	var startedAt sql.NullTime
+	var finishedAt sql.NullTime
+
+	err := store.db.QueryRowContext(ctx, `
+		SELECT id, semester_id, requested_by, status, generated_schedule_id, quality_score, quality_status, error_message, diagnostics, created_at, started_at, finished_at
+		FROM schedule_generation_jobs
+		WHERE id = $1
+	`, jobID).Scan(
+		&job.ID,
+		&job.SemesterID,
+		&job.RequestedBy,
+		&job.Status,
+		&generatedScheduleID,
+		&qualityScore,
+		&qualityStatus,
+		&errorMessage,
+		&diagnostics,
+		&createdAt,
+		&startedAt,
+		&finishedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return JobResource{}, ErrJobNotFound
+		}
+		return JobResource{}, err
+	}
+
+	if generatedScheduleID.Valid {
+		job.GeneratedScheduleID = &generatedScheduleID.Int64
+	}
+	if qualityScore.Valid {
+		score := int(qualityScore.Int64)
+		job.QualityScore = &score
+	}
+	if qualityStatus.Valid {
+		job.QualityStatus = &qualityStatus.String
+	}
+	if errorMessage.Valid {
+		job.ErrorMessage = &errorMessage.String
+	}
+	if diagnostics != nil {
+		if err := json.Unmarshal(diagnostics, &job.Diagnostics); err != nil {
+			return JobResource{}, fmt.Errorf("decode diagnostics: %w", err)
+		}
+	}
+	job.CreatedAt = createdAt.Format(time.RFC3339)
+	if startedAt.Valid {
+		formatted := startedAt.Time.Format(time.RFC3339)
+		job.StartedAt = &formatted
+	}
+	if finishedAt.Valid {
+		formatted := finishedAt.Time.Format(time.RFC3339)
+		job.FinishedAt = &formatted
+	}
+
+	return job, nil
 }
 
 func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (Input, error) {

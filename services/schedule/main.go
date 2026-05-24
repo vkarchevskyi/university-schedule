@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/examgeneration"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/generation"
+	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/notifications"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
 
@@ -31,8 +32,17 @@ func main() {
 			}
 		}()
 	}
-	startGenerationWorker(validator)
-	startExamGenerationWorker()
+	notificationPublisher := notificationPublisher()
+	if notificationPublisher != nil {
+		defer func() {
+			if err := notificationPublisher.Close(); err != nil {
+				log.Printf("close notification publisher: %v", err)
+			}
+		}()
+	}
+	startGenerationWorker(validator, notificationPublisher)
+	startExamGenerationWorker(notificationPublisher)
+	startNotificationBroker(router)
 
 	router.Get("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusNoContent)
@@ -58,7 +68,22 @@ func validationStore() (*validation.PostgresStore, error) {
 	return validation.NewPostgresStore(databaseURL)
 }
 
-func startGenerationWorker(validator validation.Validator) {
+func notificationPublisher() *notifications.Publisher {
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+	if rabbitmqURL == "" {
+		return nil
+	}
+
+	publisher, err := notifications.NewPublisher(rabbitmqURL, notificationQueueName())
+	if err != nil {
+		log.Printf("web notification publisher disabled: %v", err)
+		return nil
+	}
+
+	return publisher
+}
+
+func startGenerationWorker(validator validation.Validator, publisher *notifications.Publisher) {
 	databaseURL := os.Getenv("DATABASE_URL")
 	rabbitmqURL := os.Getenv("RABBITMQ_URL")
 	if databaseURL == "" || rabbitmqURL == "" {
@@ -76,7 +101,7 @@ func startGenerationWorker(validator validation.Validator) {
 		return
 	}
 
-	worker := generation.NewWorker(store, generation.NewGenerator(validator), queueName)
+	worker := generation.NewWorker(store, generation.NewGenerator(validator), queueName, publisher)
 	go func() {
 		defer func() {
 			if err := store.Close(); err != nil {
@@ -89,7 +114,7 @@ func startGenerationWorker(validator validation.Validator) {
 	}()
 }
 
-func startExamGenerationWorker() {
+func startExamGenerationWorker(publisher *notifications.Publisher) {
 	databaseURL := os.Getenv("DATABASE_URL")
 	rabbitmqURL := os.Getenv("RABBITMQ_URL")
 	if databaseURL == "" || rabbitmqURL == "" {
@@ -107,7 +132,7 @@ func startExamGenerationWorker() {
 		return
 	}
 
-	worker := examgeneration.NewWorker(store, examgeneration.NewGenerator(), queueName)
+	worker := examgeneration.NewWorker(store, examgeneration.NewGenerator(), queueName, publisher)
 	go func() {
 		defer func() {
 			if err := store.Close(); err != nil {
@@ -118,6 +143,32 @@ func startExamGenerationWorker() {
 			log.Printf("exam schedule generation worker stopped: %v", err)
 		}
 	}()
+}
+
+func startNotificationBroker(router chi.Router) {
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+	secret := os.Getenv("WEBSOCKET_TICKET_SECRET")
+	if rabbitmqURL == "" || secret == "" {
+		return
+	}
+
+	broker := notifications.NewBroker(notifications.NewTicketValidator(secret))
+	router.Get("/api/admin/notifications/ws", broker.ServeHTTP)
+
+	go func() {
+		if err := broker.StartRabbitMQConsumer(context.Background(), rabbitmqURL, notificationQueueName()); err != nil {
+			log.Printf("web notification broker stopped: %v", err)
+		}
+	}()
+}
+
+func notificationQueueName() string {
+	queueName := os.Getenv("GENERATION_NOTIFICATIONS_QUEUE")
+	if queueName == "" {
+		return notifications.DefaultQueueName
+	}
+
+	return queueName
 }
 
 func intEnv(name string, fallback int) int {

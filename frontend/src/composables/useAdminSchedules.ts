@@ -1,6 +1,7 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { subscribeToGenerationJob } from '@/api/generationNotifications'
 import {
   createSchedule,
   generateSchedule,
@@ -20,6 +21,7 @@ export function useAdminSchedules() {
   const isLoading = ref(true)
   const error = ref<string | null>(null)
   const generationJob = ref<ScheduleGenerationJob | null>(null)
+  let stopGenerationNotifications: (() => void) | null = null
 
   const semesterOptions = computed(() =>
     semesters.value.map((semester) => ({
@@ -30,6 +32,7 @@ export function useAdminSchedules() {
   )
 
   onMounted(load)
+  onUnmounted(() => stopGenerationNotifications?.())
 
   async function load(): Promise<void> {
     isLoading.value = true
@@ -71,7 +74,49 @@ export function useAdminSchedules() {
     }
 
     generationJob.value = await generateSchedule(selectedSemesterId.value)
-    await pollGeneration(generationJob.value.id)
+    await waitForGeneration(generationJob.value.id)
+  }
+
+  async function waitForGeneration(jobId: string): Promise<void> {
+    await new Promise<void>((resolve) => {
+      let resolved = false
+      const fallbackTimeout = window.setTimeout(startPollingFallback, 10000)
+
+      function finish(): void {
+        if (resolved) {
+          return
+        }
+        resolved = true
+        window.clearTimeout(fallbackTimeout)
+        stopGenerationNotifications?.()
+        stopGenerationNotifications = null
+        resolve()
+      }
+
+      async function startPollingFallback(): Promise<void> {
+        if (resolved) {
+          return
+        }
+        await pollGeneration(jobId)
+        finish()
+      }
+
+      stopGenerationNotifications = subscribeToGenerationJob<ScheduleGenerationJob>(
+        'schedule_generation_job',
+        jobId,
+        async ({ job }) => {
+          generationJob.value = job
+
+          if (job.status === 'completed' || job.status === 'failed') {
+            if (job.generatedScheduleId !== null) {
+              await load()
+            }
+            finish()
+          }
+        },
+        startPollingFallback,
+      )
+    })
   }
 
   async function pollGeneration(jobId: string): Promise<void> {

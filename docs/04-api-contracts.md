@@ -433,6 +433,62 @@ Response:
 
 Generation job statuses are `queued`, `running`, `completed`, and `failed`. Generated schedules are saved as reviewable drafts and are not published automatically.
 
+### POST `/api/admin/notifications/ws-ticket`
+
+Returns a short-lived ticket for opening the admin WebSocket notification channel. The endpoint requires admin authentication.
+
+Response:
+
+```json
+{
+  "ticket": "signed-ticket",
+  "expiresAt": "2026-05-13T12:02:00+00:00"
+}
+```
+
+### WebSocket `/api/admin/notifications/ws?ticket={ticket}`
+
+Accepts a WebSocket connection authenticated with a ticket from `/api/admin/notifications/ws-ticket`.
+
+Clients subscribe to generation job events:
+
+```json
+{
+  "action": "subscribe",
+  "type": "schedule_generation_job",
+  "jobId": "uuid"
+}
+```
+
+Server events include the latest persisted job resource:
+
+```json
+{
+  "type": "schedule_generation_job",
+  "jobId": "uuid",
+  "status": "completed",
+  "job": {
+    "id": "uuid",
+    "semesterId": 1,
+    "requestedBy": 1,
+    "status": "completed",
+    "generatedScheduleId": 12,
+    "qualityScore": 92,
+    "qualityStatus": "acceptable",
+    "errorMessage": null,
+    "diagnostics": {
+      "generatedEntryCount": 24,
+      "minimumQualityScore": 80
+    },
+    "createdAt": "2026-05-13T12:00:00+00:00",
+    "startedAt": "2026-05-13T12:00:01+00:00",
+    "finishedAt": "2026-05-13T12:00:03+00:00"
+  }
+}
+```
+
+Exam generation uses the same envelope with `type: "exam_schedule_generation_job"` and the existing exam job resource in `job`.
+
 ## Exam Scheduling
 
 ### POST `/api/admin/exam-schedules`

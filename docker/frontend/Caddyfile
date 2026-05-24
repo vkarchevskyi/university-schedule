@@ -1,6 +1,10 @@
 {$SERVER_NAME} {
 	encode zstd gzip
 
+	handle /api/admin/notifications/ws {
+		reverse_proxy schedule:8081
+	}
+
 	handle /api/* {
 		reverse_proxy rest-api:80
 	}

@@ -1,8 +1,8 @@
 package examgeneration
 
 type JobMessage struct {
-	JobID              string `json:"jobId"`
-	SemesterID         int64  `json:"semesterId"`
+	JobID             string `json:"jobId"`
+	SemesterID        int64  `json:"semesterId"`
 	RequestedByUserID int64  `json:"requestedByUserId"`
 }
 
@@ -11,6 +11,21 @@ type Result struct {
 	QualityScore   int
 	QualityStatus  string
 	Diagnostics    map[string]any
+}
+
+type JobResource struct {
+	ID                      string         `json:"id"`
+	SemesterID              int64          `json:"semesterId"`
+	RequestedBy             int64          `json:"requestedBy"`
+	Status                  string         `json:"status"`
+	GeneratedExamScheduleID *int64         `json:"generatedExamScheduleId"`
+	QualityScore            *int           `json:"qualityScore"`
+	QualityStatus           *string        `json:"qualityStatus"`
+	ErrorMessage            *string        `json:"errorMessage"`
+	Diagnostics             map[string]any `json:"diagnostics"`
+	CreatedAt               string         `json:"createdAt"`
+	StartedAt               *string        `json:"startedAt"`
+	FinishedAt              *string        `json:"finishedAt"`
 }
 
 type Input struct {

@@ -615,6 +615,10 @@ async function mockAdminScheduleManagement(
     })
   })
 
+  await page.route('**/api/admin/notifications/ws-ticket', async (route) => {
+    await route.fulfill({ status: 503 })
+  })
+
   await page.route('**/api/admin/generation-jobs/schedule-job-1', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
@@ -759,6 +763,10 @@ async function mockAdminExamScheduleManagement(page: Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify(examGenerationJob('running')),
     })
+  })
+
+  await page.route('**/api/admin/notifications/ws-ticket', async (route) => {
+    await route.fulfill({ status: 503 })
   })
 
   await page.route('**/api/admin/exam-schedule-generation-jobs/exam-job-1', async (route) => {
