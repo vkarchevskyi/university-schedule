@@ -8,16 +8,22 @@ import (
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/notifications"
 )
 
 type Worker struct {
 	store     *PostgresStore
 	generator Generator
 	queueName string
+	publisher eventPublisher
 }
 
-func NewWorker(store *PostgresStore, generator Generator, queueName string) Worker {
-	return Worker{store: store, generator: generator, queueName: queueName}
+type eventPublisher interface {
+	Publish(context.Context, notifications.Event) error
+}
+
+func NewWorker(store *PostgresStore, generator Generator, queueName string, publisher eventPublisher) Worker {
+	return Worker{store: store, generator: generator, queueName: queueName, publisher: publisher}
 }
 
 func (worker Worker) Start(ctx context.Context, rabbitmqURL string) error {
@@ -73,6 +79,7 @@ func (worker Worker) handleDelivery(parent context.Context, delivery amqp.Delive
 
 	if err := worker.Process(ctx, message); err != nil {
 		_ = worker.store.MarkFailed(ctx, message.JobID, err.Error())
+		worker.publishJob(ctx, message.JobID)
 		return err
 	}
 
@@ -83,6 +90,7 @@ func (worker Worker) Process(ctx context.Context, message JobMessage) error {
 	if err := worker.store.MarkRunning(ctx, message.JobID); err != nil {
 		return fmt.Errorf("mark job running: %w", err)
 	}
+	worker.publishJob(ctx, message.JobID)
 
 	input, err := worker.store.LoadInput(ctx, message.SemesterID)
 	if err != nil {
@@ -107,6 +115,28 @@ func (worker Worker) Process(ctx context.Context, message JobMessage) error {
 	if err != nil {
 		return err
 	}
+	worker.publishJob(ctx, message.JobID)
 
 	return nil
+}
+
+func (worker Worker) publishJob(ctx context.Context, jobID string) {
+	if worker.publisher == nil {
+		return
+	}
+
+	job, err := worker.store.LoadJob(ctx, jobID)
+	if err != nil {
+		log.Printf("load exam generation notification job: %v", err)
+		return
+	}
+
+	if err := worker.publisher.Publish(ctx, notifications.Event{
+		Type:   "exam_schedule_generation_job",
+		JobID:  job.ID,
+		Status: job.Status,
+		Job:    job,
+	}); err != nil {
+		log.Printf("publish exam generation notification: %v", err)
+	}
 }
