@@ -15,4 +15,10 @@ final class ExamScheduleGenerationJobRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ExamScheduleGenerationJob::class);
     }
+
+    /** @return list<ExamScheduleGenerationJob> */
+    public function findLatest(): array
+    {
+        return array_values($this->findBy([], ['createdAt' => 'DESC']));
+    }
 }

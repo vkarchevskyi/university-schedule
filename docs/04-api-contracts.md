@@ -431,6 +431,36 @@ Response:
 }
 ```
 
+### GET `/api/admin/generation-jobs`
+
+Lists schedule generation jobs for the admin workspace, newest first.
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "semesterId": 1,
+      "requestedBy": 1,
+      "status": "completed",
+      "generatedScheduleId": 12,
+      "qualityScore": 92,
+      "qualityStatus": "acceptable",
+      "errorMessage": null,
+      "diagnostics": {
+        "generatedEntryCount": 24,
+        "minimumQualityScore": 80
+      },
+      "createdAt": "2026-05-13T12:00:00+00:00",
+      "startedAt": "2026-05-13T12:00:01+00:00",
+      "finishedAt": "2026-05-13T12:00:03+00:00"
+    }
+  ]
+}
+```
+
 Generation job statuses are `queued`, `running`, `completed`, and `failed`. Generated schedules are saved as reviewable drafts and are not published automatically.
 
 ### POST `/api/admin/notifications/ws-ticket`
@@ -622,6 +652,36 @@ Response:
   "createdAt": "2026-05-13T12:00:00+00:00",
   "startedAt": "2026-05-13T12:00:01+00:00",
   "finishedAt": "2026-05-13T12:00:03+00:00"
+}
+```
+
+### GET `/api/admin/exam-schedule-generation-jobs`
+
+Lists exam schedule generation jobs for the admin workspace, newest first.
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "semesterId": 1,
+      "requestedBy": 1,
+      "status": "completed",
+      "generatedExamScheduleId": 14,
+      "qualityScore": 100,
+      "qualityStatus": "acceptable",
+      "errorMessage": null,
+      "diagnostics": {
+        "generatedEntryCount": 18,
+        "minimumQualityScore": 80
+      },
+      "createdAt": "2026-05-13T12:00:00+00:00",
+      "startedAt": "2026-05-13T12:00:01+00:00",
+      "finishedAt": "2026-05-13T12:00:03+00:00"
+    }
+  ]
 }
 ```
 

@@ -80,3 +80,7 @@ export function generateExamSchedule(semesterId: number): Promise<ExamGeneration
 export function getExamGenerationJob(jobId: string): Promise<ExamGenerationJob> {
   return requestJson(`/api/admin/exam-schedule-generation-jobs/${jobId}`, { authenticated: true })
 }
+
+export function listExamGenerationJobs(): Promise<ResourceCollection<ExamGenerationJob>> {
+  return requestJson('/api/admin/exam-schedule-generation-jobs', { authenticated: true })
+}

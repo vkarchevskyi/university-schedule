@@ -5,6 +5,7 @@ import AdminDashboardPage from '@/components/pages/AdminDashboardPage.vue'
 import AdminEntityPage from '@/components/pages/AdminEntityPage.vue'
 import AdminExamScheduleEditorPage from '@/components/pages/AdminExamScheduleEditorPage.vue'
 import AdminExamSchedulesPage from '@/components/pages/AdminExamSchedulesPage.vue'
+import AdminGenerationJobsPage from '@/components/pages/AdminGenerationJobsPage.vue'
 import AdminLoginPage from '@/components/pages/AdminLoginPage.vue'
 import AdminScheduleEditorPage from '@/components/pages/AdminScheduleEditorPage.vue'
 import AdminSchedulesPage from '@/components/pages/AdminSchedulesPage.vue'
@@ -58,6 +59,12 @@ const router = createRouter({
       path: '/admin/exam-schedules/:id',
       name: 'admin-exam-schedule-editor',
       component: AdminExamScheduleEditorPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/generation-jobs',
+      name: 'admin-generation-jobs',
+      component: AdminGenerationJobsPage,
       meta: { requiresAuth: true },
     },
     {

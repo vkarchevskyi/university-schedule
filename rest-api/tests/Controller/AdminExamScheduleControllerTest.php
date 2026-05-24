@@ -36,6 +36,10 @@ final class AdminExamScheduleControllerTest extends WebTestCase
 
     public function testExamScheduleRoutesRequireAuthentication(): void
     {
+        $this->client->request('GET', '/api/admin/exam-schedule-generation-jobs');
+
+        self::assertResponseStatusCodeSame(401);
+
         $this->client->jsonRequest('POST', '/api/admin/exam-schedules', [
             'semesterId' => 1,
         ]);
@@ -117,6 +121,29 @@ final class AdminExamScheduleControllerTest extends WebTestCase
 
         self::assertSame($this->stringValue($job, 'id'), $this->stringValue($stored, 'id'));
         self::assertSame('queued', $this->stringValue($stored, 'status'));
+    }
+
+    public function testAdminCanListExamScheduleGenerationJobs(): void
+    {
+        $fixtures = $this->createFixtures();
+        $first = $this->requestJson('POST', '/api/admin/exam-schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+        sleep(1);
+        $second = $this->requestJson('POST', '/api/admin/exam-schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+
+        $list = $this->requestJson('GET', '/api/admin/exam-schedule-generation-jobs');
+        $items = $this->listValue($list, 'items');
+        $latest = $this->objectAt($items, 0);
+
+        self::assertCount(2, $items);
+        self::assertSame($this->stringValue($second, 'id'), $this->stringValue($latest, 'id'));
+        self::assertSame($fixtures->semesterId, $this->intValue($latest, 'semesterId'));
+        self::assertSame('queued', $this->stringValue($latest, 'status'));
+        self::assertNull($latest['generatedExamScheduleId']);
+        self::assertSame($this->stringValue($first, 'id'), $this->stringValue($this->objectAt($items, 1), 'id'));
     }
 
     public function testExamWithoutMatchingConsultationIsRejected(): void

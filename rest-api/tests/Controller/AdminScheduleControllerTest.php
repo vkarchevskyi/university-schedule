@@ -49,6 +49,10 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(401);
 
+        $this->client->request('GET', '/api/admin/generation-jobs');
+
+        self::assertResponseStatusCodeSame(401);
+
         $this->client->jsonRequest('POST', '/api/admin/notifications/ws-ticket');
 
         self::assertResponseStatusCodeSame(401);
@@ -360,6 +364,29 @@ final class AdminScheduleControllerTest extends WebTestCase
 
         $storedJob = $this->requestJson('GET', sprintf('/api/admin/generation-jobs/%s', $this->stringValue($job, 'id')));
         self::assertSame($this->stringValue($job, 'id'), $this->stringValue($storedJob, 'id'));
+    }
+
+    public function testAdminCanListScheduleGenerationJobs(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $first = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+        sleep(1);
+        $second = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+        ], 202);
+
+        $list = $this->requestJson('GET', '/api/admin/generation-jobs');
+        $items = $this->listValue($list, 'items');
+        $latest = $this->objectAt($items, 0);
+
+        self::assertCount(2, $items);
+        self::assertSame($this->stringValue($second, 'id'), $this->stringValue($latest, 'id'));
+        self::assertSame($fixtures->semesterId, $this->intValue($latest, 'semesterId'));
+        self::assertSame('queued', $this->stringValue($latest, 'status'));
+        self::assertNull($latest['generatedScheduleId']);
+        self::assertSame($this->stringValue($first, 'id'), $this->stringValue($this->objectAt($items, 1), 'id'));
     }
 
     public function testScheduleGenerationRequiresActiveTeachingLoadsBeforeQueueing(): void
