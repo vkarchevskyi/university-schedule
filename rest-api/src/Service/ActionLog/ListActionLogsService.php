@@ -21,9 +21,9 @@ final readonly class ListActionLogsService
     {
         $logs = $this->entityManager->getRepository(ActionLog::class)->findBy([], ['createdAt' => 'DESC', 'id' => 'DESC']);
 
-        return new ResourceCollection(array_map(
+        return new ResourceCollection(array_values(array_map(
             fn(ActionLog $log): ActionLogResource => $this->mapper->map($log),
             $logs,
-        ));
+        )));
     }
 }
