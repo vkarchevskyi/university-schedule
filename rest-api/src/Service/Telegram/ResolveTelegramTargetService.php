@@ -24,6 +24,16 @@ final readonly class ResolveTelegramTargetService
         };
     }
 
+    public function getById(string $type, int $id): ?TelegramTarget
+    {
+        return match ($this->normalize($type)) {
+            'group' => $this->groupById($id),
+            'teacher' => $this->teacherById($id),
+            'room' => $this->roomById($id),
+            default => null,
+        };
+    }
+
     private function group(string $name): TelegramTarget
     {
         $group = $this->entityManager->getRepository(StudentGroup::class)->createQueryBuilder('g')
@@ -39,6 +49,15 @@ final readonly class ResolveTelegramTargetService
         }
 
         return new TelegramTarget('group', $group->getId(), $group->getName());
+    }
+
+    private function groupById(int $id): ?TelegramTarget
+    {
+        $group = $this->entityManager->getRepository(StudentGroup::class)->find($id);
+
+        return $group instanceof StudentGroup && $group->getId() !== null
+            ? new TelegramTarget('group', $group->getId(), $group->getName())
+            : null;
     }
 
     private function teacher(string $name): TelegramTarget
@@ -61,6 +80,15 @@ final readonly class ResolveTelegramTargetService
         throw ApiException::validation(['target' => 'Викладача не знайдено.']);
     }
 
+    private function teacherById(int $id): ?TelegramTarget
+    {
+        $teacher = $this->entityManager->getRepository(Teacher::class)->find($id);
+
+        return $teacher instanceof Teacher && $teacher->getId() !== null
+            ? new TelegramTarget('teacher', $teacher->getId(), sprintf('%s %s', $teacher->getFirstName(), $teacher->getLastName()))
+            : null;
+    }
+
     private function room(string $name): TelegramTarget
     {
         $room = $this->entityManager->getRepository(Room::class)->createQueryBuilder('r')
@@ -76,6 +104,15 @@ final readonly class ResolveTelegramTargetService
         }
 
         return new TelegramTarget('room', $room->getId(), $room->getName());
+    }
+
+    private function roomById(int $id): ?TelegramTarget
+    {
+        $room = $this->entityManager->getRepository(Room::class)->find($id);
+
+        return $room instanceof Room && $room->getId() !== null
+            ? new TelegramTarget('room', $room->getId(), $room->getName())
+            : null;
     }
 
     private function normalize(string $value): string

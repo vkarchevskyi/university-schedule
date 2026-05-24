@@ -13,6 +13,7 @@ parameters:
     telegram_notifications_queue_default: 'telegram_notifications'
     telegram_bot_token_default: ''
     telegram_webhook_secret_default: ''
+    redis_url_default: 'redis://localhost'
     gemini_model_default: 'gemini-2.5-flash'
     exam_consultation_days_before_default: 1
     exam_min_days_between_group_exams_default: 1
@@ -72,6 +73,10 @@ services:
         arguments:
             $rabbitmqUrl: '%env(RABBITMQ_URL)%'
             $queueName: '%env(default:telegram_notifications_queue_default:TELEGRAM_NOTIFICATIONS_QUEUE)%'
+
+    App\Service\Telegram\TelegramFlowStateService:
+        arguments:
+            $cache: '@cache.app'
 
     App\Command\ConsumeTelegramNotificationsCommand:
         arguments:
