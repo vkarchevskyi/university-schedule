@@ -36,6 +36,7 @@ final class TelegramWebhookControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->client->disableReboot();
         $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
 
         $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
@@ -75,6 +76,55 @@ final class TelegramWebhookControllerTest extends WebTestCase
         self::assertStringContainsString('Lab 1', FakeTelegramSender::$messages[0]['text']);
     }
 
+    public function testScheduleCommandWithoutArgumentsStartsButtonFlow(): void
+    {
+        $this->postUpdate('/schedule');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Оберіть', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame('tg:type:schedule:group:0', FakeTelegramSender::$messages[0]['keyboard'][0][0]->callbackData);
+        self::assertSame('tg:type:schedule:teacher:0', FakeTelegramSender::$messages[0]['keyboard'][1][0]->callbackData);
+        self::assertSame('tg:type:schedule:room:0', FakeTelegramSender::$messages[0]['keyboard'][2][0]->callbackData);
+    }
+
+    public function testScheduleTypeCallbackShowsPagedEntityButtons(): void
+    {
+        $this->createPublishedScheduleFixtures();
+        $this->postUpdate('/schedule');
+
+        $this->postCallback('tg:type:schedule:group:0');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Оберіть групу', FakeTelegramSender::$messages[1]['text']);
+        self::assertSame('tg:pick:schedule:group:', substr(FakeTelegramSender::$messages[1]['keyboard'][0][0]->callbackData, 0, 23));
+        self::assertSame([['id' => 'callback-1', 'text' => null]], FakeTelegramSender::$callbackAnswers);
+    }
+
+    public function testScheduleEntityCallbackSendsScheduleWithWeekNavigation(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+        $this->postUpdate('/schedule');
+        $this->postCallback('tg:type:schedule:group:0');
+
+        $this->postCallback(sprintf('tg:pick:schedule:group:%d', $fixtures->group->getId()), id: 'callback-2');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Programming', FakeTelegramSender::$messages[2]['text']);
+        self::assertSame('Попередній', FakeTelegramSender::$messages[2]['keyboard'][0][0]->text);
+        self::assertStringContainsString('tg:week:group:', FakeTelegramSender::$messages[2]['keyboard'][0][0]->callbackData);
+    }
+
+    public function testWeekNavigationCallbackSendsAdjustedWeekSchedule(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+
+        $this->postCallback(sprintf('tg:week:group:%d:2026-05-18:-1', $fixtures->group->getId()));
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Розклад на тиждень з 2026-05-11', FakeTelegramSender::$messages[0]['text']);
+        self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
+    }
+
     public function testSubscribePreventsDuplicates(): void
     {
         $fixtures = $this->createPublishedScheduleFixtures();
@@ -95,6 +145,46 @@ final class TelegramWebhookControllerTest extends WebTestCase
         self::assertCount(1, $subscriptions);
     }
 
+    public function testSubscribeButtonFlowCreatesSubscription(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+        $this->postUpdate('/subscribe');
+
+        self::assertSame('tg:type:subscribe:group:0', FakeTelegramSender::$messages[0]['keyboard'][0][0]->callbackData);
+        self::assertSame('tg:type:subscribe:teacher:0', FakeTelegramSender::$messages[0]['keyboard'][1][0]->callbackData);
+        self::assertSame('tg:cancel', FakeTelegramSender::$messages[0]['keyboard'][2][0]->callbackData);
+
+        $this->postCallback('tg:type:subscribe:group:0');
+        $this->postCallback(sprintf('tg:pick:subscribe:group:%d', $fixtures->group->getId()), id: 'callback-2');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('створено', FakeTelegramSender::$messages[2]['text']);
+        self::assertCount(1, $this->entityManager->getRepository(TelegramSubscription::class)->findBy([
+            'telegramChatId' => 123456,
+            'entityType' => 'group',
+            'entityId' => $fixtures->group->getId(),
+        ]));
+    }
+
+    public function testSubscribeButtonFlowReportsDuplicateSubscription(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+        $this->entityManager->persist(new TelegramSubscription(123456, 'group', (int) $fixtures->group->getId(), new \DateTimeImmutable()));
+        $this->entityManager->flush();
+        $this->postUpdate('/subscribe');
+        $this->postCallback('tg:type:subscribe:group:0');
+
+        $this->postCallback(sprintf('tg:pick:subscribe:group:%d', $fixtures->group->getId()), id: 'callback-2');
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('вже існує', FakeTelegramSender::$messages[2]['text']);
+        self::assertCount(1, $this->entityManager->getRepository(TelegramSubscription::class)->findBy([
+            'telegramChatId' => 123456,
+            'entityType' => 'group',
+            'entityId' => $fixtures->group->getId(),
+        ]));
+    }
+
     public function testUnsubscribeRemovesSubscription(): void
     {
         $fixtures = $this->createPublishedScheduleFixtures();
@@ -106,6 +196,32 @@ final class TelegramWebhookControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(204);
         self::assertStringContainsString('видалено', FakeTelegramSender::$messages[0]['text']);
+        self::assertCount(0, $this->entityManager->getRepository(TelegramSubscription::class)->findAll());
+    }
+
+    public function testUnsubscribeButtonFlowRemovesSubscription(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+        $this->entityManager->persist(new TelegramSubscription(123456, 'teacher', (int) $fixtures->teacher->getId(), new \DateTimeImmutable()));
+        $this->entityManager->flush();
+
+        $this->postUpdate('/unsubscribe');
+        $this->postCallback(sprintf('tg:pick:unsubscribe:teacher:%d', $fixtures->teacher->getId()));
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('видалено', FakeTelegramSender::$messages[1]['text']);
+        self::assertCount(0, $this->entityManager->getRepository(TelegramSubscription::class)->findAll());
+    }
+
+    public function testMalformedCallbackIsAnsweredWithoutMutation(): void
+    {
+        $fixtures = $this->createPublishedScheduleFixtures();
+
+        $this->postCallback(sprintf('tg:pick:subscribe:group:%d', $fixtures->group->getId()), chatId: 654321);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertStringContainsString('Кнопка застаріла', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame('Запит не вдалося виконати.', FakeTelegramSender::$callbackAnswers[0]['text']);
         self::assertCount(0, $this->entityManager->getRepository(TelegramSubscription::class)->findAll());
     }
 
@@ -189,6 +305,23 @@ final class TelegramWebhookControllerTest extends WebTestCase
                 'message_id' => 10,
                 'text' => $text,
                 'chat' => ['id' => 123456],
+            ],
+        ], [
+            'HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN' => $secret,
+        ]);
+    }
+
+    private function postCallback(string $data, string $secret = 'test-secret', string $id = 'callback-1', int $chatId = 123456): void
+    {
+        $this->client->jsonRequest('POST', '/api/telegram/webhook', [
+            'update_id' => 2,
+            'callback_query' => [
+                'id' => $id,
+                'data' => $data,
+                'message' => [
+                    'message_id' => 10,
+                    'chat' => ['id' => $chatId],
+                ],
             ],
         ], [
             'HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN' => $secret,
