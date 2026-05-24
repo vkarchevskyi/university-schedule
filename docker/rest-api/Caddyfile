@@ -5,5 +5,10 @@
 :80 {
 	root * /app/public
 	encode zstd gzip
+
+	handle /api/admin/notifications/ws {
+		reverse_proxy schedule:8081
+	}
+
 	php_server
 }

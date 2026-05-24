@@ -79,7 +79,7 @@ The stack includes:
 - Go schedule validation and generation service.
 - PostgreSQL, Redis, and RabbitMQ.
 
-Set `SERVER_NAME` to the public HTTPS domain used for the frontend, API, and Telegram webhook. Caddy routes `/api/*` to Symfony and serves the SPA for all other paths.
+Set `SERVER_NAME` to the public HTTPS domain used for the frontend, API, Telegram webhook, and WebSocket generation notifications. Caddy routes `/api/admin/notifications/ws` to the Go schedule service, routes the remaining `/api/*` paths to Symfony, and serves the SPA for all other paths.
 
 The API generates JWT keys on startup into a named Docker volume and skips generation when keys already exist.
 
@@ -92,7 +92,7 @@ Minimum useful signals:
 - LLM parsing failures.
 - Generation job failures.
 - Database migration status.
-- Queue depth for generation jobs and notifications.
+- Queue depth for generation jobs, generation WebSocket notifications, and Telegram notifications.
 
 ## Backup
 
