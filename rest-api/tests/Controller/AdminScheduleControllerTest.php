@@ -145,7 +145,15 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertSame(6, $this->intValue($card, 'remainingLessonCount'));
 
         $updated = $this->requestJson('PATCH', sprintf('/api/admin/schedules/%d/entries/%d', $this->intValue($schedule, 'id'), $this->intValue($entry, 'id')), [
+            'teachingLoadIds' => [$fixtures->teachingLoadId],
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'roomId' => $fixtures->roomId,
+            'timeSlotId' => $fixtures->timeSlotId,
+            'dayOfWeek' => 1,
             'weekParity' => 'odd',
+            'groupIds' => [$fixtures->groupId],
         ]);
 
         self::assertSame('odd', $this->stringValue($updated, 'weekParity'));

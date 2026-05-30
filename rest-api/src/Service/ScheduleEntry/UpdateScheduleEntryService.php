@@ -84,25 +84,88 @@ final class UpdateScheduleEntryService extends AbstractEntityService
 
     private function replaceGroups(ScheduleEntry $entry, ScheduleEntryData $data): void
     {
-        foreach ($entry->getGroups()->toArray() as $group) {
-            $entry->removeGroup($group);
-            $this->entityManager->remove($group);
+        $nextIds = $this->entityIds($data->groups);
+        $currentIds = [];
+
+        foreach ($entry->getGroups()->toArray() as $entryGroup) {
+            $groupId = $entryGroup->getGroup()->getId();
+            if (!is_int($groupId)) {
+                throw new \LogicException('Expected persisted group identifier.');
+            }
+
+            $currentIds[] = $groupId;
+
+            if (!in_array($groupId, $nextIds, true)) {
+                $entry->removeGroup($entryGroup);
+                $this->entityManager->remove($entryGroup);
+            }
         }
 
         foreach ($data->groups as $group) {
-            $entry->addGroup(new ScheduleEntryGroup($entry, $group));
+            $groupId = $group->getId();
+            if (!is_int($groupId)) {
+                throw new \LogicException('Expected persisted group identifier.');
+            }
+
+            if (!in_array($groupId, $currentIds, true)) {
+                $entry->addGroup(new ScheduleEntryGroup($entry, $group));
+            }
         }
     }
 
     private function replaceTeachingLoads(ScheduleEntry $entry, ScheduleEntryData $data): void
     {
-        foreach ($entry->getTeachingLoads()->toArray() as $teachingLoad) {
-            $entry->removeTeachingLoad($teachingLoad);
-            $this->entityManager->remove($teachingLoad);
+        $nextIds = $this->entityIds($data->teachingLoads);
+        $currentIds = [];
+
+        foreach ($entry->getTeachingLoads()->toArray() as $entryTeachingLoad) {
+            $teachingLoadId = $entryTeachingLoad->getTeachingLoad()->getId();
+            if (!is_int($teachingLoadId)) {
+                throw new \LogicException('Expected persisted teaching load identifier.');
+            }
+
+            $currentIds[] = $teachingLoadId;
+
+            if (!in_array($teachingLoadId, $nextIds, true)) {
+                $entry->removeTeachingLoad($entryTeachingLoad);
+                $this->entityManager->remove($entryTeachingLoad);
+            }
         }
 
         foreach ($data->teachingLoads as $teachingLoad) {
-            $entry->addTeachingLoad(new ScheduleEntryTeachingLoad($entry, $teachingLoad));
+            $teachingLoadId = $teachingLoad->getId();
+            if (!is_int($teachingLoadId)) {
+                throw new \LogicException('Expected persisted teaching load identifier.');
+            }
+
+            if (!in_array($teachingLoadId, $currentIds, true)) {
+                $entry->addTeachingLoad(new ScheduleEntryTeachingLoad($entry, $teachingLoad));
+            }
         }
+    }
+
+    /**
+     * @param list<object> $entities
+     *
+     * @return list<int>
+     */
+    private function entityIds(array $entities): array
+    {
+        $ids = [];
+
+        foreach ($entities as $entity) {
+            if (!method_exists($entity, 'getId')) {
+                throw new \LogicException('Expected entity to expose getId().');
+            }
+
+            $id = $entity->getId();
+            if (!is_int($id)) {
+                throw new \LogicException('Expected persisted entity identifier.');
+            }
+
+            $ids[] = $id;
+        }
+
+        return $ids;
     }
 }
