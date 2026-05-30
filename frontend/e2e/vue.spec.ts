@@ -314,18 +314,26 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   })
 
   await expect(page.getByTestId('schedule-entry')).toContainText('Лекція')
+  await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('2')
+  await expect(page.getByTestId('lesson-card-remaining')).toHaveText('6')
 
-  await page.getByTestId('schedule-entry').click()
-  await page.getByTestId('week-parity-select').selectOption('odd')
-  await page.getByTestId('save-entry').click()
+  await page.getByTestId('week-parity-resize-odd').click()
 
   await expect(page.getByTestId('schedule-entry')).toContainText('Непарний')
+  await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('1')
+  await expect(page.getByTestId('lesson-card-remaining')).toHaveText('7')
+
+  await page.getByTestId('schedule-entry-select').click()
+  await page.getByTestId('week-parity-select').selectOption('even')
+  await page.getByTestId('save-entry').click()
+
+  await expect(page.getByTestId('schedule-entry')).toContainText('Парний')
 
   await page.getByTestId('validate-schedule').click()
 
   await expect(page.getByTestId('conflict-panel')).toContainText('Потрібно вибрати іншу аудиторію.')
 
-  await page.getByTestId('schedule-entry').click()
+  await page.getByTestId('schedule-entry-select').click()
   await page.getByTestId('delete-entry').click()
   await page.getByTestId('confirm-cancel').click()
   await expect(page.getByTestId('schedule-entry')).toHaveCount(1)
@@ -395,7 +403,10 @@ test('shows schedule edit API errors in a modal without replacing the editor', a
 test('disables drag and drop editing for published schedules', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
-  await mockAdminScheduleManagement(page, { published: true })
+  await mockAdminScheduleManagement(page, {
+    initialEntries: [adminScheduleEntry()],
+    published: true,
+  })
   await page.addInitScript(() => {
     window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
   })
@@ -403,6 +414,7 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
   await page.goto('/admin/schedules/12')
 
   await expect(page.getByTestId('lesson-card')).toHaveAttribute('draggable', 'false')
+  await expect(page.getByTestId('week-parity-resize-odd')).toBeDisabled()
 
   await page.evaluate(() => {
     const card = document.querySelector('[data-testid="lesson-card"]')
@@ -416,7 +428,27 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
     cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
   })
 
-  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(1)
+})
+
+test('highlights an entry when inline week parity resize validation fails', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, {
+    failUpdateEntry: true,
+    initialEntries: [adminScheduleEntry()],
+  })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await page.getByTestId('week-parity-resize-odd').click()
+
+  await expect(page.getByTestId('entry-validation-summary')).toContainText(
+    'Потрібно вибрати іншу аудиторію.',
+  )
+  await expect(page.getByTestId('schedule-entry')).toHaveClass(/editor-entry--conflict/)
 })
 
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
@@ -443,7 +475,7 @@ test('highlights an entry when schedule entry update validation fails', async ({
     cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
   })
 
-  await page.getByTestId('schedule-entry').click()
+  await page.getByTestId('schedule-entry-select').click()
   await page.getByTestId('week-parity-select').selectOption('odd')
   await page.getByTestId('save-entry').click()
 
@@ -666,10 +698,11 @@ async function mockAdminScheduleManagement(
     failCreateEntry?: boolean
     failCreateScheduleError?: boolean
     failUpdateEntry?: boolean
+    initialEntries?: AdminScheduleEntry[]
     published?: boolean
   } = {},
 ): Promise<void> {
-  let entries: AdminScheduleEntry[] = []
+  let entries: AdminScheduleEntry[] = options.initialEntries ?? []
   const scheduleStatus = options.published === true ? 'published' : 'draft'
 
   await page.route('**/api/admin/semesters', async (route) => {
@@ -744,9 +777,22 @@ async function mockAdminScheduleManagement(
   })
 
   await page.route(/\/api\/admin\/schedules\/\d+\/lesson-cards$/, async (route) => {
+    const scheduledLessonCount = entries.reduce(
+      (total, entry) => total + (entry.weekParity === 'both' ? 2 : 1),
+      0,
+    )
+
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ items: [lessonCard] }),
+      body: JSON.stringify({
+        items: [
+          {
+            ...lessonCard,
+            scheduledLessonCount,
+            remainingLessonCount: lessonCard.requiredLessonCount - scheduledLessonCount,
+          },
+        ],
+      }),
     })
   })
 
@@ -1125,6 +1171,25 @@ interface AdminScheduleEntryPayload {
 interface AdminScheduleEntry extends AdminScheduleEntryPayload {
   id: number
   scheduleId: number
+}
+
+function adminScheduleEntry(
+  overrides: Partial<AdminScheduleEntryPayload> = {},
+): AdminScheduleEntry {
+  return {
+    id: 77,
+    scheduleId: 12,
+    teachingLoadIds: [lessonCard.teachingLoadId],
+    subjectId: lessonCard.subject.id,
+    teacherId: lessonCard.teacher.id,
+    lessonType: lessonCard.lessonType,
+    roomId: adminRoom.id,
+    timeSlotId: adminTimeSlot.id,
+    dayOfWeek: 1,
+    weekParity: 'both',
+    groupIds: [lessonCard.group.id],
+    ...overrides,
+  }
 }
 
 interface ExamEntryPayload {

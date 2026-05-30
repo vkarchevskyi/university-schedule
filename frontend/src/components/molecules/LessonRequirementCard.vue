@@ -36,15 +36,15 @@ function teacherName(card: LessonCard): string {
     <dl>
       <div>
         <dt>{{ t.required }}</dt>
-        <dd>{{ card.requiredLessonCount }}</dd>
+        <dd data-testid="lesson-card-required">{{ card.requiredLessonCount }}</dd>
       </div>
       <div>
         <dt>{{ t.scheduled }}</dt>
-        <dd>{{ card.scheduledLessonCount }}</dd>
+        <dd data-testid="lesson-card-scheduled">{{ card.scheduledLessonCount }}</dd>
       </div>
       <div>
         <dt>{{ t.remaining }}</dt>
-        <dd>{{ card.remainingLessonCount }}</dd>
+        <dd data-testid="lesson-card-remaining">{{ card.remainingLessonCount }}</dd>
       </div>
     </dl>
   </article>
