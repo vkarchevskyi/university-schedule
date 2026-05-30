@@ -562,6 +562,11 @@ select {
   font-size: 12px;
 }
 
+.field--invalid .field__control,
+.field--invalid button {
+  border-color: #8f2f16;
+}
+
 .schedule-create {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) auto;
