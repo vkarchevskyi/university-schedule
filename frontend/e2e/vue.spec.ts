@@ -121,7 +121,9 @@ test('renders error state and retries', async ({ page }) => {
 
   await page.getByTestId('retry-button').click()
 
-  await expect(page.getByTestId('desktop-schedule').getByTestId('schedule-card')).toContainText('Алгоритми')
+  await expect(page.getByTestId('desktop-schedule').getByTestId('schedule-card')).toContainText(
+    'Алгоритми',
+  )
 })
 
 test('uses the mobile day list layout on small screens', async ({ page }) => {
@@ -183,7 +185,9 @@ test('logs out and clears the admin session', async ({ page }) => {
   await page.getByTestId('logout-button').click()
 
   await expect(page).toHaveURL(/\/admin\/login$/)
-  await expect(page.evaluate(() => window.localStorage.getItem('university-schedule.user-token'))).resolves.toBeNull()
+  await expect(
+    page.evaluate(() => window.localStorage.getItem('university-schedule.user-token')),
+  ).resolves.toBeNull()
 })
 
 test('loads persisted admin token on protected routes', async ({ page }) => {
@@ -231,10 +235,14 @@ test('opens generation job history and generated drafts', async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/generation-jobs$/)
   await expect(page.getByRole('heading', { name: 'Завдання генерації' })).toBeVisible()
   await expect(page.getByTestId('schedule-generation-job-table')).toContainText('Розклад')
-  await expect(page.getByTestId('schedule-generation-job-table')).toContainText('2026-05-23T09:30:00+00:00')
+  await expect(page.getByTestId('schedule-generation-job-table')).toContainText(
+    '2026-05-23T09:30:00+00:00',
+  )
   await expect(page.getByTestId('schedule-generation-job-table')).toContainText('#14')
   await expect(page.getByTestId('exam-generation-job-table')).toContainText('Іспити')
-  await expect(page.getByTestId('exam-generation-job-table')).toContainText('2026-05-23T09:35:00+00:00')
+  await expect(page.getByTestId('exam-generation-job-table')).toContainText(
+    '2026-05-23T09:35:00+00:00',
+  )
   await expect(page.getByTestId('exam-generation-job-table')).toContainText('#22')
 
   await page.getByTestId('open-schedule-generation-result').click()
@@ -254,8 +262,12 @@ test('shows empty generation job history sections', async ({ page }) => {
 
   await page.goto('/admin/generation-jobs')
 
-  await expect(page.getByTestId('no-schedule-generation-jobs')).toContainText('Завдань генерації ще немає.')
-  await expect(page.getByTestId('no-exam-generation-jobs')).toContainText('Завдань генерації ще немає.')
+  await expect(page.getByTestId('no-schedule-generation-jobs')).toContainText(
+    'Завдань генерації ще немає.',
+  )
+  await expect(page.getByTestId('no-exam-generation-jobs')).toContainText(
+    'Завдань генерації ще немає.',
+  )
 })
 
 test('opens schedule management and creates a draft schedule', async ({ page }) => {
@@ -352,6 +364,61 @@ test('shows schedule entry create validation errors near the editor fields', asy
   await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
 })
 
+test('shows schedule edit API errors in a modal without replacing the editor', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { failCreateScheduleError: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+
+  await expect(page.getByTestId('error-modal')).toContainText('Only draft schedules can be edited.')
+  await expect(page.getByTestId('schedule-editor-grid')).toBeVisible()
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
+test('disables drag and drop editing for published schedules', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { published: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+
+  await expect(page.getByTestId('lesson-card')).toHaveAttribute('draggable', 'false')
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -380,7 +447,9 @@ test('highlights an entry when schedule entry update validation fails', async ({
   await page.getByTestId('week-parity-select').selectOption('odd')
   await page.getByTestId('save-entry').click()
 
-  await expect(page.getByTestId('entry-validation-summary')).toContainText('Потрібно вибрати іншу аудиторію.')
+  await expect(page.getByTestId('entry-validation-summary')).toContainText(
+    'Потрібно вибрати іншу аудиторію.',
+  )
   await expect(page.getByTestId('schedule-entry')).toHaveClass(/editor-entry--conflict/)
 })
 
@@ -486,7 +555,9 @@ test('creates, validates, edits, and deletes an exam schedule entry', async ({ p
   await expect(page.getByTestId('exam-entry-table')).toContainText('11:00')
 
   await page.getByTestId('validate-exam-schedule').click()
-  await expect(page.getByTestId('exam-validation-result')).toContainText('Розклад іспитів валідний.')
+  await expect(page.getByTestId('exam-validation-result')).toContainText(
+    'Розклад іспитів валідний.',
+  )
 
   await page.getByTestId('delete-exam-entry').click()
   await page.getByTestId('confirm-submit').click()
@@ -593,10 +664,13 @@ async function mockAdminScheduleManagement(
     valid?: boolean
     generationStatus?: 'completed' | 'failed'
     failCreateEntry?: boolean
+    failCreateScheduleError?: boolean
     failUpdateEntry?: boolean
+    published?: boolean
   } = {},
 ): Promise<void> {
   let entries: AdminScheduleEntry[] = []
+  const scheduleStatus = options.published === true ? 'published' : 'draft'
 
   await page.route('**/api/admin/semesters', async (route) => {
     await route.fulfill({
@@ -640,7 +714,14 @@ async function mockAdminScheduleManagement(
     })
   })
 
-  await page.route('**/api/admin/schedules', async (route) => {
+  await page.route(/\/api\/admin\/schedules\/\d+$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ...adminSchedule(12, entries), status: scheduleStatus }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules$/, async (route) => {
     if (route.request().method() === 'POST') {
       await route.fulfill({
         contentType: 'application/json',
@@ -651,14 +732,14 @@ async function mockAdminScheduleManagement(
 
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ items: [adminSchedule(12, entries)] }),
+      body: JSON.stringify({ items: [{ ...adminSchedule(12, entries), status: scheduleStatus }] }),
     })
   })
 
-  await page.route('**/api/admin/schedules?**', async (route) => {
+  await page.route(/\/api\/admin\/schedules\?.*$/, async (route) => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ items: [adminSchedule(12, entries)] }),
+      body: JSON.stringify({ items: [{ ...adminSchedule(12, entries), status: scheduleStatus }] }),
     })
   })
 
@@ -670,6 +751,17 @@ async function mockAdminScheduleManagement(
   })
 
   await page.route(/\/api\/admin\/schedules\/\d+\/entries$/, async (route) => {
+    if (options.failCreateScheduleError === true) {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          errors: { schedule: 'Only draft schedules can be edited.' },
+        }),
+      })
+      return
+    }
+
     if (options.failCreateEntry === true) {
       await route.fulfill({
         status: 422,
@@ -726,7 +818,11 @@ async function mockAdminScheduleManagement(
           : {
               valid: false,
               conflicts: [
-                { type: 'room_conflict', message: 'Потрібно вибрати іншу аудиторію.', entryIds: [77] },
+                {
+                  type: 'room_conflict',
+                  message: 'Потрібно вибрати іншу аудиторію.',
+                  entryIds: [77],
+                },
               ],
             },
       ),
@@ -762,7 +858,7 @@ async function mockAdminScheduleManagement(
     const id = Number(new URL(route.request().url()).pathname.split('/').pop())
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(adminSchedule(id, entries)),
+      body: JSON.stringify({ ...adminSchedule(id, entries), status: scheduleStatus }),
     })
   })
 }

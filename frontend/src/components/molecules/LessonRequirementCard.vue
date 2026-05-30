@@ -4,6 +4,7 @@ import type { LessonCard } from '@/types/adminSchedule'
 
 defineProps<{
   card: LessonCard
+  disabled?: boolean
 }>()
 
 const { t } = useAdminI18n()
@@ -16,10 +17,18 @@ function teacherName(card: LessonCard): string {
 
 <template>
   <article
-    :class="['lesson-requirement-card', { 'lesson-requirement-card--done': card.remainingLessonCount <= 0 }]"
-    :draggable="card.remainingLessonCount > 0"
+    :class="[
+      'lesson-requirement-card',
+      { 'lesson-requirement-card--done': card.remainingLessonCount <= 0 || disabled },
+    ]"
+    :draggable="card.remainingLessonCount > 0 && !disabled"
+    :aria-disabled="disabled"
     data-testid="lesson-card"
-    @dragstart="card.remainingLessonCount > 0 && $event.dataTransfer?.setData('application/json', JSON.stringify(card))"
+    @dragstart="
+      card.remainingLessonCount > 0 &&
+      !disabled &&
+      $event.dataTransfer?.setData('application/json', JSON.stringify(card))
+    "
   >
     <strong>{{ card.subject.name }}</strong>
     <span>{{ labels.lessonTypes[card.lessonType] ?? card.lessonType }}</span>

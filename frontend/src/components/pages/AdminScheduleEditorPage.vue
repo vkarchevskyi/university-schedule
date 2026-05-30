@@ -6,6 +6,7 @@ import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
 import ConflictPanel from '@/components/molecules/ConflictPanel.vue'
+import ErrorModal from '@/components/molecules/ErrorModal.vue'
 import LessonRequirementCard from '@/components/molecules/LessonRequirementCard.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import ScheduleEntryEditor from '@/components/organisms/ScheduleEntryEditor.vue'
@@ -31,7 +32,9 @@ const {
   errorEntryIds,
   message,
   error,
+  actionError,
   isLoading,
+  isReadOnly,
   roomOptions,
   place,
   createEntry,
@@ -40,10 +43,13 @@ const {
   removeEntry,
   validate,
   publish,
+  clearActionError,
 } = useAdminScheduleEditor(scheduleId)
 
 const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => conflict.entryIds))
-const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryIds.value, ...errorEntryIds.value])))
+const highlightedEntryIds = computed(() =>
+  Array.from(new Set([...conflictEntryIds.value, ...errorEntryIds.value])),
+)
 </script>
 
 <template>
@@ -63,8 +69,7 @@ const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryI
           {{ t.publish }}
         </AppButton>
       </header>
-      <StateMessage v-if="message" :title="message" data-testid="validation-result">
-      </StateMessage>
+      <StateMessage v-if="message" :title="message" data-testid="validation-result"> </StateMessage>
       <ConflictPanel :conflicts="conflicts" />
       <div class="schedule-editor-layout">
         <aside class="lesson-card-panel">
@@ -82,6 +87,7 @@ const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryI
             v-else
             :key="card.teachingLoadId"
             :card="card"
+            :disabled="isReadOnly"
           />
         </aside>
         <ScheduleEntryGrid
@@ -92,6 +98,7 @@ const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryI
           :teachers="teachers"
           :time-slots="timeSlots"
           :conflict-entry-ids="highlightedEntryIds"
+          :read-only="isReadOnly"
           @place="place"
           @move="moveEntry($event.entry, $event.dayOfWeek, $event.timeSlotId)"
           @select="selectedEntry = $event"
@@ -111,5 +118,12 @@ const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryI
         />
       </div>
     </section>
+    <ErrorModal
+      v-if="actionError.title"
+      :title="actionError.title"
+      :message="actionError.message"
+      :details="actionError.details"
+      @close="clearActionError"
+    />
   </AdminLayout>
 </template>

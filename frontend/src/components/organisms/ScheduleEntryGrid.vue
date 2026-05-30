@@ -21,6 +21,7 @@ const props = defineProps<{
   teachers: AdminTeacher[]
   timeSlots: AdminTimeSlot[]
   conflictEntryIds?: number[]
+  readOnly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -50,6 +51,10 @@ function entriesFor(dayOfWeek: number, timeSlotId: number): AdminScheduleEntry[]
 }
 
 function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
+  if (props.readOnly) {
+    return
+  }
+
   const rawEntry = event.dataTransfer?.getData('application/x-schedule-entry')
   if (rawEntry) {
     emit('move', { entry: JSON.parse(rawEntry) as AdminScheduleEntry, dayOfWeek, timeSlotId })
@@ -65,6 +70,11 @@ function drop(event: DragEvent, dayOfWeek: number, timeSlotId: number): void {
 }
 
 function dragEntry(event: DragEvent, entry: AdminScheduleEntry): void {
+  if (props.readOnly) {
+    event.preventDefault()
+    return
+  }
+
   event.dataTransfer?.setData('application/x-schedule-entry', JSON.stringify(entry))
 }
 
@@ -86,9 +96,7 @@ function roomName(id: number): string {
 }
 
 function groupNames(ids: number[]): string {
-  return ids
-    .map((id) => props.groups.find((group) => group.id === id)?.name ?? `#${id}`)
-    .join(', ')
+  return ids.map((id) => props.groups.find((group) => group.id === id)?.name ?? `#${id}`).join(', ')
 }
 
 function hasConflict(entry: AdminScheduleEntry): boolean {
@@ -123,7 +131,7 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
             v-for="day in 7"
             :key="`${slot.id}-${day}`"
             data-testid="schedule-cell"
-            @dragover.prevent
+            @dragover="!readOnly && $event.preventDefault()"
             @drop="drop($event, day, slot.id)"
           >
             <button
@@ -132,12 +140,15 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
               type="button"
               :class="['editor-entry', { 'editor-entry--conflict': hasConflict(entry) }]"
               data-testid="schedule-entry"
-              draggable="true"
+              :draggable="!readOnly"
               @dragstart="dragEntry($event, entry)"
               @click="emit('select', entry)"
             >
               <strong>{{ entryTitle(entry) }}</strong>
-              <span>{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} · {{ weekParityLabel(entry.weekParity) }}</span>
+              <span
+                >{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} ·
+                {{ weekParityLabel(entry.weekParity) }}</span
+              >
               <small>{{ teacherName(entry.teacherId) }}</small>
               <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
             </button>

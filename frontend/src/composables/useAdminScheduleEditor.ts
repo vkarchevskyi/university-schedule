@@ -45,7 +45,14 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const errorEntryIds = ref<number[]>([])
   const message = ref<string | null>(null)
   const error = ref<string | null>(null)
+  const actionError = ref<{ title: string; message: string | null; details: string[] }>({
+    title: '',
+    message: null,
+    details: [],
+  })
   const isLoading = ref(true)
+
+  const isReadOnly = computed(() => schedule.value?.status === 'published')
 
   const roomOptions = computed(() =>
     rooms.value.map((room) => ({
@@ -96,7 +103,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function refreshScheduleData(): Promise<void> {
-    error.value = null
+    actionError.value = emptyActionError()
 
     try {
       const [scheduleResponse, cardsResponse] = await Promise.all([
@@ -107,7 +114,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       cards.value = cardsResponse.items
       clearEntryErrors()
     } catch {
-      error.value = t.value.apiError
+      showActionError()
     }
   }
 
@@ -116,9 +123,13 @@ export function useAdminScheduleEditor(scheduleId: number) {
     dayOfWeek: number
     timeSlotId: number
   }): Promise<void> {
+    if (isReadOnly.value) {
+      return
+    }
+
     if (selectedRoomId.value === null) {
       clearEntryErrors()
-      error.value = t.value.selectRoom
+      showActionError(t.value.selectRoom)
       return
     }
 
@@ -136,7 +147,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function saveEntry(payload: Partial<ScheduleEntryPayload>): Promise<void> {
-    if (selectedEntry.value === null) {
+    if (selectedEntry.value === null || isReadOnly.value) {
       return
     }
 
@@ -153,6 +164,10 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function createEntry(payload: ScheduleEntryPayload): Promise<void> {
+    if (isReadOnly.value) {
+      return
+    }
+
     clearEntryErrors()
 
     try {
@@ -163,7 +178,15 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
-  async function moveEntry(entry: AdminScheduleEntry, dayOfWeek: number, timeSlotId: number): Promise<void> {
+  async function moveEntry(
+    entry: AdminScheduleEntry,
+    dayOfWeek: number,
+    timeSlotId: number,
+  ): Promise<void> {
+    if (isReadOnly.value) {
+      return
+    }
+
     clearEntryErrors()
 
     try {
@@ -175,33 +198,47 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function removeEntry(): Promise<void> {
-    if (selectedEntry.value === null) {
+    if (selectedEntry.value === null || isReadOnly.value) {
       return
     }
 
     clearEntryErrors()
-    await deleteScheduleEntry(scheduleId, selectedEntry.value.id)
-    selectedEntry.value = null
-    await refreshScheduleData()
+    const entryId = selectedEntry.value.id
+
+    try {
+      await deleteScheduleEntry(scheduleId, entryId)
+      selectedEntry.value = null
+      await refreshScheduleData()
+    } catch (exception) {
+      handleEntryMutationError(exception, [entryId])
+    }
   }
 
   async function validate(): Promise<void> {
-    const result = await validateSchedule(scheduleId)
-    conflicts.value = result.conflicts
-    message.value = result.valid ? t.value.validationPassed : t.value.validationFailed
+    try {
+      const result = await validateSchedule(scheduleId)
+      conflicts.value = result.conflicts
+      message.value = result.valid ? t.value.validationPassed : t.value.validationFailed
+    } catch (exception) {
+      handleActionError(exception)
+    }
   }
 
   async function publish(): Promise<void> {
-    const result = await validateSchedule(scheduleId)
-    conflicts.value = result.conflicts
+    try {
+      const result = await validateSchedule(scheduleId)
+      conflicts.value = result.conflicts
 
-    if (!result.valid) {
-      message.value = t.value.cannotPublishInvalid
-      return
+      if (!result.valid) {
+        message.value = t.value.cannotPublishInvalid
+        return
+      }
+
+      schedule.value = await publishSchedule(scheduleId)
+      message.value = t.value.published
+    } catch (exception) {
+      handleActionError(exception)
     }
-
-    schedule.value = await publishSchedule(scheduleId)
-    message.value = t.value.published
   }
 
   function entryPayload(
@@ -229,15 +266,64 @@ export function useAdminScheduleEditor(scheduleId: number) {
 
   function handleEntryMutationError(exception: unknown, entryIds: number[] = []): void {
     if (exception instanceof ApiError && exception.violations.length > 0) {
+      const fieldViolations = exception.violations.filter(
+        (violation) => violation.propertyPath !== 'schedule',
+      )
+      const actionViolations = exception.violations.filter(
+        (violation) => violation.propertyPath === 'schedule',
+      )
+
+      if (actionViolations.length > 0) {
+        showActionError(
+          exception.message,
+          actionViolations.map((violation) => violation.message),
+        )
+        return
+      }
+
       entryErrors.value = Object.fromEntries(
-        exception.violations.map((violation) => [violation.propertyPath, violation.message]),
+        fieldViolations.map((violation) => [violation.propertyPath, violation.message]),
       )
       errorEntryIds.value = entryIds
       error.value = null
       return
     }
 
-    error.value = t.value.apiError
+    handleActionError(exception)
+  }
+
+  function handleActionError(exception: unknown): void {
+    if (exception instanceof ApiError && exception.violations.length > 0) {
+      showActionError(
+        exception.message,
+        exception.violations.map((violation) => violation.message),
+      )
+      return
+    }
+
+    if (exception instanceof Error) {
+      showActionError(exception.message)
+      return
+    }
+
+    showActionError()
+  }
+
+  function showActionError(message: string | null = null, details: string[] = []): void {
+    actionError.value = {
+      title: t.value.apiError,
+      message,
+      details,
+    }
+    error.value = null
+  }
+
+  function clearActionError(): void {
+    actionError.value = emptyActionError()
+  }
+
+  function emptyActionError(): { title: string; message: string | null; details: string[] } {
+    return { title: '', message: null, details: [] }
   }
 
   return {
@@ -255,7 +341,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     errorEntryIds,
     message,
     error,
+    actionError,
     isLoading,
+    isReadOnly,
     roomOptions,
     place,
     createEntry,
@@ -264,5 +352,6 @@ export function useAdminScheduleEditor(scheduleId: number) {
     removeEntry,
     validate,
     publish,
+    clearActionError,
   }
 }

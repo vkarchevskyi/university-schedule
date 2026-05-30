@@ -93,9 +93,15 @@ export async function requestJson<T>(
         title?: string
         detail?: string
         violations?: ApiViolation[]
+        errors?: Record<string, string>
       }
       message = payload.detail ?? payload.title ?? message
-      violations = payload.violations ?? []
+      violations =
+        payload.violations ??
+        Object.entries(payload.errors ?? {}).map(([propertyPath, violationMessage]) => ({
+          propertyPath,
+          message: violationMessage,
+        }))
     } catch {
       // Keep the generic transport message when the response is not JSON.
     }
