@@ -188,6 +188,11 @@ describe('App', () => {
           component: { template: '<div />' },
         },
         {
+          path: '/admin/generation-jobs',
+          name: 'admin-generation-jobs',
+          component: { template: '<div />' },
+        },
+        {
           path: '/admin/entities/:entity',
           name: 'admin-entity',
           component: { template: '<div />' },
@@ -213,20 +218,44 @@ describe('App', () => {
   it('maps API validation problems into ApiError violations', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () =>
-        new Response(
-          JSON.stringify({
-            title: 'Validation failed',
-            violations: [{ propertyPath: 'name', message: 'This value should not be blank.' }],
-          }),
-          { status: 422, headers: { 'Content-Type': 'application/json' } },
-        ),
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              title: 'Validation failed',
+              violations: [{ propertyPath: 'name', message: 'This value should not be blank.' }],
+            }),
+            { status: 422, headers: { 'Content-Type': 'application/json' } },
+          ),
       ),
     )
 
     await expect(requestJson('/api/admin/groups', { method: 'POST' })).rejects.toMatchObject({
       status: 422,
       violations: [{ propertyPath: 'name', message: 'This value should not be blank.' }],
+    } satisfies Partial<ApiError>)
+  })
+
+  it('maps API errors objects into ApiError violations', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              title: 'Validation failed',
+              errors: { schedule: 'Only draft schedules can be edited.' },
+            }),
+            { status: 422, headers: { 'Content-Type': 'application/json' } },
+          ),
+      ),
+    )
+
+    await expect(
+      requestJson('/api/admin/schedules/12/entries', { method: 'POST' }),
+    ).rejects.toMatchObject({
+      status: 422,
+      violations: [{ propertyPath: 'schedule', message: 'Only draft schedules can be edited.' }],
     } satisfies Partial<ApiError>)
   })
 })
