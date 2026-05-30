@@ -27,11 +27,13 @@ const props = defineProps<{
 const emit = defineEmits<{
   place: [payload: { card: LessonCard; dayOfWeek: number; timeSlotId: number }]
   move: [payload: { entry: AdminScheduleEntry; dayOfWeek: number; timeSlotId: number }]
+  resize: [payload: { entry: AdminScheduleEntry; weekParity: WeekParity }]
   select: [entry: AdminScheduleEntry]
 }>()
 
 const { t } = useAdminI18n()
 const { t: publicLabels } = usePublicScheduleI18n()
+const weekParityOptions: WeekParity[] = ['both', 'odd', 'even']
 
 const entriesByCell = computed(() => {
   const map = new Map<string, AdminScheduleEntry[]>()
@@ -76,6 +78,14 @@ function dragEntry(event: DragEvent, entry: AdminScheduleEntry): void {
   }
 
   event.dataTransfer?.setData('application/x-schedule-entry', JSON.stringify(entry))
+}
+
+function resizeEntry(entry: AdminScheduleEntry, weekParity: WeekParity): void {
+  if (props.readOnly || entry.weekParity === weekParity) {
+    return
+  }
+
+  emit('resize', { entry, weekParity })
 }
 
 function entryTitle(entry: AdminScheduleEntry): string {
@@ -134,24 +144,45 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
             @dragover="!readOnly && $event.preventDefault()"
             @drop="drop($event, day, slot.id)"
           >
-            <button
+            <article
               v-for="entry in entriesFor(day, slot.id)"
               :key="entry.id"
-              type="button"
               :class="['editor-entry', { 'editor-entry--conflict': hasConflict(entry) }]"
               data-testid="schedule-entry"
               :draggable="!readOnly"
               @dragstart="dragEntry($event, entry)"
-              @click="emit('select', entry)"
             >
-              <strong>{{ entryTitle(entry) }}</strong>
-              <span
-                >{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} ·
-                {{ weekParityLabel(entry.weekParity) }}</span
+              <button
+                type="button"
+                class="editor-entry__select"
+                data-testid="schedule-entry-select"
+                @click="emit('select', entry)"
               >
-              <small>{{ teacherName(entry.teacherId) }}</small>
-              <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
-            </button>
+                <strong>{{ entryTitle(entry) }}</strong>
+                <span
+                  >{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} ·
+                  {{ weekParityLabel(entry.weekParity) }}</span
+                >
+                <small>{{ teacherName(entry.teacherId) }}</small>
+                <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
+              </button>
+              <div class="editor-entry__parity" data-testid="week-parity-resize">
+                <button
+                  v-for="weekParity in weekParityOptions"
+                  :key="weekParity"
+                  type="button"
+                  :class="[
+                    'editor-entry__parity-option',
+                    { 'editor-entry__parity-option--active': entry.weekParity === weekParity },
+                  ]"
+                  :disabled="readOnly"
+                  :data-testid="`week-parity-resize-${weekParity}`"
+                  @click.stop="resizeEntry(entry, weekParity)"
+                >
+                  {{ weekParityLabel(weekParity) }}
+                </button>
+              </div>
+            </article>
           </td>
         </tr>
       </tbody>
