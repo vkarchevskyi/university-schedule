@@ -27,6 +27,8 @@ const {
   selectedRoomId,
   selectedEntry,
   conflicts,
+  entryErrors,
+  errorEntryIds,
   message,
   error,
   isLoading,
@@ -41,6 +43,7 @@ const {
 } = useAdminScheduleEditor(scheduleId)
 
 const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => conflict.entryIds))
+const highlightedEntryIds = computed(() => Array.from(new Set([...conflictEntryIds.value, ...errorEntryIds.value])))
 </script>
 
 <template>
@@ -88,7 +91,7 @@ const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => co
           :subjects="subjects"
           :teachers="teachers"
           :time-slots="timeSlots"
-          :conflict-entry-ids="conflictEntryIds"
+          :conflict-entry-ids="highlightedEntryIds"
           @place="place"
           @move="moveEntry($event.entry, $event.dayOfWeek, $event.timeSlotId)"
           @select="selectedEntry = $event"
@@ -101,6 +104,7 @@ const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => co
           :subjects="subjects"
           :teachers="teachers"
           :time-slots="timeSlots"
+          :errors="entryErrors"
           @create="createEntry"
           @save="saveEntry"
           @delete="removeEntry"

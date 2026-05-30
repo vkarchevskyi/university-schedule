@@ -8,6 +8,7 @@ defineProps<{
   label: string
   modelValue: string | number
   options: LookupOption[]
+  error?: string
 }>()
 
 const emit = defineEmits<{
@@ -16,7 +17,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="field">
+  <div :class="['field', { 'field--invalid': error }]">
     <Label :for="id">{{ label }}</Label>
     <Select
       :id="id"
@@ -24,5 +25,6 @@ const emit = defineEmits<{
       :options="options"
       @update:model-value="emit('update:modelValue', $event)"
     />
+    <small v-if="error" class="field-error">{{ error }}</small>
   </div>
 </template>

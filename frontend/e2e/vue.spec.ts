@@ -323,6 +323,67 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
 })
 
+test('shows schedule entry create validation errors near the editor fields', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { failCreateEntry: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
+  await expect(page.getByTestId('schedule-cell').first()).toBeVisible()
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+
+  await expect(page.getByTestId('entry-validation-summary')).toContainText('Аудиторія недоступна.')
+  await expect(page.getByTestId('entry-editor')).toContainText('Аудиторія недоступна.')
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
+test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, { failUpdateEntry: true })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
+  await expect(page.getByTestId('schedule-cell').first()).toBeVisible()
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+
+  await page.getByTestId('schedule-entry').click()
+  await page.getByTestId('week-parity-select').selectOption('odd')
+  await page.getByTestId('save-entry').click()
+
+  await expect(page.getByTestId('entry-validation-summary')).toContainText('Потрібно вибрати іншу аудиторію.')
+  await expect(page.getByTestId('schedule-entry')).toHaveClass(/editor-entry--conflict/)
+})
+
 test('publishes a valid schedule after validation passes', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -528,7 +589,12 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
 
 async function mockAdminScheduleManagement(
   page: Page,
-  options: { valid?: boolean; generationStatus?: 'completed' | 'failed' } = {},
+  options: {
+    valid?: boolean
+    generationStatus?: 'completed' | 'failed'
+    failCreateEntry?: boolean
+    failUpdateEntry?: boolean
+  } = {},
 ): Promise<void> {
   let entries: AdminScheduleEntry[] = []
 
@@ -604,6 +670,18 @@ async function mockAdminScheduleManagement(
   })
 
   await page.route(/\/api\/admin\/schedules\/\d+\/entries$/, async (route) => {
+    if (options.failCreateEntry === true) {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          title: 'Validation failed',
+          violations: [{ propertyPath: 'roomId', message: 'Аудиторія недоступна.' }],
+        }),
+      })
+      return
+    }
+
     const payload = (await route.request().postDataJSON()) as AdminScheduleEntryPayload
     entries = [{ id: 77, scheduleId: 12, ...payload }]
     await route.fulfill({
@@ -616,6 +694,18 @@ async function mockAdminScheduleManagement(
     if (route.request().method() === 'DELETE') {
       entries = []
       await route.fulfill({ status: 204 })
+      return
+    }
+
+    if (options.failUpdateEntry === true) {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          title: 'Validation failed',
+          violations: [{ propertyPath: 'roomId', message: 'Потрібно вибрати іншу аудиторію.' }],
+        }),
+      })
       return
     }
 

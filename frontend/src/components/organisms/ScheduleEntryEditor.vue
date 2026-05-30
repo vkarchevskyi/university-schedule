@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
+import StateMessage from '@/components/atoms/StateMessage.vue'
 import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
 import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
@@ -27,6 +28,7 @@ const props = defineProps<{
   subjects: AdminSubject[]
   teachers: AdminTeacher[]
   timeSlots: AdminTimeSlot[]
+  errors: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -92,6 +94,8 @@ const teachingLoadOptions = computed<LookupOption[]>(() =>
   })),
 )
 
+const errorMessages = computed(() => Object.values(props.errors))
+
 watch(
   () => props.entry,
   (entry) => {
@@ -155,16 +159,31 @@ function save(): void {
 
   emit('save', payload)
 }
+
+function fieldError(field: string): string | undefined {
+  return props.errors[field]
+}
 </script>
 
 <template>
   <aside class="entry-editor" data-testid="entry-editor">
     <h2>{{ entry ? t.scheduleEditor : t.add }}</h2>
+    <StateMessage
+      v-if="errorMessages.length > 0"
+      tone="error"
+      :title="t.validationFailed"
+      data-testid="entry-validation-summary"
+    >
+      <ul>
+        <li v-for="message in errorMessages" :key="message">{{ message }}</li>
+      </ul>
+    </StateMessage>
     <AppSelect
       id="entry-teaching-load"
       :label="t.lessonCards"
       :model-value="teachingLoadId ?? ''"
       :options="teachingLoadOptions"
+      :error="fieldError('teachingLoadIds')"
       @update:model-value="teachingLoadId = Number($event)"
     />
     <AppSelect
@@ -172,6 +191,7 @@ function save(): void {
       :label="t.subject"
       :model-value="subjectId ?? ''"
       :options="subjectOptions"
+      :error="fieldError('subjectId')"
       @update:model-value="subjectId = Number($event)"
     />
     <AppSelect
@@ -179,6 +199,7 @@ function save(): void {
       :label="t.teacher"
       :model-value="teacherId ?? ''"
       :options="teacherOptions"
+      :error="fieldError('teacherId')"
       @update:model-value="teacherId = Number($event)"
     />
     <AppSelect
@@ -186,6 +207,7 @@ function save(): void {
       :label="t.group"
       :model-value="groupId ?? ''"
       :options="groupOptions"
+      :error="fieldError('groupIds')"
       @update:model-value="groupId = Number($event)"
     />
     <AppSelect
@@ -193,6 +215,7 @@ function save(): void {
       :label="t.room"
       :model-value="roomId ?? ''"
       :options="roomOptions"
+      :error="fieldError('roomId')"
       @update:model-value="roomId = Number($event)"
     />
     <AppSelect
@@ -200,15 +223,19 @@ function save(): void {
       :label="t.nav.timeSlots"
       :model-value="timeSlotId ?? ''"
       :options="timeSlotOptions"
+      :error="fieldError('timeSlotId')"
       @update:model-value="timeSlotId = Number($event)"
     />
-    <label class="field" for="entry-day">
+    <label :class="['field', { 'field--invalid': fieldError('dayOfWeek') }]" for="entry-day">
       <span class="field__label">{{ t.day }}</span>
       <select id="entry-day" v-model.number="dayOfWeek" class="field__control">
         <option v-for="day in 7" :key="day" :value="day">{{ day }}</option>
       </select>
+      <small v-if="fieldError('dayOfWeek')" class="field-error">
+        {{ fieldError('dayOfWeek') }}
+      </small>
     </label>
-    <label class="field" for="entry-lesson-type">
+    <label :class="['field', { 'field--invalid': fieldError('lessonType') }]" for="entry-lesson-type">
       <span class="field__label">{{ t.lessonType }}</span>
       <select id="entry-lesson-type" v-model="lessonType" class="field__control">
         <option value="lecture">{{ publicLabels.lessonTypes.lecture }}</option>
@@ -216,8 +243,11 @@ function save(): void {
         <option value="seminar">{{ publicLabels.lessonTypes.seminar }}</option>
         <option value="practical">{{ publicLabels.lessonTypes.practical }}</option>
       </select>
+      <small v-if="fieldError('lessonType')" class="field-error">
+        {{ fieldError('lessonType') }}
+      </small>
     </label>
-    <label class="field" for="entry-week-parity">
+    <label :class="['field', { 'field--invalid': fieldError('weekParity') }]" for="entry-week-parity">
       <span class="field__label">{{ t.weekParity }}</span>
       <select
         id="entry-week-parity"
@@ -229,6 +259,9 @@ function save(): void {
         <option value="odd">{{ t.weekParityOptions.odd }}</option>
         <option value="even">{{ t.weekParityOptions.even }}</option>
       </select>
+      <small v-if="fieldError('weekParity')" class="field-error">
+        {{ fieldError('weekParity') }}
+      </small>
     </label>
     <div class="entry-editor__actions">
       <AppButton variant="primary" data-testid="save-entry" @click="save">{{
