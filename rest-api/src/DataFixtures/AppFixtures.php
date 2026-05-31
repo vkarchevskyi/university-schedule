@@ -138,12 +138,12 @@ final class AppFixtures extends Fixture
     private function persistTimeSlots(ObjectManager $manager): void
     {
         foreach ([
-            [1, '08:30', '10:00'],
-            [2, '10:15', '11:45'],
-            [3, '12:15', '13:45'],
-            [4, '14:00', '15:30'],
-            [5, '15:45', '17:15'],
-            [6, '17:30', '19:00'],
+            [1, '08:20', '09:40'],
+            [2, '09:50', '11:10'],
+            [3, '11:40', '13:00'],
+            [4, '13:10', '14:30'],
+            [5, '14:40', '16:00'],
+            [6, '16:10', '17:30'],
         ] as [$number, $startsAt, $endsAt]) {
             $manager->persist(new TimeSlot($number, new \DateTimeImmutable($startsAt), new \DateTimeImmutable($endsAt)));
         }
