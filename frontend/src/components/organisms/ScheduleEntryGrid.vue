@@ -4,7 +4,6 @@ import { computed } from 'vue'
 import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
   AdminScheduleEntry,
-  AdminGroup,
   AdminRoom,
   AdminSubject,
   AdminTeacher,
@@ -15,7 +14,6 @@ import type {
 
 const props = defineProps<{
   entries: AdminScheduleEntry[]
-  groups: AdminGroup[]
   rooms: AdminRoom[]
   subjects: AdminSubject[]
   teachers: AdminTeacher[]

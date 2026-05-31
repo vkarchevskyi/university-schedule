@@ -645,6 +645,16 @@ select {
   gap: 16px;
 }
 
+.schedule-editor-page__controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.schedule-editor-page__controls .field {
+  min-width: 220px;
+}
+
 .schedule-editor-page__header h1,
 .schedule-editor-page__header p {
   margin: 0;
@@ -722,14 +732,35 @@ select {
   background: #ffffff;
 }
 
+.editor-grid .schedule-grid {
+  width: max-content;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.editor-grid .schedule-grid__time-column,
+.editor-grid .schedule-grid tbody th {
+  width: 120px;
+}
+
+.editor-grid .schedule-grid thead th:not(.schedule-grid__time-column),
+.editor-grid .schedule-grid td {
+  width: 220px;
+}
+
+.editor-grid .schedule-grid td {
+  height: 164px;
+}
+
 .editor-entry {
   width: 100%;
   margin-bottom: 8px;
-  border: 2px solid #172026;
-  border-radius: 0;
-  color: #050505;
-  background: #ffffff;
+  border: 1px solid #cad8de;
+  border-radius: 8px;
+  color: #172026;
+  background: #fdfefe;
   text-align: center;
+  box-shadow: 0 1px 2px rgb(18 38 49 / 8%);
   cursor: grab;
 }
 
@@ -744,31 +775,32 @@ select {
   border: 0;
   color: inherit;
   background: transparent;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: inherit;
   text-align: center;
   cursor: pointer;
 }
 
 .editor-entry strong {
   max-width: 100%;
-  font-size: 26px;
-  line-height: 1.08;
+  color: #172026;
+  font-size: 18px;
+  line-height: 1.18;
   overflow-wrap: anywhere;
 }
 
 .editor-entry span {
   max-width: 100%;
-  color: #050505;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.12;
+  color: #33444f;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
 .editor-entry small {
-  color: #050505;
-  font-size: 20px;
-  font-weight: 700;
+  color: #60717c;
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -894,5 +926,15 @@ select {
   .schedule-list__item {
     align-items: start;
     flex-direction: column;
+  }
+
+  .schedule-editor-page__controls {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .schedule-editor-page__controls .field {
+    min-width: 0;
   }
 }
