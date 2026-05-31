@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import ScheduleCard from '@/components/molecules/ScheduleCard.vue'
 import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type { ScheduleItem } from '@/types/publicSchedule'
-import { formatDisplayDate, weekDates } from '@/utils/date'
+import { formatDisplayDate, scheduleWeekDates } from '@/utils/date'
 
 const props = defineProps<{
   weekStart: string
@@ -52,7 +52,7 @@ function cellKey(date: string, slotNumber: number): string {
       <thead>
         <tr>
           <th class="schedule-grid__time-column" scope="col"></th>
-          <th v-for="(date, index) in weekDates(weekStart)" :key="date" scope="col">
+          <th v-for="(date, index) in scheduleWeekDates(weekStart)" :key="date" scope="col">
             <span>{{ labels.days[index] }}</span>
             <small>{{ formatDisplayDate(date) }}</small>
           </th>
@@ -61,7 +61,7 @@ function cellKey(date: string, slotNumber: number): string {
       <tbody>
         <tr v-for="slotNumber in slotNumbers" :key="slotNumber">
           <th scope="row">{{ slotLabel(slotNumber) }}</th>
-          <td v-for="date in weekDates(weekStart)" :key="`${date}-${slotNumber}`">
+          <td v-for="date in scheduleWeekDates(weekStart)" :key="`${date}-${slotNumber}`">
             <ScheduleCard v-for="item in itemsFor(date, slotNumber)" :key="item.id" :item="item" />
           </td>
         </tr>

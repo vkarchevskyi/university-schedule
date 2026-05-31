@@ -1,6 +1,8 @@
 const isoDateLength = 10
 const daysInWeek = 7
 
+export const scheduleWeekdays = [1, 2, 3, 4, 5] as const
+
 export function toIsoDate(date: Date): string {
   return date.toISOString().slice(0, isoDateLength)
 }
@@ -26,9 +28,17 @@ export function addWeeks(weekStart: string, weeks: number): string {
 }
 
 export function weekDates(weekStart: string): string[] {
+  return datesFromWeekStart(weekStart, daysInWeek)
+}
+
+export function scheduleWeekDates(weekStart: string): string[] {
+  return datesFromWeekStart(weekStart, scheduleWeekdays.length)
+}
+
+function datesFromWeekStart(weekStart: string, dayCount: number): string[] {
   const start = parseIsoDate(weekStart)
 
-  return Array.from({ length: daysInWeek }, (_, index) => {
+  return Array.from({ length: dayCount }, (_, index) => {
     const date = new Date(start)
     date.setUTCDate(start.getUTCDate() + index)
 

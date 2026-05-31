@@ -6,6 +6,7 @@ import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
 import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
 import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
+import { scheduleWeekdays } from '@/utils/date'
 import type {
   AdminGroup,
   AdminRoom,
@@ -229,7 +230,9 @@ function fieldError(field: string): string | undefined {
     <label :class="['field', { 'field--invalid': fieldError('dayOfWeek') }]" for="entry-day">
       <span class="field__label">{{ t.day }}</span>
       <select id="entry-day" v-model.number="dayOfWeek" class="field__control">
-        <option v-for="day in 7" :key="day" :value="day">{{ day }}</option>
+        <option v-for="day in scheduleWeekdays" :key="day" :value="day">
+          {{ publicLabels.days[day - 1] ?? day }}
+        </option>
       </select>
       <small v-if="fieldError('dayOfWeek')" class="field-error">
         {{ fieldError('dayOfWeek') }}

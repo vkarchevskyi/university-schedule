@@ -2,7 +2,7 @@
 import ScheduleCard from '@/components/molecules/ScheduleCard.vue'
 import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type { ScheduleItem } from '@/types/publicSchedule'
-import { formatDisplayDate, weekDates } from '@/utils/date'
+import { formatDisplayDate, scheduleWeekDates } from '@/utils/date'
 
 const props = defineProps<{
   weekStart: string
@@ -20,7 +20,7 @@ function itemsFor(date: string): ScheduleItem[] {
 
 <template>
   <div class="mobile-schedule" data-testid="mobile-schedule">
-    <section v-for="(date, index) in weekDates(weekStart)" :key="date" class="mobile-schedule__day">
+    <section v-for="(date, index) in scheduleWeekDates(weekStart)" :key="date" class="mobile-schedule__day">
       <h2>
         {{ labels.days[index] }} <span>{{ formatDisplayDate(date) }}</span>
       </h2>
