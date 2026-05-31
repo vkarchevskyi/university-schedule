@@ -32,6 +32,11 @@ func TestGeneratorCreatesValidSchedule(t *testing.T) {
 	if status != "acceptable" {
 		t.Fatalf("status = %q, want acceptable", status)
 	}
+	for _, entry := range entries {
+		if entry.DayOfWeek < firstScheduleDay || entry.DayOfWeek > lastScheduleDay {
+			t.Fatalf("entry day = %d, want weekday", entry.DayOfWeek)
+		}
+	}
 }
 
 func TestGeneratorFailsWhenRoomCapacityIsInsufficient(t *testing.T) {

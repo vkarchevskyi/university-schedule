@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppButton from '@/components/atoms/AppButton.vue'
 import { usePublicScheduleI18n } from '@/composables/useI18n'
-import { addWeeks, currentWeekStart, formatDisplayDate, weekDates } from '@/utils/date'
+import { addWeeks, currentWeekStart, formatDisplayDate, scheduleWeekDates } from '@/utils/date'
 
 const props = defineProps<{
   weekStart: string
@@ -25,8 +25,8 @@ function reset(): void {
 <template>
   <div class="week-navigator" data-testid="week-navigator">
     <span class="week-navigator__label">
-      {{ labels.week }}: {{ formatDisplayDate(weekDates(weekStart)[0] ?? weekStart) }} -
-      {{ formatDisplayDate(weekDates(weekStart)[6] ?? weekStart) }}
+      {{ labels.week }}: {{ formatDisplayDate(scheduleWeekDates(weekStart)[0] ?? weekStart) }} -
+      {{ formatDisplayDate(scheduleWeekDates(weekStart)[4] ?? weekStart) }}
     </span>
     <div class="week-navigator__actions">
       <AppButton variant="ghost" data-testid="previous-week" @click="move(-1)">

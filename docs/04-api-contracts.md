@@ -138,6 +138,8 @@ Query parameters:
 - `id`: entity id
 - `weekStart`: ISO date for Monday
 
+Schedule item `dayOfWeek` values are `1` through `5`, Monday through Friday.
+
 Response:
 
 ```json
@@ -264,6 +266,8 @@ Returns schedule details.
 ### POST `/api/admin/schedules/{id}/entries`
 
 Creates a schedule entry.
+
+`dayOfWeek` must be `1` through `5`, Monday through Friday.
 
 Request:
 

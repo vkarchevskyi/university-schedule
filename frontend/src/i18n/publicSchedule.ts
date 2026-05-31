@@ -33,7 +33,7 @@ export const publicScheduleLabels = {
       seminar: 'Семінар',
       practical: 'Практична',
     } satisfies Record<string, string>,
-    days: ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота', 'Неділя'],
+    days: ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця"],
   },
   en: {
     title: 'Class Schedule',
@@ -67,6 +67,6 @@ export const publicScheduleLabels = {
       seminar: 'Seminar',
       practical: 'Practical',
     } satisfies Record<string, string>,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
   },
 }

@@ -116,7 +116,7 @@ Fields:
 
 - id
 - teacher
-- dayOfWeek
+- dayOfWeek (1-5, Monday-Friday)
 - unavailableFrom
 - unavailableTo
 
@@ -269,7 +269,7 @@ Fields:
 - lessonType
 - room
 - timeSlot
-- dayOfWeek
+- dayOfWeek (1-5, Monday-Friday)
 - weekParity
 
 Relationships:

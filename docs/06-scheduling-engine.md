@@ -96,6 +96,8 @@ Use cases:
 }
 ```
 
+`dayOfWeek` values for class schedule entries are limited to `1` through `5`, Monday through Friday.
+
 ## Implementation Notes
 
 - Keep validation logic reusable between manual editing and publishing.

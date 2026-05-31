@@ -204,13 +204,13 @@ final class AdminScheduleControllerTest extends WebTestCase
         ], 201);
 
         $payload = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
-            'teachingLoadIds' => [],
+            'teachingLoadIds' => [$fixtures->teachingLoadId],
             'subjectId' => $fixtures->subjectId,
             'teacherId' => $fixtures->teacherId,
             'lessonType' => 'laboratory',
             'roomId' => $fixtures->roomId,
             'timeSlotId' => $fixtures->timeSlotId,
-            'dayOfWeek' => 9,
+            'dayOfWeek' => 6,
             'weekParity' => 'both',
             'groupIds' => [$fixtures->groupId],
         ], 422);

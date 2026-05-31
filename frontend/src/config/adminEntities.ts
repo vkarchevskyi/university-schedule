@@ -1,4 +1,5 @@
 import type { EntityConfig } from '@/types/adminEntities'
+import { scheduleWeekdays } from '@/utils/date'
 
 function text(value: unknown): string {
   return value === null || value === undefined ? '' : String(value)
@@ -8,15 +9,18 @@ function lookupLabel(value: unknown): string {
   return text(value)
 }
 
-const weekdayOptions = [
-  { value: 1, label: 'Понеділок' },
-  { value: 2, label: 'Вівторок' },
-  { value: 3, label: 'Середа' },
-  { value: 4, label: 'Четвер' },
-  { value: 5, label: "П'ятниця" },
-  { value: 6, label: 'Субота' },
-  { value: 7, label: 'Неділя' },
+const weekdayLabels = [
+  'Понеділок',
+  'Вівторок',
+  'Середа',
+  'Четвер',
+  "П'ятниця",
 ]
+
+const weekdayOptions = scheduleWeekdays.map((value, index) => ({
+  value,
+  label: weekdayLabels[index] ?? String(value),
+}))
 
 export const entityConfigs: EntityConfig[] = [
   {

@@ -72,6 +72,11 @@ type Conflict struct {
 	EntryIDs []int64 `json:"entryIds"`
 }
 
+const (
+	firstScheduleDay = 1
+	lastScheduleDay  = 5
+)
+
 type Validator struct{}
 
 func NewValidator() Validator {
@@ -80,6 +85,7 @@ func NewValidator() Validator {
 
 func (Validator) Validate(schedule Schedule) ValidationResult {
 	conflicts := make([]Conflict, 0)
+	conflicts = append(conflicts, validateScheduleDays(schedule.Entries)...)
 	conflicts = append(conflicts, validateEntryConflicts(schedule.Entries)...)
 	conflicts = append(conflicts, validateCapacity(schedule.Entries)...)
 	conflicts = append(conflicts, validateTeacherSubjects(schedule)...)
@@ -91,6 +97,22 @@ func (Validator) Validate(schedule Schedule) ValidationResult {
 		Valid:     len(conflicts) == 0,
 		Conflicts: conflicts,
 	}
+}
+
+func validateScheduleDays(entries []ScheduleEntry) []Conflict {
+	conflicts := make([]Conflict, 0)
+
+	for _, entry := range entries {
+		if entry.DayOfWeek < firstScheduleDay || entry.DayOfWeek > lastScheduleDay {
+			conflicts = append(conflicts, Conflict{
+				Type:     "invalid_day_of_week",
+				Message:  "Schedule entries can only be placed Monday through Friday.",
+				EntryIDs: []int64{entry.ID},
+			})
+		}
+	}
+
+	return conflicts
 }
 
 func validateEntryConflicts(entries []ScheduleEntry) []Conflict {

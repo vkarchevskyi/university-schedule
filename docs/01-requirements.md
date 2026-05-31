@@ -32,7 +32,7 @@
 ### Schedule Formation
 
 - Administrators can manually create schedule entries.
-- A schedule entry includes subject, teacher, lesson type, room, time slot, day of week, week parity, and one or more groups.
+- A schedule entry includes subject, teacher, lesson type, room, weekday (1-5, Monday-Friday), week parity, and one or more groups.
 - Schedule entries should be linkable to the teaching-load requirement they satisfy.
 - The admin editor should expose lesson cards derived from teaching-load requirements and already scheduled entries.
 - Lesson cards can be placed into the table schedule and resized or adjusted through week parity: both weeks, odd weeks, or even weeks.

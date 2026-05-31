@@ -167,7 +167,7 @@ describe('App', () => {
         { key: 'unavailableTo', type: 'time', required: true },
       ],
     })
-    expect(teacherUnavailability?.fields[1]?.options).toHaveLength(7)
+    expect(teacherUnavailability?.fields[1]?.options).toHaveLength(5)
   })
 
   it('renders teacher workflow links in admin navigation', async () => {

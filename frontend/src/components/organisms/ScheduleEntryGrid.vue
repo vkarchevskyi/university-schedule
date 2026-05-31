@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 import { usePublicScheduleI18n } from '@/composables/useI18n'
+import { scheduleWeekdays } from '@/utils/date'
 import type {
   AdminScheduleEntry,
   AdminRoom,
@@ -145,7 +146,7 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
         <tr v-for="slot in timeSlots" :key="slot.id">
           <th scope="row">{{ slot.startsAt }}-{{ slot.endsAt }}</th>
           <td
-            v-for="day in 7"
+            v-for="day in scheduleWeekdays"
             :key="`${slot.id}-${day}`"
             data-testid="schedule-cell"
             @dragover="!readOnly && $event.preventDefault()"
