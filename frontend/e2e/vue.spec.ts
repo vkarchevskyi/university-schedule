@@ -302,18 +302,12 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   await expect(page.getByTestId('schedule-group-filter')).toContainText('КН-22')
   await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
   await expect(page.getByTestId('lesson-card')).toContainText('КН-22')
+  await expect(page.locator('#placement-room')).toHaveCount(0)
 
-  await page.evaluate(() => {
-    const card = document.querySelector('[data-testid="lesson-card"]')
-    const cell = document.querySelector('[data-testid="schedule-cell"]')
-    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
-      throw new Error('Schedule editor test elements are missing')
-    }
-
-    const dataTransfer = new DataTransfer()
-    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
-    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
-  })
+  await dragLessonCardToFirstCell(page)
+  await expect(page.getByTestId('room-selection-modal')).toContainText('Алгоритми · КН-22')
+  await expect(page.getByTestId('room-selection-modal')).toContainText('Лаб 1')
+  await page.getByTestId('confirm-room-selection').click()
 
   await expect(page.getByTestId('schedule-entry')).toContainText('Алгоритми (л)')
   await expect(page.getByTestId('schedule-entry')).toContainText('Іван Петренко')
@@ -364,21 +358,56 @@ test('shows schedule entry create validation errors near the editor fields', asy
   await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
   await expect(page.getByTestId('schedule-cell').first()).toBeVisible()
 
-  await page.evaluate(() => {
-    const card = document.querySelector('[data-testid="lesson-card"]')
-    const cell = document.querySelector('[data-testid="schedule-cell"]')
-    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
-      throw new Error('Schedule editor test elements are missing')
-    }
-
-    const dataTransfer = new DataTransfer()
-    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
-    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
-  })
+  await placeLessonCardInFirstCell(page)
 
   await expect(page.getByTestId('entry-validation-summary')).toContainText('Аудиторія недоступна.')
   await expect(page.getByTestId('entry-editor')).toContainText('Аудиторія недоступна.')
   await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+})
+
+test('filters placement room choices by occupation and computer requirement', async ({ page }) => {
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, {
+    initialEntries: [adminScheduleEntry()],
+    lessonCards: [{ ...lessonCard, requiresComputerRoom: true }],
+    rooms: [adminRoom, lectureRoom, secondComputerRoom],
+  })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await dragLessonCardToFirstCell(page)
+
+  await expect(page.getByTestId('room-selection-modal')).toContainText('Лаб 2')
+  await expect(page.getByTestId('room-selection-modal')).not.toContainText('Лаб 1')
+  await expect(page.getByTestId('room-selection-modal')).not.toContainText('Ауд 101')
+})
+
+test('blocks lesson placement when no room is available for the slot', async ({ page }) => {
+  let createRequests = 0
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, {
+    initialEntries: [adminScheduleEntry()],
+    onCreateEntry: () => {
+      createRequests += 1
+    },
+    rooms: [adminRoom],
+  })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await dragLessonCardToFirstCell(page)
+
+  await expect(page.getByTestId('room-selection-modal')).toHaveCount(0)
+  await expect(page.getByTestId('error-modal')).toContainText(
+    'Немає доступних аудиторій для обраної пари.',
+  )
+  expect(createRequests).toBe(0)
 })
 
 test('shows schedule edit API errors in a modal without replacing the editor', async ({ page }) => {
@@ -392,17 +421,7 @@ test('shows schedule edit API errors in a modal without replacing the editor', a
   await page.goto('/admin/schedules/12')
   await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
 
-  await page.evaluate(() => {
-    const card = document.querySelector('[data-testid="lesson-card"]')
-    const cell = document.querySelector('[data-testid="schedule-cell"]')
-    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
-      throw new Error('Schedule editor test elements are missing')
-    }
-
-    const dataTransfer = new DataTransfer()
-    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
-    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
-  })
+  await placeLessonCardInFirstCell(page)
 
   await expect(page.getByTestId('error-modal')).toContainText('Only draft schedules can be edited.')
   await expect(page.getByTestId('schedule-editor-grid')).toBeVisible()
@@ -424,19 +443,10 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
 
   await expect(page.getByTestId('lesson-card')).toHaveAttribute('draggable', 'false')
 
-  await page.evaluate(() => {
-    const card = document.querySelector('[data-testid="lesson-card"]')
-    const cell = document.querySelector('[data-testid="schedule-cell"]')
-    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
-      throw new Error('Schedule editor test elements are missing')
-    }
-
-    const dataTransfer = new DataTransfer()
-    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
-    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
-  })
+  await dragLessonCardToFirstCell(page)
 
   await expect(page.getByTestId('schedule-entry')).toHaveCount(1)
+  await expect(page.getByTestId('room-selection-modal')).toHaveCount(0)
 })
 
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
@@ -451,17 +461,7 @@ test('highlights an entry when schedule entry update validation fails', async ({
   await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
   await expect(page.getByTestId('schedule-cell').first()).toBeVisible()
 
-  await page.evaluate(() => {
-    const card = document.querySelector('[data-testid="lesson-card"]')
-    const cell = document.querySelector('[data-testid="schedule-cell"]')
-    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
-      throw new Error('Schedule editor test elements are missing')
-    }
-
-    const dataTransfer = new DataTransfer()
-    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
-    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
-  })
+  await placeLessonCardInFirstCell(page)
 
   await page.getByTestId('schedule-entry-select').click()
   await page.getByTestId('week-parity-select').selectOption('odd')
@@ -678,6 +678,29 @@ async function mockSuccessfulAuth(page: Page): Promise<void> {
   })
 }
 
+async function dragLessonCardToFirstCell(page: Page): Promise<void> {
+  await expect(page.getByTestId('lesson-card').first()).toBeVisible()
+  await expect(page.getByTestId('schedule-cell').first()).toBeVisible()
+
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="lesson-card"]')
+    const cell = document.querySelector('[data-testid="schedule-cell"]')
+    if (!(card instanceof HTMLElement) || !(cell instanceof HTMLElement)) {
+      throw new Error('Schedule editor test elements are missing')
+    }
+
+    const dataTransfer = new DataTransfer()
+    card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }))
+    cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
+  })
+}
+
+async function placeLessonCardInFirstCell(page: Page): Promise<void> {
+  await dragLessonCardToFirstCell(page)
+  await expect(page.getByTestId('room-selection-modal')).toBeVisible()
+  await page.getByTestId('confirm-room-selection').click()
+}
+
 async function mockAdminScheduleManagement(
   page: Page,
   options: {
@@ -687,10 +710,14 @@ async function mockAdminScheduleManagement(
     failCreateScheduleError?: boolean
     failUpdateEntry?: boolean
     initialEntries?: AdminScheduleEntry[]
+    lessonCards?: LessonCardFixture[]
+    onCreateEntry?: () => void
     published?: boolean
+    rooms?: AdminRoomFixture[]
   } = {},
 ): Promise<void> {
   let entries: AdminScheduleEntry[] = options.initialEntries ?? []
+  const cards = options.lessonCards ?? lessonCards
   const scheduleStatus = options.published === true ? 'published' : 'draft'
 
   await page.route('**/api/admin/semesters', async (route) => {
@@ -703,7 +730,7 @@ async function mockAdminScheduleManagement(
   await page.route('**/api/admin/rooms', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ items: [adminRoom] }),
+      body: JSON.stringify({ items: options.rooms ?? [adminRoom] }),
     })
   })
 
@@ -768,7 +795,7 @@ async function mockAdminScheduleManagement(
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        items: lessonCards.map((card) => {
+        items: cards.map((card) => {
           const scheduledLessonCount = entries
             .filter(
               (entry) =>
@@ -811,6 +838,7 @@ async function mockAdminScheduleManagement(
       return
     }
 
+    options.onCreateEntry?.()
     const payload = (await route.request().postDataJSON()) as AdminScheduleEntryPayload
     entries = [{ id: 77, scheduleId: 12, ...payload }]
     await route.fulfill({
@@ -1164,6 +1192,25 @@ interface AdminScheduleEntry extends AdminScheduleEntryPayload {
   scheduleId: number
 }
 
+interface AdminRoomFixture {
+  id: number
+  name: string
+  type: 'computer' | 'lecture'
+  capacity: number
+}
+
+interface LessonCardFixture {
+  teachingLoadId: number
+  group: { id: number; name: string }
+  subject: { id: number; name: string }
+  teacher: { id: number; firstName: string; lastName: string; department: string }
+  lessonType: 'lecture' | 'laboratory' | 'seminar' | 'practical'
+  requiredLessonCount: number
+  requiresComputerRoom: boolean
+  scheduledLessonCount: number
+  remainingLessonCount: number
+}
+
 function adminScheduleEntry(
   overrides: Partial<AdminScheduleEntryPayload> = {},
 ): AdminScheduleEntry {
@@ -1226,7 +1273,21 @@ const adminRoom = {
   name: 'Лаб 1',
   type: 'computer',
   capacity: 30,
-}
+} satisfies AdminRoomFixture
+
+const lectureRoom = {
+  id: 4,
+  name: 'Ауд 101',
+  type: 'lecture',
+  capacity: 40,
+} satisfies AdminRoomFixture
+
+const secondComputerRoom = {
+  id: 5,
+  name: 'Лаб 2',
+  type: 'computer',
+  capacity: 24,
+} satisfies AdminRoomFixture
 
 const adminGroup = {
   id: 1,
@@ -1305,7 +1366,7 @@ const lessonCard = {
   requiresComputerRoom: false,
   scheduledLessonCount: 0,
   remainingLessonCount: 8,
-}
+} satisfies LessonCardFixture
 
 const secondLessonCard = {
   ...lessonCard,
