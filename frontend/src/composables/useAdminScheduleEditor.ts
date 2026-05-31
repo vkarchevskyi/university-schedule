@@ -27,7 +27,6 @@ import type {
   LessonCard,
   ScheduleEntryPayload,
   ScheduleValidationConflict,
-  WeekParity,
 } from '@/types/adminSchedule'
 
 export function useAdminScheduleEditor(scheduleId: number) {
@@ -198,21 +197,6 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
-  async function resizeEntry(entry: AdminScheduleEntry, weekParity: WeekParity): Promise<void> {
-    if (isReadOnly.value || entry.weekParity === weekParity) {
-      return
-    }
-
-    clearEntryErrors()
-
-    try {
-      await updateScheduleEntry(scheduleId, entry.id, { weekParity })
-      await refreshScheduleData()
-    } catch (exception) {
-      handleEntryMutationError(exception, [entry.id])
-    }
-  }
-
   async function removeEntry(): Promise<void> {
     if (selectedEntry.value === null || isReadOnly.value) {
       return
@@ -364,7 +348,6 @@ export function useAdminScheduleEditor(scheduleId: number) {
     place,
     createEntry,
     moveEntry,
-    resizeEntry,
     saveEntry,
     removeEntry,
     validate,

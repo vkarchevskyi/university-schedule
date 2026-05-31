@@ -39,7 +39,6 @@ const {
   place,
   createEntry,
   moveEntry,
-  resizeEntry,
   saveEntry,
   removeEntry,
   validate,
@@ -102,7 +101,6 @@ const highlightedEntryIds = computed(() =>
           :read-only="isReadOnly"
           @place="place"
           @move="moveEntry($event.entry, $event.dayOfWeek, $event.timeSlotId)"
-          @resize="resizeEntry($event.entry, $event.weekParity)"
           @select="selectedEntry = $event"
         />
         <ScheduleEntryEditor
