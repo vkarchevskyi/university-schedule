@@ -106,7 +106,8 @@ Request:
   "subjectId": 4,
   "teacherId": 7,
   "lessonType": "laboratory",
-  "requiredLessonCount": 8
+  "requiredLessonCount": 8,
+  "requiresComputerRoom": true
 }
 ```
 
@@ -120,9 +121,12 @@ Response:
   "subjectId": 4,
   "teacherId": 7,
   "lessonType": "laboratory",
-  "requiredLessonCount": 8
+  "requiredLessonCount": 8,
+  "requiresComputerRoom": true
 }
 ```
+
+`requiresComputerRoom` defaults to `false` when omitted. Room `type` values are `lecture` and `computer`.
 
 Teaching-load endpoints should also support list, update, and soft delete/archive behavior.
 
@@ -361,6 +365,7 @@ Response:
       },
       "lessonType": "laboratory",
       "requiredLessonCount": 8,
+      "requiresComputerRoom": true,
       "scheduledLessonCount": 4,
       "remainingLessonCount": 4
     }

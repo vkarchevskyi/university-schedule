@@ -178,6 +178,7 @@ Fields:
 - teacher
 - lessonType
 - requiredLessonCount
+- requiresComputerRoom
 - createdAt
 - updatedAt
 - deletedAt, if soft deletes are implemented through nullable timestamp
@@ -212,7 +213,7 @@ Fields:
 
 - id
 - name
-- type
+- type: `lecture` or `computer`
 - capacity
 
 ### TimeSlot
