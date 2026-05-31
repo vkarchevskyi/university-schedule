@@ -57,8 +57,8 @@ trait InputNormalizerTrait
             throw ApiException::validation(['dayOfWeek' => 'Expected integer.']);
         }
 
-        if ($value < 1 || $value > 7) {
-            throw ApiException::validation(['dayOfWeek' => 'Expected day of week from 1 to 7.']);
+        if ($value < 1 || $value > 5) {
+            throw ApiException::validation(['dayOfWeek' => 'Expected weekday from 1 to 5.']);
         }
 
         return $value;

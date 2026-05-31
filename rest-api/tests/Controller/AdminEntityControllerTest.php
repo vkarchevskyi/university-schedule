@@ -72,6 +72,24 @@ final class AdminEntityControllerTest extends WebTestCase
         self::assertArrayHasKey('endsAt', $this->objectValue($payload, 'errors'));
     }
 
+    public function testTeacherUnavailabilityRejectsWeekendDay(): void
+    {
+        $teacher = $this->requestJson('POST', '/api/admin/teachers', [
+            'firstName' => 'John',
+            'lastName' => 'Doe',
+            'department' => 'Computer Science',
+        ], 201);
+
+        $payload = $this->requestJson('POST', '/api/admin/teacher-unavailability', [
+            'teacherId' => $this->intValue($teacher, 'id'),
+            'dayOfWeek' => 6,
+            'unavailableFrom' => '08:30:00',
+            'unavailableTo' => '09:50:00',
+        ], 422);
+
+        self::assertArrayHasKey('dayOfWeek', $this->objectValue($payload, 'errors'));
+    }
+
     public function testDtoValidationRejectsMissingFields(): void
     {
         $payload = $this->requestJson('POST', '/api/admin/groups', [

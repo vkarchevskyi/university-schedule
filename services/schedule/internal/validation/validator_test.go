@@ -97,6 +97,39 @@ func TestValidatorAcceptsCompleteSchedule(t *testing.T) {
 	}
 }
 
+func TestValidatorRejectsWeekendEntries(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID:               1,
+				SubjectID:        10,
+				TeacherID:        20,
+				LessonType:       "laboratory",
+				RoomID:           30,
+				RoomCapacity:     20,
+				TimeSlotID:       40,
+				TimeSlotStartsAt: "08:30:00",
+				TimeSlotEndsAt:   "09:50:00",
+				DayOfWeek:        6,
+				WeekParity:       "both",
+				GroupIDs:         []int64{50},
+				StudentCount:     12,
+				TeachingLoadIDs:  []int64{60},
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 10, TeacherID: 20, LessonType: "laboratory", RequiredLessonCount: 2},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{
+			{TeacherID: 20, SubjectID: 10},
+		},
+	})
+
+	assertConflictType(t, result, "invalid_day_of_week")
+}
+
 func TestValidatorDetectsOverlappingTimeRanges(t *testing.T) {
 	validator := NewValidator()
 

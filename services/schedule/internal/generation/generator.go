@@ -7,7 +7,11 @@ import (
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
 
-const minimumQualityScore = 80
+const (
+	minimumQualityScore = 80
+	firstScheduleDay    = 1
+	lastScheduleDay     = 5
+)
 
 type Input struct {
 	TeachingLoads []TeachingLoad
@@ -108,7 +112,7 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 	var best []CandidateEntry
 
 	for index, entry := range entries {
-		for day := 1; day <= 5; day++ {
+		for day := firstScheduleDay; day <= lastScheduleDay; day++ {
 			for _, slot := range input.TimeSlots {
 				for _, room := range input.Rooms {
 					if room.Capacity < entry.StudentCount {
@@ -147,7 +151,7 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 }
 
 func (generator Generator) place(load TeachingLoad, weekParity int, entries []CandidateEntry, input Input) (CandidateEntry, bool) {
-	for day := 1; day <= 5; day++ {
+	for day := firstScheduleDay; day <= lastScheduleDay; day++ {
 		for _, slot := range input.TimeSlots {
 			for _, room := range input.Rooms {
 				if room.Capacity < load.StudentCount {
