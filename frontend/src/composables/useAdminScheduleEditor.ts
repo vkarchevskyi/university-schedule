@@ -25,6 +25,7 @@ import type {
   AdminTeacher,
   AdminTimeSlot,
   LessonCard,
+  LookupOption,
   ScheduleEntryPayload,
   ScheduleValidationConflict,
 } from '@/types/adminSchedule'
@@ -39,6 +40,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const subjects = ref<AdminSubject[]>([])
   const timeSlots = ref<AdminTimeSlot[]>([])
   const selectedRoomId = ref<number | null>(null)
+  const selectedGroupId = ref<number | null>(null)
   const selectedEntry = ref<AdminScheduleEntry | null>(null)
   const conflicts = ref<ScheduleValidationConflict[]>([])
   const entryErrors = ref<Record<string, string>>({})
@@ -61,6 +63,29 @@ export function useAdminScheduleEditor(scheduleId: number) {
       description: `${room.type}, ${room.capacity}`,
     })),
   )
+  const groupOptions = computed<LookupOption[]>(() =>
+    groups.value.map((group) => ({
+      id: group.id,
+      label: group.name,
+      description: `${group.speciality}, ${group.course}`,
+    })),
+  )
+  const filteredCards = computed(() => {
+    if (selectedGroupId.value === null) {
+      return cards.value
+    }
+
+    return cards.value.filter((card) => card.group.id === selectedGroupId.value)
+  })
+  const filteredEntries = computed(() => {
+    if (selectedGroupId.value === null || schedule.value === null) {
+      return schedule.value?.entries ?? []
+    }
+
+    return schedule.value.entries.filter((entry) =>
+      entry.groupIds.includes(selectedGroupId.value as number),
+    )
+  })
 
   onMounted(loadEditor)
 
@@ -94,6 +119,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       teachers.value = teacherResponse.items
       subjects.value = subjectResponse.items
       selectedRoomId.value = roomResponse.items[0]?.id ?? null
+      ensureSelectedGroup()
       clearEntryErrors()
     } catch {
       error.value = t.value.apiError
@@ -112,6 +138,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       ])
       schedule.value = scheduleResponse
       cards.value = cardsResponse.items
+      ensureSelectedGroup()
       clearEntryErrors()
     } catch {
       showActionError()
@@ -264,6 +291,19 @@ export function useAdminScheduleEditor(scheduleId: number) {
     errorEntryIds.value = []
   }
 
+  function ensureSelectedGroup(): void {
+    const availableIds = new Set([
+      ...cards.value.map((card) => card.group.id),
+      ...groups.value.map((group) => group.id),
+    ])
+
+    if (selectedGroupId.value !== null && availableIds.has(selectedGroupId.value)) {
+      return
+    }
+
+    selectedGroupId.value = cards.value[0]?.group.id ?? groups.value[0]?.id ?? null
+  }
+
   function handleEntryMutationError(exception: unknown, entryIds: number[] = []): void {
     if (exception instanceof ApiError && exception.violations.length > 0) {
       const fieldViolations = exception.violations.filter(
@@ -335,6 +375,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     subjects,
     timeSlots,
     selectedRoomId,
+    selectedGroupId,
     selectedEntry,
     conflicts,
     entryErrors,
@@ -345,6 +386,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     isLoading,
     isReadOnly,
     roomOptions,
+    groupOptions,
+    filteredCards,
+    filteredEntries,
     place,
     createEntry,
     moveEntry,

@@ -26,6 +26,7 @@ const {
   subjects,
   timeSlots,
   selectedRoomId,
+  selectedGroupId,
   selectedEntry,
   conflicts,
   entryErrors,
@@ -36,6 +37,9 @@ const {
   isLoading,
   isReadOnly,
   roomOptions,
+  groupOptions,
+  filteredCards,
+  filteredEntries,
   place,
   createEntry,
   moveEntry,
@@ -50,6 +54,11 @@ const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => co
 const highlightedEntryIds = computed(() =>
   Array.from(new Set([...conflictEntryIds.value, ...errorEntryIds.value])),
 )
+
+function selectGroup(value: string): void {
+  selectedGroupId.value = Number(value)
+  selectedEntry.value = null
+}
 </script>
 
 <template>
@@ -62,12 +71,22 @@ const highlightedEntryIds = computed(() =>
           <h1>{{ t.scheduleEditor }} #{{ schedule.id }}</h1>
           <p>{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
         </div>
-        <AppButton variant="primary" data-testid="validate-schedule" @click="validate">
-          {{ t.validate }}
-        </AppButton>
-        <AppButton data-testid="publish-schedule" @click="publish">
-          {{ t.publish }}
-        </AppButton>
+        <div class="schedule-editor-page__controls">
+          <AppSelect
+            id="schedule-group-filter"
+            data-testid="schedule-group-filter"
+            :label="t.groups"
+            :model-value="selectedGroupId ?? ''"
+            :options="groupOptions"
+            @update:model-value="selectGroup"
+          />
+          <AppButton variant="primary" data-testid="validate-schedule" @click="validate">
+            {{ t.validate }}
+          </AppButton>
+          <AppButton data-testid="publish-schedule" @click="publish">
+            {{ t.publish }}
+          </AppButton>
+        </div>
       </header>
       <StateMessage v-if="message" :title="message" data-testid="validation-result"> </StateMessage>
       <ConflictPanel :conflicts="conflicts" />
@@ -81,9 +100,9 @@ const highlightedEntryIds = computed(() =>
             :options="roomOptions"
             @update:model-value="selectedRoomId = Number($event)"
           />
-          <StateMessage v-if="cards.length === 0" :title="t.noCards" />
+          <StateMessage v-if="filteredCards.length === 0" :title="t.noCards" />
           <LessonRequirementCard
-            v-for="card in cards"
+            v-for="card in filteredCards"
             v-else
             :key="card.teachingLoadId"
             :card="card"
@@ -91,8 +110,7 @@ const highlightedEntryIds = computed(() =>
           />
         </aside>
         <ScheduleEntryGrid
-          :entries="schedule.entries"
-          :groups="groups"
+          :entries="filteredEntries"
           :rooms="rooms"
           :subjects="subjects"
           :teachers="teachers"
@@ -106,7 +124,7 @@ const highlightedEntryIds = computed(() =>
         <ScheduleEntryEditor
           :entry="selectedEntry"
           :groups="groups"
-          :lesson-cards="cards"
+          :lesson-cards="filteredCards"
           :rooms="rooms"
           :subjects="subjects"
           :teachers="teachers"
