@@ -313,21 +313,18 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
     cell.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer }))
   })
 
-  await expect(page.getByTestId('schedule-entry')).toContainText('Лекція')
+  await expect(page.getByTestId('schedule-entry')).toContainText('Алгоритми (л)')
+  await expect(page.getByTestId('schedule-entry')).toContainText('Іван Петренко')
+  await expect(page.getByTestId('schedule-entry')).toContainText('Лаб 1')
   await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('2')
   await expect(page.getByTestId('lesson-card-remaining')).toHaveText('6')
 
-  await page.getByTestId('week-parity-resize-odd').click()
-
-  await expect(page.getByTestId('schedule-entry')).toContainText('Непарний')
-  await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('1')
-  await expect(page.getByTestId('lesson-card-remaining')).toHaveText('7')
-
   await page.getByTestId('schedule-entry-select').click()
-  await page.getByTestId('week-parity-select').selectOption('even')
+  await page.getByTestId('week-parity-select').selectOption('odd')
   await page.getByTestId('save-entry').click()
 
-  await expect(page.getByTestId('schedule-entry')).toContainText('Парний')
+  await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('1')
+  await expect(page.getByTestId('lesson-card-remaining')).toHaveText('7')
 
   await page.getByTestId('validate-schedule').click()
 
@@ -414,7 +411,6 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
   await page.goto('/admin/schedules/12')
 
   await expect(page.getByTestId('lesson-card')).toHaveAttribute('draggable', 'false')
-  await expect(page.getByTestId('week-parity-resize-odd')).toBeDisabled()
 
   await page.evaluate(() => {
     const card = document.querySelector('[data-testid="lesson-card"]')
@@ -429,26 +425,6 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
   })
 
   await expect(page.getByTestId('schedule-entry')).toHaveCount(1)
-})
-
-test('highlights an entry when inline week parity resize validation fails', async ({ page }) => {
-  await mockSchedule(page)
-  await mockSuccessfulAuth(page)
-  await mockAdminScheduleManagement(page, {
-    failUpdateEntry: true,
-    initialEntries: [adminScheduleEntry()],
-  })
-  await page.addInitScript(() => {
-    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
-  })
-
-  await page.goto('/admin/schedules/12')
-  await page.getByTestId('week-parity-resize-odd').click()
-
-  await expect(page.getByTestId('entry-validation-summary')).toContainText(
-    'Потрібно вибрати іншу аудиторію.',
-  )
-  await expect(page.getByTestId('schedule-entry')).toHaveClass(/editor-entry--conflict/)
 })
 
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {

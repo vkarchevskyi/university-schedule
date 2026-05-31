@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
+import { usePublicScheduleI18n } from '@/composables/useI18n'
 import type {
   AdminScheduleEntry,
   AdminGroup,
@@ -10,7 +10,7 @@ import type {
   AdminTeacher,
   AdminTimeSlot,
   LessonCard,
-  WeekParity,
+  LessonType,
 } from '@/types/adminSchedule'
 
 const props = defineProps<{
@@ -27,13 +27,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   place: [payload: { card: LessonCard; dayOfWeek: number; timeSlotId: number }]
   move: [payload: { entry: AdminScheduleEntry; dayOfWeek: number; timeSlotId: number }]
-  resize: [payload: { entry: AdminScheduleEntry; weekParity: WeekParity }]
   select: [entry: AdminScheduleEntry]
 }>()
 
-const { t } = useAdminI18n()
 const { t: publicLabels } = usePublicScheduleI18n()
-const weekParityOptions: WeekParity[] = ['both', 'odd', 'even']
 
 const entriesByCell = computed(() => {
   const map = new Map<string, AdminScheduleEntry[]>()
@@ -80,16 +77,12 @@ function dragEntry(event: DragEvent, entry: AdminScheduleEntry): void {
   event.dataTransfer?.setData('application/x-schedule-entry', JSON.stringify(entry))
 }
 
-function resizeEntry(entry: AdminScheduleEntry, weekParity: WeekParity): void {
-  if (props.readOnly || entry.weekParity === weekParity) {
-    return
-  }
-
-  emit('resize', { entry, weekParity })
-}
-
 function entryTitle(entry: AdminScheduleEntry): string {
   return subjectName(entry.subjectId)
+}
+
+function entryTitleWithMarker(entry: AdminScheduleEntry): string {
+  return `${entryTitle(entry)} (${lessonTypeMarker(entry.lessonType)})`
 }
 
 function subjectName(id: number): string {
@@ -105,16 +98,32 @@ function roomName(id: number): string {
   return props.rooms.find((room) => room.id === id)?.name ?? `#${id}`
 }
 
-function groupNames(ids: number[]): string {
-  return ids.map((id) => props.groups.find((group) => group.id === id)?.name ?? `#${id}`).join(', ')
-}
-
 function hasConflict(entry: AdminScheduleEntry): boolean {
   return props.conflictEntryIds?.includes(entry.id) ?? false
 }
 
-function weekParityLabel(value: WeekParity): string {
-  return t.value.weekParityOptions[value]
+function lessonTypeMarker(type: LessonType): string {
+  const isEnglish = publicLabels.value.lessonTypes.lecture === 'Lecture'
+
+  if (isEnglish) {
+    return (
+      {
+        lecture: 'lec',
+        laboratory: 'lab',
+        seminar: 'sem',
+        practical: 'pr',
+      } satisfies Record<LessonType, string>
+    )[type]
+  }
+
+  return (
+    {
+      lecture: 'л',
+      laboratory: 'лаб',
+      seminar: 'с',
+      practical: 'пр',
+    } satisfies Record<LessonType, string>
+  )[type]
 }
 
 function cellKey(dayOfWeek: number, timeSlotId: number): string {
@@ -158,30 +167,10 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
                 data-testid="schedule-entry-select"
                 @click="emit('select', entry)"
               >
-                <strong>{{ entryTitle(entry) }}</strong>
-                <span
-                  >{{ publicLabels.lessonTypes[entry.lessonType] ?? entry.lessonType }} ·
-                  {{ weekParityLabel(entry.weekParity) }}</span
-                >
-                <small>{{ teacherName(entry.teacherId) }}</small>
-                <small>{{ groupNames(entry.groupIds) }} · {{ roomName(entry.roomId) }}</small>
+                <strong>{{ entryTitleWithMarker(entry) }}</strong>
+                <span>{{ teacherName(entry.teacherId) }}</span>
+                <small>{{ roomName(entry.roomId) }}</small>
               </button>
-              <div class="editor-entry__parity" data-testid="week-parity-resize">
-                <button
-                  v-for="weekParity in weekParityOptions"
-                  :key="weekParity"
-                  type="button"
-                  :class="[
-                    'editor-entry__parity-option',
-                    { 'editor-entry__parity-option--active': entry.weekParity === weekParity },
-                  ]"
-                  :disabled="readOnly"
-                  :data-testid="`week-parity-resize-${weekParity}`"
-                  @click.stop="resizeEntry(entry, weekParity)"
-                >
-                  {{ weekParityLabel(weekParity) }}
-                </button>
-              </div>
             </article>
           </td>
         </tr>
