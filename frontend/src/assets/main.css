@@ -724,7 +724,7 @@ select {
 
 .editor-entry {
   display: grid;
-  gap: 3px;
+  gap: 8px;
   width: 100%;
   margin-bottom: 8px;
   padding: 8px;
@@ -733,6 +733,18 @@ select {
   color: #172026;
   background: #fdfefe;
   text-align: left;
+  cursor: grab;
+}
+
+.editor-entry__select {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -740,6 +752,34 @@ select {
 .editor-entry small {
   color: #60717c;
   font-size: 12px;
+}
+
+.editor-entry__parity {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.editor-entry__parity-option {
+  min-height: 28px;
+  padding: 4px;
+  border: 1px solid #cad8de;
+  border-radius: 6px;
+  color: #33444f;
+  background: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.editor-entry__parity-option--active {
+  border-color: #27566b;
+  color: #ffffff;
+  background: #27566b;
+}
+
+.editor-entry__parity-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .editor-entry--conflict,
