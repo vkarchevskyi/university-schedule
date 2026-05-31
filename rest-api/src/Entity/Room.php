@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\RoomType;
 use App\Repository\RoomRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,13 +21,13 @@ class Room
     #[ORM\Column(type: Types::STRING)]
     private string $name;
 
-    #[ORM\Column(type: Types::STRING)]
-    private string $type;
+    #[ORM\Column(type: Types::STRING, enumType: RoomType::class)]
+    private RoomType $type;
 
     #[ORM\Column(type: Types::INTEGER)]
     private int $capacity;
 
-    public function __construct(string $name, string $type, int $capacity)
+    public function __construct(string $name, RoomType $type, int $capacity)
     {
         $this->name = $name;
         $this->type = $type;
@@ -48,12 +49,12 @@ class Room
         $this->name = $name;
     }
 
-    public function getType(): string
+    public function getType(): RoomType
     {
         return $this->type;
     }
 
-    public function setType(string $type): void
+    public function setType(RoomType $type): void
     {
         $this->type = $type;
     }

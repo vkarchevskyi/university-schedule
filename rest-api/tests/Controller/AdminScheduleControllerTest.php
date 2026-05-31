@@ -218,6 +218,46 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertArrayHasKey('dayOfWeek', $this->objectValue($payload, 'errors'));
     }
 
+    public function testComputerRoomRequiredTeachingLoadRejectsLectureRoom(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $lectureRoom = $this->requestJson('POST', '/api/admin/rooms', [
+            'name' => 'Lecture 1',
+            'type' => 'lecture',
+            'capacity' => 30,
+        ], 201);
+        $this->requestJson('PATCH', '/api/admin/teaching-loads/' . $fixtures->teachingLoadId, [
+            'requiresComputerRoom' => true,
+        ]);
+        $schedule = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $payload = [
+            'teachingLoadIds' => [$fixtures->teachingLoadId],
+            'subjectId' => $fixtures->subjectId,
+            'teacherId' => $fixtures->teacherId,
+            'lessonType' => 'laboratory',
+            'roomId' => $this->intValue($lectureRoom, 'id'),
+            'timeSlotId' => $fixtures->timeSlotId,
+            'dayOfWeek' => 1,
+            'weekParity' => 'odd',
+            'groupIds' => [$fixtures->groupId],
+        ];
+
+        $rejected = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), $payload, 422);
+        self::assertArrayHasKey('roomId', $this->objectValue($rejected, 'errors'));
+
+        $accepted = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/entries', $this->intValue($schedule, 'id')), [
+            ...$payload,
+            'roomId' => $fixtures->roomId,
+        ], 201);
+
+        self::assertSame($fixtures->roomId, $this->intValue($accepted, 'roomId'));
+    }
+
     public function testSchedulePeriodMustStayWithinSemester(): void
     {
         $fixtures = $this->createScheduleFixtures();

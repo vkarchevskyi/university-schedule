@@ -20,7 +20,7 @@ final readonly class ListPublicRoomsService
         return new ResourceCollection(array_values(array_map(fn(Room $room): RoomResource => new RoomResource(
             $room->getId(),
             $room->getName(),
-            $room->getType(),
+            $room->getType()->value,
             $room->getCapacity(),
         ), $rooms)));
     }

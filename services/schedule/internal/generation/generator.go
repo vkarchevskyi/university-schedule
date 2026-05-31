@@ -118,6 +118,9 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 					if room.Capacity < entry.StudentCount {
 						continue
 					}
+					if !roomMatchesRequirement(room, entry.RequiresComputerRoom) {
+						continue
+					}
 
 					move := fmt.Sprintf("%d:%d:%d:%d", index, day, slot.ID, room.ID)
 					if expiresAt, exists := tabu[move]; exists && expiresAt > iteration {
@@ -130,6 +133,7 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 					candidate[index].TimeSlotStartsAt = slot.StartsAt
 					candidate[index].TimeSlotEndsAt = slot.EndsAt
 					candidate[index].RoomID = room.ID
+					candidate[index].RoomType = room.Type
 					candidate[index].RoomCapacity = room.Capacity
 
 					if conflictsWithOthers(candidate[index], candidate, index) || violatesTeacherUnavailability(candidate[index], input.Unavailable) {
@@ -157,21 +161,26 @@ func (generator Generator) place(load TeachingLoad, weekParity int, entries []Ca
 				if room.Capacity < load.StudentCount {
 					continue
 				}
+				if !roomMatchesRequirement(room, load.RequiresComputerRoom) {
+					continue
+				}
 
 				entry := CandidateEntry{
-					TeachingLoadID:   load.ID,
-					GroupID:          load.GroupID,
-					SubjectID:        load.SubjectID,
-					TeacherID:        load.TeacherID,
-					LessonType:       load.LessonType,
-					RoomID:           room.ID,
-					RoomCapacity:     room.Capacity,
-					TimeSlotID:       slot.ID,
-					TimeSlotStartsAt: slot.StartsAt,
-					TimeSlotEndsAt:   slot.EndsAt,
-					DayOfWeek:        day,
-					WeekParity:       weekParity,
-					StudentCount:     load.StudentCount,
+					TeachingLoadID:       load.ID,
+					GroupID:              load.GroupID,
+					SubjectID:            load.SubjectID,
+					TeacherID:            load.TeacherID,
+					LessonType:           load.LessonType,
+					RoomID:               room.ID,
+					RoomType:             room.Type,
+					RoomCapacity:         room.Capacity,
+					TimeSlotID:           slot.ID,
+					TimeSlotStartsAt:     slot.StartsAt,
+					TimeSlotEndsAt:       slot.EndsAt,
+					DayOfWeek:            day,
+					WeekParity:           weekParity,
+					StudentCount:         load.StudentCount,
+					RequiresComputerRoom: load.RequiresComputerRoom,
 				}
 				if !conflicts(entry, entries) && !violatesTeacherUnavailability(entry, input.Unavailable) {
 					return entry, true
@@ -181,6 +190,10 @@ func (generator Generator) place(load TeachingLoad, weekParity int, entries []Ca
 	}
 
 	return CandidateEntry{}, false
+}
+
+func roomMatchesRequirement(room Room, requiresComputerRoom bool) bool {
+	return !requiresComputerRoom || room.Type == "computer"
 }
 
 func conflicts(candidate CandidateEntry, entries []CandidateEntry) bool {
@@ -275,6 +288,7 @@ func validationEntries(entries []CandidateEntry) []validation.ScheduleEntry {
 			TeacherID:        entry.TeacherID,
 			LessonType:       lessonTypeName(entry.LessonType),
 			RoomID:           entry.RoomID,
+			RoomType:         entry.RoomType,
 			RoomCapacity:     entry.RoomCapacity,
 			TimeSlotID:       entry.TimeSlotID,
 			TimeSlotStartsAt: entry.TimeSlotStartsAt,
@@ -294,12 +308,13 @@ func validationTeachingLoads(loads []TeachingLoad) []validation.TeachingLoad {
 	result := make([]validation.TeachingLoad, 0, len(loads))
 	for _, load := range loads {
 		result = append(result, validation.TeachingLoad{
-			ID:                  load.ID,
-			GroupID:             load.GroupID,
-			SubjectID:           load.SubjectID,
-			TeacherID:           load.TeacherID,
-			LessonType:          lessonTypeName(load.LessonType),
-			RequiredLessonCount: load.RequiredLessonCount,
+			ID:                   load.ID,
+			GroupID:              load.GroupID,
+			SubjectID:            load.SubjectID,
+			TeacherID:            load.TeacherID,
+			LessonType:           lessonTypeName(load.LessonType),
+			RequiredLessonCount:  load.RequiredLessonCount,
+			RequiresComputerRoom: load.RequiresComputerRoom,
 		})
 	}
 

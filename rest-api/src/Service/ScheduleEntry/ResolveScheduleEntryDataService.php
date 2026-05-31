@@ -13,6 +13,7 @@ use App\Entity\Subject;
 use App\Entity\Teacher;
 use App\Entity\TeachingLoad;
 use App\Entity\TimeSlot;
+use App\Enum\RoomType;
 use App\Exception\ApiException;
 use App\Service\AbstractEntityService;
 use App\Service\InputNormalizerTrait;
@@ -188,6 +189,10 @@ final class ResolveScheduleEntryDataService extends AbstractEntityService
 
             if ($teachingLoad->getSubject() !== $data->subject || $teachingLoad->getTeacher() !== $data->teacher || $teachingLoad->getLessonType() !== $data->lessonType) {
                 throw ApiException::validation(['teachingLoadIds' => 'Teaching load must match subject, teacher, and lesson type.']);
+            }
+
+            if ($teachingLoad->requiresComputerRoom() && $data->room->getType() !== RoomType::Computer) {
+                throw ApiException::validation(['roomId' => 'Teaching load requires a computer room.']);
             }
 
             $teachingLoadGroupId = $teachingLoad->getGroup()->getId();

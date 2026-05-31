@@ -15,6 +15,7 @@ use App\Entity\TeachingLoad;
 use App\Entity\TimeSlot;
 use App\Entity\User;
 use App\Enum\LessonType;
+use App\Enum\RoomType;
 use App\Enum\UserRole;
 use App\Enum\WeekParity;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -80,6 +81,7 @@ final class AppFixtures extends Fixture
                 $teachers[$load['teacher']],
                 $this->lessonType($load['lessonType']),
                 $load['requiredLessonCount'],
+                false,
                 $now,
                 $now,
             ));
@@ -131,8 +133,17 @@ final class AppFixtures extends Fixture
     private function persistRooms(ObjectManager $manager): void
     {
         foreach (self::rooms() as $data) {
-            $manager->persist(new Room($data['name'], $data['type'], $data['capacity']));
+            $manager->persist(new Room($data['name'], $this->roomType($data['type']), $data['capacity']));
         }
+    }
+
+    private function roomType(string $type): RoomType
+    {
+        return match ($type) {
+            'lecture', 'classroom', 'online' => RoomType::Lecture,
+            'computer' => RoomType::Computer,
+            default => throw new \LogicException(sprintf('Unsupported room type "%s".', $type)),
+        };
     }
 
     private function persistTimeSlots(ObjectManager $manager): void

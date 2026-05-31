@@ -42,6 +42,9 @@ class TeachingLoad
     #[ORM\Column(name: 'required_lesson_count', type: Types::INTEGER)]
     private int $requiredLessonCount;
 
+    #[ORM\Column(name: 'requires_computer_room', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $requiresComputerRoom;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -62,6 +65,7 @@ class TeachingLoad
         Teacher $teacher,
         LessonType $lessonType,
         int $requiredLessonCount,
+        bool $requiresComputerRoom,
         \DateTimeImmutable $createdAt,
         \DateTimeImmutable $updatedAt,
         ?\DateTimeImmutable $deletedAt = null,
@@ -72,6 +76,7 @@ class TeachingLoad
         $this->teacher = $teacher;
         $this->lessonType = $lessonType;
         $this->requiredLessonCount = $requiredLessonCount;
+        $this->requiresComputerRoom = $requiresComputerRoom;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
         $this->deletedAt = $deletedAt;
@@ -141,6 +146,16 @@ class TeachingLoad
     public function setRequiredLessonCount(int $requiredLessonCount): void
     {
         $this->requiredLessonCount = $requiredLessonCount;
+    }
+
+    public function requiresComputerRoom(): bool
+    {
+        return $this->requiresComputerRoom;
+    }
+
+    public function setRequiresComputerRoom(bool $requiresComputerRoom): void
+    {
+        $this->requiresComputerRoom = $requiresComputerRoom;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

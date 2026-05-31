@@ -29,6 +29,7 @@ type ScheduleEntry struct {
 	TeacherID        int64   `json:"teacherId"`
 	LessonType       string  `json:"lessonType"`
 	RoomID           int64   `json:"roomId"`
+	RoomType         string  `json:"roomType"`
 	RoomCapacity     int     `json:"roomCapacity"`
 	TimeSlotID       int64   `json:"timeSlotId"`
 	TimeSlotStartsAt string  `json:"timeSlotStartsAt"`
@@ -41,12 +42,13 @@ type ScheduleEntry struct {
 }
 
 type TeachingLoad struct {
-	ID                  int64  `json:"id"`
-	GroupID             int64  `json:"groupId"`
-	SubjectID           int64  `json:"subjectId"`
-	TeacherID           int64  `json:"teacherId"`
-	LessonType          string `json:"lessonType"`
-	RequiredLessonCount int    `json:"requiredLessonCount"`
+	ID                   int64  `json:"id"`
+	GroupID              int64  `json:"groupId"`
+	SubjectID            int64  `json:"subjectId"`
+	TeacherID            int64  `json:"teacherId"`
+	LessonType           string `json:"lessonType"`
+	RequiredLessonCount  int    `json:"requiredLessonCount"`
+	RequiresComputerRoom bool   `json:"requiresComputerRoom"`
 }
 
 type TeacherSubject struct {
@@ -88,6 +90,7 @@ func (Validator) Validate(schedule Schedule) ValidationResult {
 	conflicts = append(conflicts, validateScheduleDays(schedule.Entries)...)
 	conflicts = append(conflicts, validateEntryConflicts(schedule.Entries)...)
 	conflicts = append(conflicts, validateCapacity(schedule.Entries)...)
+	conflicts = append(conflicts, validateRoomRequirements(schedule)...)
 	conflicts = append(conflicts, validateTeacherSubjects(schedule)...)
 	conflicts = append(conflicts, validateTeacherUnavailability(schedule)...)
 	conflicts = append(conflicts, validateSchedulePeriod(schedule)...)
@@ -161,6 +164,32 @@ func validateCapacity(entries []ScheduleEntry) []Conflict {
 			conflicts = append(conflicts, Conflict{
 				Type:     "room_capacity_conflict",
 				Message:  fmt.Sprintf("Room capacity is %d, but scheduled groups contain %d students.", entry.RoomCapacity, entry.StudentCount),
+				EntryIDs: []int64{entry.ID},
+			})
+		}
+	}
+
+	return conflicts
+}
+
+func validateRoomRequirements(schedule Schedule) []Conflict {
+	teachingLoadsByID := make(map[int64]TeachingLoad, len(schedule.TeachingLoads))
+	conflicts := make([]Conflict, 0)
+
+	for _, teachingLoad := range schedule.TeachingLoads {
+		teachingLoadsByID[teachingLoad.ID] = teachingLoad
+	}
+
+	for _, entry := range schedule.Entries {
+		for _, teachingLoadID := range entry.TeachingLoadIDs {
+			teachingLoad, exists := teachingLoadsByID[teachingLoadID]
+			if !exists || !teachingLoad.RequiresComputerRoom || entry.RoomType == "computer" {
+				continue
+			}
+
+			conflicts = append(conflicts, Conflict{
+				Type:     "room_type_conflict",
+				Message:  fmt.Sprintf("Teaching load %d requires a computer room.", teachingLoad.ID),
 				EntryIDs: []int64{entry.ID},
 			})
 		}

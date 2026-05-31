@@ -55,6 +55,47 @@ func TestGeneratorFailsWhenRoomCapacityIsInsufficient(t *testing.T) {
 	}
 }
 
+func TestGeneratorUsesComputerRoomsForComputerRequirements(t *testing.T) {
+	generator := NewGenerator(validation.NewValidator())
+
+	entries, _, _, err := generator.Generate(Input{
+		TeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 1, RequiresComputerRoom: true, StudentCount: 20},
+		},
+		Rooms: []Room{
+			{ID: 1, Type: "lecture", Capacity: 30},
+			{ID: 2, Type: "computer", Capacity: 30},
+		},
+		TimeSlots:   []TimeSlot{{ID: 1, StartsAt: "08:30:00", EndsAt: "09:50:00"}},
+		Assignments: []validation.TeacherSubject{{TeacherID: 1, SubjectID: 1}},
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("len(entries) = %d, want 1", len(entries))
+	}
+	if entries[0].RoomID != 2 {
+		t.Fatalf("entry room = %d, want computer room 2", entries[0].RoomID)
+	}
+}
+
+func TestGeneratorFailsWhenComputerRequirementHasNoComputerRoom(t *testing.T) {
+	generator := NewGenerator(validation.NewValidator())
+
+	_, _, _, err := generator.Generate(Input{
+		TeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 1, RequiresComputerRoom: true, StudentCount: 20},
+		},
+		Rooms:       []Room{{ID: 1, Type: "lecture", Capacity: 30}},
+		TimeSlots:   []TimeSlot{{ID: 1, StartsAt: "08:30:00", EndsAt: "09:50:00"}},
+		Assignments: []validation.TeacherSubject{{TeacherID: 1, SubjectID: 1}},
+	})
+	if err == nil {
+		t.Fatal("Generate() error = nil, want error")
+	}
+}
+
 func TestGeneratorAvoidsTeacherUnavailability(t *testing.T) {
 	generator := NewGenerator(validation.NewValidator())
 

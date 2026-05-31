@@ -29,7 +29,7 @@ final class UpdateRoomService extends AbstractEntityService
             $room->setName($this->string($data->name));
         }
         if ($data->has('type')) {
-            $room->setType($this->string($data->type));
+            $room->setType($this->roomType($data->type));
         }
         if ($data->has('capacity')) {
             $room->setCapacity($this->positiveInt($data->capacity));

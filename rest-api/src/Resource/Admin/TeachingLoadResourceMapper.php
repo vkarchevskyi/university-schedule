@@ -18,6 +18,7 @@ final readonly class TeachingLoadResourceMapper
             $teachingLoad->getTeacher()->getId(),
             strtolower($teachingLoad->getLessonType()->name),
             $teachingLoad->getRequiredLessonCount(),
+            $teachingLoad->requiresComputerRoom(),
             $teachingLoad->getDeletedAt()?->format(\DateTimeInterface::ATOM),
         );
     }

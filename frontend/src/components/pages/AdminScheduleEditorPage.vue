@@ -19,7 +19,6 @@ const scheduleId = Number(route.params.id)
 const { t } = useAdminI18n()
 const {
   schedule,
-  cards,
   rooms,
   groups,
   teachers,

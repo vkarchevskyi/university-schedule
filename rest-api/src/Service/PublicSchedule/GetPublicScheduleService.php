@@ -215,7 +215,7 @@ final readonly class GetPublicScheduleService
 
     private function room(Room $room): ScheduleRoomResource
     {
-        return new ScheduleRoomResource($room->getId(), $room->getName(), $room->getType());
+        return new ScheduleRoomResource($room->getId(), $room->getName(), $room->getType()->value);
     }
 
     private function timeSlot(TimeSlot $timeSlot): TimeSlotResource

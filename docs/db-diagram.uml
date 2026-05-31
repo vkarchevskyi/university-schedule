@@ -90,6 +90,7 @@ entity teaching_loads {
   * teacher_id : bigint <<FK>>
   * lesson_type : tinyint
   * required_lesson_count : int
+  * requires_computer_room : boolean
   * created_at : timestamp
   * updated_at : timestamp
   deleted_at : timestamp
@@ -99,7 +100,7 @@ entity rooms {
   * id : bigint <<PK>>
   --
   * name : varchar
-  * type : varchar
+  * type : varchar (lecture|computer)
   * capacity : int
 }
 

@@ -19,6 +19,7 @@ use App\Entity\Subject;
 use App\Entity\Teacher;
 use App\Entity\TimeSlot;
 use App\Enum\LessonType;
+use App\Enum\RoomType;
 use App\Enum\ScheduleStatus;
 use App\Enum\WeekParity;
 use Doctrine\ORM\EntityManagerInterface;
@@ -102,7 +103,7 @@ final class PublicScheduleControllerTest extends WebTestCase
     public function testLessonOverrideAndCancellationFlagsAreReturned(): void
     {
         $fixtures = $this->createPublishedScheduleFixtures();
-        $overrideRoom = new Room('Lab 2', 'computer', 20);
+        $overrideRoom = new Room('Lab 2', RoomType::Computer, 20);
         $overrideLesson = new Lesson(
             new \DateTimeImmutable('2026-09-07'),
             $fixtures->subject,
@@ -172,7 +173,7 @@ final class PublicScheduleControllerTest extends WebTestCase
         $group = new StudentGroup('KN-22', 'Computer Science', 4, 24);
         $teacher = new Teacher('John', 'Doe', 'Computer Science');
         $subject = new Subject('Programming');
-        $room = new Room('Lab 1', 'computer', 30);
+        $room = new Room('Lab 1', RoomType::Computer, 30);
         $timeSlot = new TimeSlot(1, new \DateTimeImmutable('08:30'), new \DateTimeImmutable('10:00'));
         $schedule = new Schedule(
             $semester,

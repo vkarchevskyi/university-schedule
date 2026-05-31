@@ -144,15 +144,15 @@ export function useAdminEntities(config: EntityConfig) {
     return String(value ?? '')
   }
 
-  function initialValues(item: AdminEntity = {}): Record<string, string | number> {
+  function initialValues(item: AdminEntity = {}): Record<string, string | number | boolean> {
     return Object.fromEntries(
       config.fields.map((field) => {
         const value = item[field.key]
-        if (typeof value === 'number' || typeof value === 'string') {
+        if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
           return [field.key, value]
         }
 
-        return [field.key, field.type === 'number' || field.type === 'select' ? '' : '']
+        return [field.key, field.type === 'boolean' ? false : '']
       }),
     )
   }
@@ -161,6 +161,10 @@ export function useAdminEntities(config: EntityConfig) {
     return Object.fromEntries(
       config.fields.map((field) => {
         const value = form.value.values[field.key]
+
+        if (field.type === 'boolean') {
+          return [field.key, value === true]
+        }
 
         if (field.type === 'number' || (field.type === 'select' && field.lookup !== undefined)) {
           const numericValue = Number(value)

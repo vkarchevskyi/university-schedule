@@ -17,10 +17,12 @@ export interface AdminSemester {
   firstWeekParity: 'odd' | 'even'
 }
 
+export type RoomType = 'lecture' | 'computer'
+
 export interface AdminRoom {
   id: number
   name: string
-  type: string
+  type: RoomType
   capacity: number
 }
 
@@ -87,6 +89,7 @@ export interface LessonCard {
   teacher: { id: number; firstName: string; lastName: string; department: string }
   lessonType: LessonType
   requiredLessonCount: number
+  requiresComputerRoom: boolean
   scheduledLessonCount: number
   remainingLessonCount: number
 }

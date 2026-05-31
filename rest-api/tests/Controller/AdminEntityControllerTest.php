@@ -72,6 +72,31 @@ final class AdminEntityControllerTest extends WebTestCase
         self::assertArrayHasKey('endsAt', $this->objectValue($payload, 'errors'));
     }
 
+    public function testRoomTypeAcceptsOnlySupportedValues(): void
+    {
+        $room = $this->requestJson('POST', '/api/admin/rooms', [
+            'name' => 'Lab 1',
+            'type' => 'computer',
+            'capacity' => 24,
+        ], 201);
+
+        self::assertSame('computer', $this->stringValue($room, 'type'));
+
+        $updated = $this->requestJson('PATCH', '/api/admin/rooms/' . $this->intValue($room, 'id'), [
+            'type' => 'lecture',
+        ]);
+
+        self::assertSame('lecture', $this->stringValue($updated, 'type'));
+
+        $invalid = $this->requestJson('POST', '/api/admin/rooms', [
+            'name' => 'Room X',
+            'type' => 'classroom',
+            'capacity' => 24,
+        ], 422);
+
+        self::assertArrayHasKey('type', $this->objectValue($invalid, 'errors'));
+    }
+
     public function testTeacherUnavailabilityRejectsWeekendDay(): void
     {
         $teacher = $this->requestJson('POST', '/api/admin/teachers', [
@@ -180,6 +205,13 @@ final class AdminEntityControllerTest extends WebTestCase
 
         self::assertSame('laboratory', $this->stringValue($teachingLoad, 'lessonType'));
         self::assertSame(8, $this->intValue($teachingLoad, 'requiredLessonCount'));
+        self::assertFalse($this->boolValue($teachingLoad, 'requiresComputerRoom'));
+
+        $updated = $this->requestJson('PATCH', '/api/admin/teaching-loads/' . $this->intValue($teachingLoad, 'id'), [
+            'requiresComputerRoom' => true,
+        ]);
+
+        self::assertTrue($this->boolValue($updated, 'requiresComputerRoom'));
 
         $this->requestNoContent('DELETE', '/api/admin/teaching-loads/' . $this->intValue($teachingLoad, 'id'));
     }

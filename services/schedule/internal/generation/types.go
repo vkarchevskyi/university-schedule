@@ -35,17 +35,19 @@ type Semester struct {
 }
 
 type TeachingLoad struct {
-	ID                  int64
-	GroupID             int64
-	SubjectID           int64
-	TeacherID           int64
-	LessonType          int
-	RequiredLessonCount int
-	StudentCount        int
+	ID                   int64
+	GroupID              int64
+	SubjectID            int64
+	TeacherID            int64
+	LessonType           int
+	RequiredLessonCount  int
+	RequiresComputerRoom bool
+	StudentCount         int
 }
 
 type Room struct {
 	ID       int64
+	Type     string
 	Capacity int
 }
 
@@ -56,17 +58,19 @@ type TimeSlot struct {
 }
 
 type CandidateEntry struct {
-	TeachingLoadID   int64
-	GroupID          int64
-	SubjectID        int64
-	TeacherID        int64
-	LessonType       int
-	RoomID           int64
-	RoomCapacity     int
-	TimeSlotID       int64
-	TimeSlotStartsAt string
-	TimeSlotEndsAt   string
-	DayOfWeek        int
-	WeekParity       int
-	StudentCount     int
+	TeachingLoadID       int64
+	GroupID              int64
+	SubjectID            int64
+	TeacherID            int64
+	LessonType           int
+	RoomID               int64
+	RoomType             string
+	RoomCapacity         int
+	TimeSlotID           int64
+	TimeSlotStartsAt     string
+	TimeSlotEndsAt       string
+	DayOfWeek            int
+	WeekParity           int
+	StudentCount         int
+	RequiresComputerRoom bool
 }

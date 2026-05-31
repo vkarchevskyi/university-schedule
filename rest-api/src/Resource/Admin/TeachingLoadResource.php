@@ -14,6 +14,7 @@ final readonly class TeachingLoadResource
         public ?int $teacherId,
         public string $lessonType,
         public int $requiredLessonCount,
+        public bool $requiresComputerRoom,
         public ?string $deletedAt,
     ) {}
 }

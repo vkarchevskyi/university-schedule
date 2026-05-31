@@ -49,6 +49,9 @@ final class UpdateTeachingLoadService extends AbstractEntityService
         if ($data->has('requiredLessonCount')) {
             $teachingLoad->setRequiredLessonCount($this->positiveInt($data->requiredLessonCount));
         }
+        if ($data->has('requiresComputerRoom')) {
+            $teachingLoad->setRequiresComputerRoom($data->requiresComputerRoom === true);
+        }
 
         $this->validateTeacherSubject($teachingLoad->getTeacher(), $teachingLoad->getSubject());
         $teachingLoad->setUpdatedAt(new \DateTimeImmutable());

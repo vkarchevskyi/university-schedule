@@ -23,7 +23,7 @@ final class CreateRoomService extends AbstractEntityService
 
     public function handle(RoomRequestDto $data): RoomResource
     {
-        $room = new Room($this->string($data->name), $this->string($data->type), $this->positiveInt($data->capacity));
+        $room = new Room($this->string($data->name), $this->roomType($data->type), $this->positiveInt($data->capacity));
         $this->save($room);
 
         return $this->mapper->map($room);

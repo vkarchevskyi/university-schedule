@@ -1,4 +1,5 @@
 export type PublicScheduleFilterType = 'group' | 'teacher' | 'room'
+export type PublicRoomType = 'lecture' | 'computer'
 
 export interface PublicGroup {
   id: number
@@ -18,7 +19,7 @@ export interface PublicTeacher {
 export interface PublicRoom {
   id: number
   name: string
-  type: string
+  type: PublicRoomType
   capacity: number
 }
 
@@ -47,7 +48,7 @@ export interface ScheduleTeacher {
 export interface ScheduleRoom {
   id: number
   name: string
-  type: string
+  type: PublicRoomType
 }
 
 export interface ScheduleGroup {
