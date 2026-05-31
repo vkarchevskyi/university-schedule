@@ -2,7 +2,7 @@ export interface ResourceCollection<T> {
   items: T[]
 }
 
-export type FieldType = 'text' | 'number' | 'date' | 'time' | 'select'
+export type FieldType = 'text' | 'number' | 'date' | 'time' | 'select' | 'boolean'
 
 export interface EntityField {
   key: string
@@ -27,6 +27,6 @@ export type AdminEntity = Record<string, unknown> & { id?: number }
 export type EntityLookups = Partial<Record<NonNullable<EntityField['lookup']>, AdminEntity[]>>
 
 export interface EntityFormState {
-  values: Record<string, string | number>
+  values: Record<string, string | number | boolean>
   errors: Record<string, string>
 }

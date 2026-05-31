@@ -9,6 +9,10 @@ function lookupLabel(value: unknown): string {
   return text(value)
 }
 
+function booleanLabel(value: unknown): string {
+  return value === true ? 'Так' : 'Ні'
+}
+
 const weekdayLabels = [
   'Понеділок',
   'Вівторок',
@@ -110,7 +114,16 @@ export const entityConfigs: EntityConfig[] = [
     endpoint: '/api/admin/rooms',
     fields: [
       { key: 'name', label: 'Назва', type: 'text', required: true },
-      { key: 'type', label: 'Тип', type: 'text', required: true },
+      {
+        key: 'type',
+        label: 'Тип',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'lecture', label: 'Лекційна аудиторія' },
+          { value: 'computer', label: "Комп'ютерна аудиторія" },
+        ],
+      },
       { key: 'capacity', label: 'Місткість', type: 'number', required: true },
     ],
     columns: [
@@ -203,6 +216,7 @@ export const entityConfigs: EntityConfig[] = [
         ],
       },
       { key: 'requiredLessonCount', label: 'Кількість занять', type: 'number', required: true },
+      { key: 'requiresComputerRoom', label: "Потрібна комп'ютерна аудиторія", type: 'boolean' },
     ],
     columns: [
       { key: 'semesterId', label: 'Семестр' },
@@ -211,6 +225,7 @@ export const entityConfigs: EntityConfig[] = [
       { key: 'teacherId', label: 'Викладач' },
       { key: 'lessonType', label: 'Тип' },
       { key: 'requiredLessonCount', label: 'Кількість' },
+      { key: 'requiresComputerRoom', label: "Комп'ютери", format: booleanLabel },
     ],
   },
 ]

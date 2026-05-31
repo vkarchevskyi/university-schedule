@@ -109,6 +109,12 @@ const { t } = useAdminI18n()
                 </option>
               </select>
               <input
+                v-else-if="field.type === 'boolean'"
+                v-model="state.form.value.values[field.key]"
+                class="field__checkbox"
+                type="checkbox"
+              />
+              <input
                 v-else
                 v-model="state.form.value.values[field.key]"
                 class="field__control"

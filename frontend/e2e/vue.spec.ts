@@ -1302,6 +1302,7 @@ const lessonCard = {
   teacher: { id: 7, firstName: 'Іван', lastName: 'Петренко', department: 'Інформатика' },
   lessonType: 'lecture',
   requiredLessonCount: 8,
+  requiresComputerRoom: false,
   scheduledLessonCount: 0,
   remainingLessonCount: 8,
 }
