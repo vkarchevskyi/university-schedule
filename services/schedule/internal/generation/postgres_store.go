@@ -309,7 +309,7 @@ func (store *PostgresStore) loadSemester(ctx context.Context, semesterID int64) 
 
 func (store *PostgresStore) loadTeachingLoads(ctx context.Context, semesterID int64) ([]TeachingLoad, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, g.student_count
+		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room, g.student_count
 		FROM teaching_loads tl
 		INNER JOIN groups g ON g.id = tl.group_id
 		WHERE tl.semester_id = $1 AND tl.deleted_at IS NULL
@@ -323,7 +323,7 @@ func (store *PostgresStore) loadTeachingLoads(ctx context.Context, semesterID in
 	loads := make([]TeachingLoad, 0)
 	for rows.Next() {
 		var load TeachingLoad
-		if err := rows.Scan(&load.ID, &load.GroupID, &load.SubjectID, &load.TeacherID, &load.LessonType, &load.RequiredLessonCount, &load.StudentCount); err != nil {
+		if err := rows.Scan(&load.ID, &load.GroupID, &load.SubjectID, &load.TeacherID, &load.LessonType, &load.RequiredLessonCount, &load.RequiresComputerRoom, &load.StudentCount); err != nil {
 			return nil, fmt.Errorf("scan teaching load: %w", err)
 		}
 
@@ -335,7 +335,7 @@ func (store *PostgresStore) loadTeachingLoads(ctx context.Context, semesterID in
 
 func (store *PostgresStore) loadRooms(ctx context.Context) ([]Room, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT id, capacity
+		SELECT id, type, capacity
 		FROM rooms
 		ORDER BY capacity ASC, id ASC
 	`)
@@ -347,7 +347,7 @@ func (store *PostgresStore) loadRooms(ctx context.Context) ([]Room, error) {
 	rooms := make([]Room, 0)
 	for rows.Next() {
 		var room Room
-		if err := rows.Scan(&room.ID, &room.Capacity); err != nil {
+		if err := rows.Scan(&room.ID, &room.Type, &room.Capacity); err != nil {
 			return nil, fmt.Errorf("scan room: %w", err)
 		}
 

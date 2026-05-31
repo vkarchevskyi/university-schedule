@@ -90,6 +90,7 @@ func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (
 			se.teacher_id,
 			se.lesson_type,
 			se.room_id,
+			r.type,
 			r.capacity,
 			se.time_slot_id,
 			to_char(ts.starts_at, 'HH24:MI:SS'),
@@ -120,6 +121,7 @@ func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (
 			&entry.TeacherID,
 			&lessonType,
 			&entry.RoomID,
+			&entry.RoomType,
 			&entry.RoomCapacity,
 			&entry.TimeSlotID,
 			&entry.TimeSlotStartsAt,
@@ -205,7 +207,7 @@ func (store *PostgresStore) attachTeachingLoadIDs(ctx context.Context, scheduleI
 
 func (store *PostgresStore) loadTeachingLoads(ctx context.Context, scheduleID int64) ([]TeachingLoad, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count
+		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room
 		FROM teaching_loads tl
 		INNER JOIN schedules s ON s.semester_id = tl.semester_id
 		WHERE s.id = $1 AND tl.deleted_at IS NULL
@@ -229,6 +231,7 @@ func (store *PostgresStore) loadTeachingLoads(ctx context.Context, scheduleID in
 			&teachingLoad.TeacherID,
 			&lessonType,
 			&teachingLoad.RequiredLessonCount,
+			&teachingLoad.RequiresComputerRoom,
 		); err != nil {
 			return nil, fmt.Errorf("scan teaching load: %w", err)
 		}
