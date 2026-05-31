@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Enum\LessonType;
+use App\Enum\RoomType;
 use App\Enum\WeekParity;
 use App\Exception\ApiException;
 
@@ -111,6 +112,19 @@ trait InputNormalizerTrait
         }
 
         throw ApiException::validation(['lessonType' => 'Unknown lesson type.']);
+    }
+
+    protected function roomType(mixed $value): RoomType
+    {
+        if (!is_string($value)) {
+            throw ApiException::validation(['type' => 'Unknown room type.']);
+        }
+
+        return match (strtolower(trim($value))) {
+            'lecture', 'classroom' => RoomType::Lecture,
+            'computer' => RoomType::Computer,
+            default => throw ApiException::validation(['type' => 'Unknown room type.']),
+        };
     }
 
     protected function weekParity(mixed $value): WeekParity

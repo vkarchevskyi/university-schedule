@@ -15,6 +15,7 @@ final class RoomRequestDto extends AbstractRequestDto
         public readonly ?string $name = null,
         #[Assert\NotBlank(groups: ['create'])]
         #[Assert\Type('string', groups: ['create', 'update'])]
+        #[Assert\Choice(choices: ['lecture', 'computer'], groups: ['create', 'update'])]
         public readonly ?string $type = null,
         #[Assert\NotNull(groups: ['create'])]
         #[Assert\Type('integer', groups: ['create', 'update'])]

@@ -18,6 +18,7 @@ use App\Entity\Subject;
 use App\Entity\Teacher;
 use App\Entity\TimeSlot;
 use App\Enum\LessonType;
+use App\Enum\RoomType;
 use App\Enum\ScheduleStatus;
 use App\Enum\WeekParity;
 use App\Service\ScheduleEntry\ScheduleEntryData;
@@ -40,7 +41,7 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
             $fixtures->subject,
             $fixtures->teacher,
             LessonType::Laboratory,
-            new Room('Lab 2', 'computer', 20),
+            new Room('Lab 2', RoomType::Computer, 20),
             $fixtures->timeSlot,
             1,
             WeekParity::Both,
@@ -60,7 +61,7 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
             $fixtures->subject,
             new Teacher('Grace', 'Hopper', 'Computer Science'),
             LessonType::Laboratory,
-            new Room('Lab 2', 'computer', 20),
+            new Room('Lab 2', RoomType::Computer, 20),
             $fixtures->timeSlot,
             1,
             WeekParity::Even,
@@ -118,7 +119,7 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
         $schedule = new Schedule($semester, ScheduleStatus::Draft, new \DateTimeImmutable('2026-09-07'), new \DateTimeImmutable('2026-12-31'), $admin, new \DateTimeImmutable('2026-08-01'));
         $subject = new Subject('Programming');
         $teacher = new Teacher('John', 'Doe', 'Computer Science');
-        $room = new Room('Lab 1', 'computer', 30);
+        $room = new Room('Lab 1', RoomType::Computer, 30);
         $timeSlot = new TimeSlot(1, new \DateTimeImmutable('08:30'), new \DateTimeImmutable('10:00'));
         $group = new StudentGroup('KN-22', 'Computer Science', 4, 24);
         $this->setEntityId($group, 10);

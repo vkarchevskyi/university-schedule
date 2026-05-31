@@ -13,7 +13,7 @@ final readonly class RoomResourceMapper
         return new RoomResource(
             $room->getId(),
             $room->getName(),
-            $room->getType(),
+            $room->getType()->value,
             $room->getCapacity(),
         );
     }

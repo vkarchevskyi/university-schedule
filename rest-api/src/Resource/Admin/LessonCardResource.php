@@ -13,6 +13,7 @@ final readonly class LessonCardResource
         public TeacherResource $teacher,
         public string $lessonType,
         public int $requiredLessonCount,
+        public bool $requiresComputerRoom,
         public int $scheduledLessonCount,
         public int $remainingLessonCount,
     ) {}

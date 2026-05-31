@@ -23,6 +23,7 @@ final readonly class LessonCardResourceMapper
             $this->teachers->map($teachingLoad->getTeacher()),
             strtolower($teachingLoad->getLessonType()->name),
             $teachingLoad->getRequiredLessonCount(),
+            $teachingLoad->requiresComputerRoom(),
             $scheduledLessonCount,
             max($teachingLoad->getRequiredLessonCount() - $scheduledLessonCount, 0),
         );

@@ -18,6 +18,7 @@ use App\Entity\Teacher;
 use App\Entity\TelegramSubscription;
 use App\Entity\TimeSlot;
 use App\Enum\LessonType;
+use App\Enum\RoomType;
 use App\Enum\ScheduleStatus;
 use App\Enum\WeekParity;
 use App\Service\AI\TelegramIntent;
@@ -359,7 +360,7 @@ final class TelegramWebhookControllerTest extends WebTestCase
         $group = new StudentGroup('КН-22', 'Computer Science', 4, 24);
         $teacher = new Teacher('John', 'Doe', 'Computer Science');
         $subject = new Subject('Programming');
-        $room = new Room('Lab 1', 'computer', 30);
+        $room = new Room('Lab 1', RoomType::Computer, 30);
         $timeSlot = new TimeSlot(1, new \DateTimeImmutable('08:30'), new \DateTimeImmutable('10:00'));
         $schedule = new Schedule(
             $semester,

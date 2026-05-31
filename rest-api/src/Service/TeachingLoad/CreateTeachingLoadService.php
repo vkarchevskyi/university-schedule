@@ -41,6 +41,7 @@ final class CreateTeachingLoadService extends AbstractEntityService
             $teacher,
             $this->lessonType($data->lessonType),
             $this->positiveInt($data->requiredLessonCount),
+            $data->requiresComputerRoom ?? false,
             $now,
             $now,
         );
