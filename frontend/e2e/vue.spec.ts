@@ -299,7 +299,9 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
 
   await page.goto('/admin/schedules/12')
 
+  await expect(page.getByTestId('schedule-group-filter')).toContainText('КН-22')
   await expect(page.getByTestId('lesson-card')).toContainText('Алгоритми')
+  await expect(page.getByTestId('lesson-card')).toContainText('КН-22')
 
   await page.evaluate(() => {
     const card = document.querySelector('[data-testid="lesson-card"]')
@@ -325,6 +327,16 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
 
   await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('1')
   await expect(page.getByTestId('lesson-card-remaining')).toHaveText('7')
+
+  await page.getByTestId('schedule-group-filter').getByRole('combobox').click()
+  await page.getByRole('option', { name: /КН-23/ }).click()
+
+  await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
+  await expect(page.getByTestId('lesson-card')).toContainText('КН-23')
+  await expect(page.getByTestId('lesson-card')).not.toContainText('КН-22')
+
+  await page.getByTestId('schedule-group-filter').getByRole('combobox').click()
+  await page.getByRole('option', { name: /КН-22/ }).click()
 
   await page.getByTestId('validate-schedule').click()
 
@@ -753,21 +765,24 @@ async function mockAdminScheduleManagement(
   })
 
   await page.route(/\/api\/admin\/schedules\/\d+\/lesson-cards$/, async (route) => {
-    const scheduledLessonCount = entries.reduce(
-      (total, entry) => total + (entry.weekParity === 'both' ? 2 : 1),
-      0,
-    )
-
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        items: [
-          {
-            ...lessonCard,
+        items: lessonCards.map((card) => {
+          const scheduledLessonCount = entries
+            .filter(
+              (entry) =>
+                entry.teachingLoadIds.includes(card.teachingLoadId) &&
+                entry.groupIds.includes(card.group.id),
+            )
+            .reduce((total, entry) => total + (entry.weekParity === 'both' ? 2 : 1), 0)
+
+          return {
+            ...card,
             scheduledLessonCount,
-            remainingLessonCount: lessonCard.requiredLessonCount - scheduledLessonCount,
-          },
-        ],
+            remainingLessonCount: card.requiredLessonCount - scheduledLessonCount,
+          }
+        }),
       }),
     })
   })
@@ -1290,3 +1305,11 @@ const lessonCard = {
   scheduledLessonCount: 0,
   remainingLessonCount: 8,
 }
+
+const secondLessonCard = {
+  ...lessonCard,
+  teachingLoadId: 45,
+  group: { id: 2, name: 'КН-23' },
+}
+
+const lessonCards = [lessonCard, secondLessonCard]
