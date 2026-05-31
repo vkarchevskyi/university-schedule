@@ -28,7 +28,16 @@ import type {
   LookupOption,
   ScheduleEntryPayload,
   ScheduleValidationConflict,
+  WeekParity,
 } from '@/types/adminSchedule'
+
+interface PendingPlacement {
+  card: LessonCard
+  dayOfWeek: number
+  timeSlotId: number
+  roomOptions: LookupOption[]
+  selectedRoomId: number
+}
 
 export function useAdminScheduleEditor(scheduleId: number) {
   const { t } = useAdminI18n()
@@ -39,9 +48,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const teachers = ref<AdminTeacher[]>([])
   const subjects = ref<AdminSubject[]>([])
   const timeSlots = ref<AdminTimeSlot[]>([])
-  const selectedRoomId = ref<number | null>(null)
   const selectedGroupId = ref<number | null>(null)
   const selectedEntry = ref<AdminScheduleEntry | null>(null)
+  const pendingPlacement = ref<PendingPlacement | null>(null)
   const conflicts = ref<ScheduleValidationConflict[]>([])
   const entryErrors = ref<Record<string, string>>({})
   const errorEntryIds = ref<number[]>([])
@@ -56,13 +65,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
 
   const isReadOnly = computed(() => schedule.value?.status === 'published')
 
-  const roomOptions = computed(() =>
-    rooms.value.map((room) => ({
-      id: room.id,
-      label: room.name,
-      description: `${room.type}, ${room.capacity}`,
-    })),
-  )
+  const pendingRoomOptions = computed(() => pendingPlacement.value?.roomOptions ?? [])
   const groupOptions = computed<LookupOption[]>(() =>
     groups.value.map((group) => ({
       id: group.id,
@@ -118,7 +121,6 @@ export function useAdminScheduleEditor(scheduleId: number) {
       groups.value = groupResponse.items
       teachers.value = teacherResponse.items
       subjects.value = subjectResponse.items
-      selectedRoomId.value = roomResponse.items[0]?.id ?? null
       ensureSelectedGroup()
       clearEntryErrors()
     } catch {
@@ -154,23 +156,58 @@ export function useAdminScheduleEditor(scheduleId: number) {
       return
     }
 
-    if (selectedRoomId.value === null) {
-      clearEntryErrors()
-      showActionError(t.value.selectRoom)
+    clearEntryErrors()
+    const roomOptions = availableRoomOptions(
+      payload.card.requiresComputerRoom,
+      payload.dayOfWeek,
+      payload.timeSlotId,
+      'both',
+    )
+
+    if (roomOptions.length === 0) {
+      showActionError(t.value.noAvailableRooms)
       return
     }
 
+    const firstRoom = roomOptions[0]
+    if (firstRoom === undefined) {
+      return
+    }
+
+    pendingPlacement.value = {
+      ...payload,
+      roomOptions,
+      selectedRoomId: firstRoom.id,
+    }
+  }
+
+  async function confirmPlacement(): Promise<void> {
+    if (pendingPlacement.value === null || isReadOnly.value) {
+      return
+    }
+
+    const placement = pendingPlacement.value
     clearEntryErrors()
 
     try {
       await createScheduleEntry(
         scheduleId,
-        entryPayload(payload.card, payload.dayOfWeek, payload.timeSlotId),
+        entryPayload(
+          placement.card,
+          placement.dayOfWeek,
+          placement.timeSlotId,
+          placement.selectedRoomId,
+        ),
       )
+      pendingPlacement.value = null
       await refreshScheduleData()
     } catch (exception) {
       handleEntryMutationError(exception)
     }
+  }
+
+  function cancelPlacement(): void {
+    pendingPlacement.value = null
   }
 
   async function saveEntry(payload: Partial<ScheduleEntryPayload>): Promise<void> {
@@ -215,6 +252,19 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
 
     clearEntryErrors()
+
+    const currentRoomIsAvailable = availableRoomOptions(
+      false,
+      dayOfWeek,
+      timeSlotId,
+      entry.weekParity,
+      entry,
+    ).some((room) => room.id === entry.roomId)
+
+    if (!currentRoomIsAvailable) {
+      showActionError(t.value.noAvailableRooms)
+      return
+    }
 
     try {
       await updateScheduleEntry(scheduleId, entry.id, { dayOfWeek, timeSlotId })
@@ -272,18 +322,81 @@ export function useAdminScheduleEditor(scheduleId: number) {
     card: LessonCard,
     dayOfWeek: number,
     timeSlotId: number,
+    roomId: number,
   ): ScheduleEntryPayload {
     return {
       teachingLoadIds: [card.teachingLoadId],
       subjectId: card.subject.id,
       teacherId: card.teacher.id,
       lessonType: card.lessonType,
-      roomId: selectedRoomId.value as number,
+      roomId,
       timeSlotId,
       dayOfWeek,
       weekParity: 'both',
       groupIds: [card.group.id],
     }
+  }
+
+  function availableRoomOptions(
+    requiresComputerRoom: boolean,
+    dayOfWeek: number,
+    timeSlotId: number,
+    weekParity: WeekParity,
+    ignoredEntry: AdminScheduleEntry | null = null,
+  ): LookupOption[] {
+    return rooms.value
+      .filter((room) => !requiresComputerRoom || room.type === 'computer')
+      .filter(
+        (room) =>
+          !isRoomOccupied(room.id, dayOfWeek, timeSlotId, weekParity, ignoredEntry),
+      )
+      .map(roomOption)
+  }
+
+  function roomOption(room: AdminRoom): LookupOption {
+    return {
+      id: room.id,
+      label: room.name,
+      description: `${room.type}, ${room.capacity}`,
+    }
+  }
+
+  function isRoomOccupied(
+    roomId: number,
+    dayOfWeek: number,
+    timeSlotId: number,
+    weekParity: WeekParity,
+    ignoredEntry: AdminScheduleEntry | null,
+  ): boolean {
+    const targetSlot = timeSlots.value.find((slot) => slot.id === timeSlotId)
+    if (schedule.value === null || targetSlot === undefined) {
+      return true
+    }
+
+    return schedule.value.entries.some((entry) => {
+      if (ignoredEntry !== null && entry.id === ignoredEntry.id) {
+        return false
+      }
+
+      if (entry.roomId !== roomId || entry.dayOfWeek !== dayOfWeek) {
+        return false
+      }
+
+      const entrySlot = timeSlots.value.find((slot) => slot.id === entry.timeSlotId)
+      return (
+        entrySlot !== undefined &&
+        weekParityOverlaps(entry.weekParity, weekParity) &&
+        timeRangesOverlap(entrySlot, targetSlot)
+      )
+    })
+  }
+
+  function weekParityOverlaps(left: WeekParity, right: WeekParity): boolean {
+    return left === 'both' || right === 'both' || left === right
+  }
+
+  function timeRangesOverlap(left: AdminTimeSlot, right: AdminTimeSlot): boolean {
+    return left.startsAt < right.endsAt && right.startsAt < left.endsAt
   }
 
   function clearEntryErrors(): void {
@@ -374,9 +487,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     teachers,
     subjects,
     timeSlots,
-    selectedRoomId,
     selectedGroupId,
     selectedEntry,
+    pendingPlacement,
     conflicts,
     entryErrors,
     errorEntryIds,
@@ -385,11 +498,13 @@ export function useAdminScheduleEditor(scheduleId: number) {
     actionError,
     isLoading,
     isReadOnly,
-    roomOptions,
+    pendingRoomOptions,
     groupOptions,
     filteredCards,
     filteredEntries,
     place,
+    confirmPlacement,
+    cancelPlacement,
     createEntry,
     moveEntry,
     saveEntry,

@@ -24,9 +24,9 @@ const {
   teachers,
   subjects,
   timeSlots,
-  selectedRoomId,
   selectedGroupId,
   selectedEntry,
+  pendingPlacement,
   conflicts,
   entryErrors,
   errorEntryIds,
@@ -35,11 +35,13 @@ const {
   actionError,
   isLoading,
   isReadOnly,
-  roomOptions,
+  pendingRoomOptions,
   groupOptions,
   filteredCards,
   filteredEntries,
   place,
+  confirmPlacement,
+  cancelPlacement,
   createEntry,
   moveEntry,
   saveEntry,
@@ -92,13 +94,6 @@ function selectGroup(value: string): void {
       <div class="schedule-editor-layout">
         <aside class="lesson-card-panel">
           <h2>{{ t.lessonCards }}</h2>
-          <AppSelect
-            id="placement-room"
-            :label="t.room"
-            :model-value="selectedRoomId ?? ''"
-            :options="roomOptions"
-            @update:model-value="selectedRoomId = Number($event)"
-          />
           <StateMessage v-if="filteredCards.length === 0" :title="t.noCards" />
           <LessonRequirementCard
             v-for="card in filteredCards"
@@ -142,5 +137,35 @@ function selectGroup(value: string): void {
       :details="actionError.details"
       @close="clearActionError"
     />
+    <div v-if="pendingPlacement" class="modal-backdrop" data-testid="room-selection-modal">
+      <section class="modal-panel room-selection-dialog" role="dialog" aria-modal="true">
+        <header class="modal-panel__header">
+          <h2>{{ t.chooseRoom }}</h2>
+        </header>
+        <p>
+          {{ pendingPlacement.card.subject.name }} · {{ pendingPlacement.card.group.name }}
+        </p>
+        <AppSelect
+          id="room-selection"
+          data-testid="room-selection-room"
+          :label="t.room"
+          :model-value="pendingPlacement.selectedRoomId"
+          :options="pendingRoomOptions"
+          @update:model-value="pendingPlacement.selectedRoomId = Number($event)"
+        />
+        <footer class="modal-panel__footer">
+          <AppButton data-testid="cancel-room-selection" @click="cancelPlacement">
+            {{ t.cancel }}
+          </AppButton>
+          <AppButton
+            variant="primary"
+            data-testid="confirm-room-selection"
+            @click="confirmPlacement"
+          >
+            {{ t.add }}
+          </AppButton>
+        </footer>
+      </section>
+    </div>
   </AdminLayout>
 </template>
