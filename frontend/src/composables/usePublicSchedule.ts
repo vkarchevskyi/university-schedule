@@ -35,7 +35,7 @@ export function usePublicSchedule() {
       return teachers.value.map((teacher) => ({
         id: teacher.id,
         label: `${teacher.firstName} ${teacher.lastName}`,
-        description: teacher.department,
+        description: '',
       }))
     }
 
@@ -50,7 +50,7 @@ export function usePublicSchedule() {
     return groups.value.map((group) => ({
       id: group.id,
       label: group.name,
-      description: `${group.speciality}, ${group.course}`,
+      description: '',
     }))
   })
 

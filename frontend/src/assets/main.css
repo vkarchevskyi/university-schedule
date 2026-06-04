@@ -667,7 +667,7 @@ select {
 
 .schedule-editor-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 280px;
+  grid-template-columns: 360px minmax(0, 1fr) 280px;
   gap: 14px;
   align-items: start;
 }
@@ -828,6 +828,343 @@ select {
   align-items: start;
 }
 
+.admin-layout--collapsed {
+  grid-template-columns: 84px minmax(0, 1fr);
+}
+
+.admin-sidebar__brand,
+.panel-header,
+.entry-editor__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-sidebar__toggle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #dbe4e8;
+  border-radius: 6px;
+  color: #33444f;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-nav__group {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-nav__group h2 {
+  margin: 0;
+  color: #60717c;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.admin-layout--collapsed .admin-sidebar strong,
+.admin-layout--collapsed .admin-nav__group h2,
+.admin-layout--collapsed .admin-sidebar a {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.admin-topbar small {
+  display: block;
+  color: #60717c;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.admin-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-dashboard-page,
+.admin-entity-page,
+.schedule-review-page,
+.generation-jobs-page {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-dashboard.schedule-review-page,
+.admin-dashboard.generation-jobs-page,
+.admin-dashboard.action-log-page {
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.overview-card,
+.quick-action-panel,
+.setup-hint-panel,
+.placement-panel {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #dbe4e8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.overview-card span,
+.review-card span,
+.panel-header p,
+.quick-action-panel h2,
+.setup-hint-panel p {
+  margin: 0;
+  color: #60717c;
+}
+
+.overview-card strong {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.quick-action-panel h2 {
+  color: #172026;
+  font-size: 18px;
+}
+
+.schedule-summary-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.schedule-summary-bar article {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dbe4e8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.schedule-summary-bar span,
+.schedule-summary-bar small {
+  color: #60717c;
+  font-size: 12px;
+}
+
+.schedule-summary-bar strong {
+  overflow-wrap: anywhere;
+}
+
+.lesson-card-filters,
+.exam-filter-bar,
+.audit-filter-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.inline-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #33444f;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.schedule-side-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.lesson-requirement-card__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lesson-requirement-card__header span {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #eef4f6;
+  color: #33444f;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.lesson-requirement-card__progress {
+  display: grid;
+  gap: 4px;
+}
+
+.lesson-requirement-card__progress span {
+  color: #33444f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.lesson-requirement-card__progress progress {
+  width: 100%;
+  height: 7px;
+  accent-color: #176b87;
+}
+
+.lesson-requirement-card--lecture {
+  border-left: 4px solid #176b87;
+}
+
+.lesson-requirement-card--laboratory {
+  border-left: 4px solid #4b7f52;
+}
+
+.lesson-requirement-card--seminar {
+  border-left: 4px solid #7d5a9f;
+}
+
+.lesson-requirement-card--practical {
+  border-left: 4px solid #b36b3c;
+}
+
+.schedule-grid__drop-cell {
+  position: relative;
+}
+
+.schedule-grid__drop-cell--empty {
+  background:
+    linear-gradient(135deg, rgb(23 107 135 / 5%) 25%, transparent 25%) 0 0 / 16px 16px,
+    #ffffff;
+}
+
+.schedule-grid__drop-cell:has(.drop-cell-hint) {
+  outline: 1px dashed #c9d5db;
+  outline-offset: -8px;
+}
+
+.drop-cell-hint {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  color: #8da0aa;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.editor-entry__select {
+  min-height: 126px;
+  padding: 12px;
+  text-align: left;
+  justify-items: start;
+}
+
+.editor-entry em {
+  max-width: 100%;
+  color: #60717c;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.editor-entry__conflict {
+  display: block;
+  max-width: 100%;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: #8f2f16;
+  background: #ffe7db;
+  font-size: 11px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.entry-editor__header h2 {
+  margin: 0;
+}
+
+.schedule-review-list,
+.admin-entity-content {
+  display: grid;
+  gap: 12px;
+}
+
+.schedule-review-group {
+  display: grid;
+  gap: 8px;
+}
+
+.schedule-review-group h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.review-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #dbe4e8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.review-card div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.entity-search {
+  max-width: 460px;
+}
+
+.table-actions--compact {
+  gap: 6px;
+}
+
+.date-group-row td {
+  color: #33444f;
+  background: #f8fafb;
+  font-weight: 800;
+}
+
+.generation-job__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.generation-job details pre,
+.action-log-table details pre {
+  margin-top: 8px;
+}
+
+.mobile-schedule__empty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed #c9d5db;
+  border-radius: 6px;
+  color: #60717c;
+  background: #f8fafb;
+}
+
 @media (max-width: 760px) {
   .public-page {
     padding: 16px;
@@ -899,6 +1236,10 @@ select {
     grid-template-columns: 1fr;
   }
 
+  .admin-layout--collapsed {
+    grid-template-columns: 1fr;
+  }
+
   .admin-sidebar {
     border-right: 0;
     border-bottom: 1px solid #dbe4e8;
@@ -908,7 +1249,16 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .admin-nav {
+    grid-template-columns: 1fr;
+  }
+
   .admin-topbar {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .admin-topbar__actions {
     align-items: start;
     flex-direction: column;
   }
@@ -917,7 +1267,13 @@ select {
   .schedule-editor-layout,
   .exam-editor-layout,
   .entity-form-grid,
-  .admin-dashboard__shortcuts {
+  .admin-dashboard__shortcuts,
+  .overview-grid,
+  .schedule-summary-bar,
+  .lesson-card-filters,
+  .exam-filter-bar,
+  .audit-filter-bar,
+  .review-card {
     grid-template-columns: 1fr;
   }
 

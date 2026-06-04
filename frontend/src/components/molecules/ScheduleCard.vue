@@ -24,7 +24,7 @@ function lessonTypeLabel(type: string): string {
   <article class="schedule-card" data-testid="schedule-card">
     <div class="schedule-card__header">
       <strong>{{ item.subject.name }}</strong>
-      <span>{{ lessonTypeLabel(item.lessonType) }}</span>
+      <StatusBadge tone="info">{{ lessonTypeLabel(item.lessonType) }}</StatusBadge>
     </div>
     <dl class="schedule-card__details">
       <div>
@@ -40,7 +40,7 @@ function lessonTypeLabel(type: string): string {
         <dd>{{ item.groups.map((group) => group.name).join(', ') }}</dd>
       </div>
     </dl>
-    <div v-if="item.isCancelled || item.isOverride" class="schedule-card__badges">
+    <div class="schedule-card__badges">
       <StatusBadge v-if="item.isCancelled" tone="warning">{{ labels.cancelled }}</StatusBadge>
       <StatusBadge v-if="item.isOverride" tone="info">{{ labels.override }}</StatusBadge>
     </div>

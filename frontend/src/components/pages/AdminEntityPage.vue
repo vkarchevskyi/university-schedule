@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AppButton from '@/components/atoms/AppButton.vue'
@@ -12,7 +13,30 @@ import { entityConfigByKey } from '@/config/adminEntities'
 const route = useRoute()
 const config = entityConfigByKey(String(route.params.entity))
 const state = config === undefined ? null : useAdminEntities(config)
-const { t } = useAdminI18n()
+const { t, label } = useAdminI18n()
+const query = ref('')
+const filteredItems = computed(() => {
+  if (state === null) {
+    return []
+  }
+
+  const needle = query.value.trim().toLocaleLowerCase()
+  if (needle === '') {
+    return state.items.value
+  }
+
+  return state.items.value.filter((item) =>
+    config?.columns
+      .map((column) => {
+        const value = column.format
+          ? column.format(item[column.key], item)
+          : state.displayValue(item, column.key)
+        return value.toLocaleLowerCase()
+      })
+      .join(' ')
+      .includes(needle),
+  )
+})
 </script>
 
 <template>
@@ -21,8 +45,8 @@ const { t } = useAdminI18n()
     <section v-else class="admin-entity-page">
       <header class="admin-page-header">
         <div>
-          <h1>{{ config.title }}</h1>
-          <p>{{ t.entityIntro }}</p>
+          <h1>{{ label(config.titleKey) }}</h1>
+          <p>{{ label(config.hintKey) }}</p>
         </div>
         <AppButton variant="primary" data-testid="create-entity" @click="state.startCreate">
           {{ t.add }}
@@ -31,45 +55,57 @@ const { t } = useAdminI18n()
 
       <StateMessage v-if="state.error.value" tone="error" :title="state.error.value" />
       <StateMessage v-else-if="state.isLoading.value" :title="t.loading" />
-      <div v-else class="admin-table-wrap">
-        <table class="admin-table" data-testid="entity-table">
-          <thead>
-            <tr>
-              <th v-for="column in config.columns" :key="column.key" scope="col">
-                {{ column.label }}
-              </th>
-              <th scope="col">{{ t.actions }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="state.items.value.length === 0">
-              <td :colspan="config.columns.length + 1">{{ t.noRecords }}</td>
-            </tr>
-            <tr v-for="item in state.items.value" v-else :key="item.id">
-              <td v-for="column in config.columns" :key="column.key">
-                {{
-                  column.format
-                    ? column.format(item[column.key], item)
-                    : state.displayValue(item, column.key)
-                }}
-              </td>
-              <td>
-                <div class="table-actions">
-                  <AppButton data-testid="edit-entity" @click="state.startEdit(item)">
-                    {{ t.edit }}
-                  </AppButton>
-                  <ConfirmActionButton
-                    :message="t.deleteConfirm"
-                    testid="delete-entity"
-                    @confirm="state.remove(item)"
-                  >
-                    {{ t.delete }}
-                  </ConfirmActionButton>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else class="admin-entity-content">
+        <section class="setup-hint-panel">
+          <strong>{{ t.setupData }}</strong>
+          <p>{{ label(config.hintKey) }}</p>
+        </section>
+        <label class="field entity-search">
+          <span class="field__label">{{ t.search }}</span>
+          <input v-model="query" class="field__control" type="search" :placeholder="t.searchPlaceholder" />
+        </label>
+        <div class="admin-table-wrap">
+          <table class="admin-table" data-testid="entity-table">
+            <thead>
+              <tr>
+                <th v-for="column in config.columns" :key="column.key" scope="col">
+                  {{ label(column.labelKey) }}
+                </th>
+                <th scope="col">{{ t.actions }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="filteredItems.length === 0">
+                <td :colspan="config.columns.length + 1">
+                  {{ state.items.value.length === 0 ? label(config.hintKey) : t.noRecords }}
+                </td>
+              </tr>
+              <tr v-for="item in filteredItems" v-else :key="item.id">
+                <td v-for="column in config.columns" :key="column.key">
+                  {{
+                    column.format
+                      ? state.displayValue({ ...item, [column.key]: column.format(item[column.key], item) }, column.key)
+                      : state.displayValue(item, column.key)
+                  }}
+                </td>
+                <td>
+                  <div class="table-actions table-actions--compact">
+                    <AppButton data-testid="edit-entity" @click="state.startEdit(item)">
+                      {{ t.edit }}
+                    </AppButton>
+                    <ConfirmActionButton
+                      :message="t.deleteConfirm"
+                      testid="delete-entity"
+                      @confirm="state.remove(item)"
+                    >
+                      {{ t.delete }}
+                    </ConfirmActionButton>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div v-if="Object.keys(state.form.value.values).length > 0" class="modal-backdrop">
@@ -92,7 +128,7 @@ const { t } = useAdminI18n()
           </StateMessage>
           <div class="entity-form-grid">
             <label v-for="field in config.fields" :key="field.key" class="field">
-              <span class="field__label">{{ field.label }}</span>
+              <span class="field__label">{{ label(field.labelKey) }}</span>
               <select
                 v-if="field.type === 'select'"
                 v-model="state.form.value.values[field.key]"

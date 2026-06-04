@@ -96,8 +96,14 @@ export interface LessonCard {
 
 export interface ScheduleValidationConflict {
   type: string
+  severity?: 'hard' | 'soft' | string
   message: string
   entryIds: number[]
+  dayOfWeek?: number | null
+  timeSlotId?: number | null
+  roomId?: number | null
+  teacherId?: number | null
+  groupIds?: number[]
 }
 
 export interface ScheduleValidationResult {

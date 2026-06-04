@@ -16,10 +16,14 @@ import type {
 const props = defineProps<{
   entries: AdminScheduleEntry[]
   rooms: AdminRoom[]
+  groups: Array<{ id: number; name: string }>
   subjects: AdminSubject[]
   teachers: AdminTeacher[]
   timeSlots: AdminTimeSlot[]
   conflictEntryIds?: number[]
+  conflictMessages?: Record<number, string[]>
+  dropHint: string
+  conflictLabel: string
   readOnly?: boolean
 }>()
 
@@ -97,6 +101,10 @@ function roomName(id: number): string {
   return props.rooms.find((room) => room.id === id)?.name ?? `#${id}`
 }
 
+function groupNames(entry: AdminScheduleEntry): string {
+  return entry.groupIds.map((id) => props.groups.find((group) => group.id === id)?.name ?? `#${id}`).join(', ')
+}
+
 function hasConflict(entry: AdminScheduleEntry): boolean {
   return props.conflictEntryIds?.includes(entry.id) ?? false
 }
@@ -125,6 +133,10 @@ function lessonTypeMarker(type: LessonType): string {
   )[type]
 }
 
+function weekParityLabel(entry: AdminScheduleEntry): string {
+  return entry.weekParity === 'both' ? '2w' : entry.weekParity
+}
+
 function cellKey(dayOfWeek: number, timeSlotId: number): string {
   return `${dayOfWeek}-${timeSlotId}`
 }
@@ -148,10 +160,14 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
           <td
             v-for="day in scheduleWeekdays"
             :key="`${slot.id}-${day}`"
+            :class="['schedule-grid__drop-cell', { 'schedule-grid__drop-cell--empty': entriesFor(day, slot.id).length === 0 }]"
             data-testid="schedule-cell"
             @dragover="!readOnly && $event.preventDefault()"
             @drop="drop($event, day, slot.id)"
           >
+            <span v-if="entriesFor(day, slot.id).length === 0 && !readOnly" class="drop-cell-hint">
+              {{ dropHint }}
+            </span>
             <article
               v-for="entry in entriesFor(day, slot.id)"
               :key="entry.id"
@@ -167,8 +183,12 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
                 @click="emit('select', entry)"
               >
                 <strong>{{ entryTitleWithMarker(entry) }}</strong>
+                <em>{{ groupNames(entry) }}</em>
                 <span>{{ teacherName(entry.teacherId) }}</span>
-                <small>{{ roomName(entry.roomId) }}</small>
+                <small>{{ roomName(entry.roomId) }} · {{ weekParityLabel(entry) }}</small>
+                <b v-if="hasConflict(entry)" class="editor-entry__conflict">
+                  {{ conflictMessages?.[entry.id]?.[0] ?? conflictLabel }}
+                </b>
               </button>
             </article>
           </td>

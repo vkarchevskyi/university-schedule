@@ -36,6 +36,8 @@ const emit = defineEmits<{
   create: [payload: ScheduleEntryPayload]
   save: [payload: Partial<ScheduleEntryPayload>]
   delete: []
+  duplicate: [entry: AdminScheduleEntry]
+  clear: []
 }>()
 
 const { t } = useAdminI18n()
@@ -67,7 +69,7 @@ const teacherOptions = computed<LookupOption[]>(() =>
   props.teachers.map((teacher) => ({
     id: teacher.id,
     label: `${teacher.firstName} ${teacher.lastName}`,
-    description: teacher.department,
+    description: '',
   })),
 )
 
@@ -75,7 +77,7 @@ const groupOptions = computed<LookupOption[]>(() =>
   props.groups.map((group) => ({
     id: group.id,
     label: group.name,
-    description: `${group.speciality}, ${group.course}`,
+    description: '',
   })),
 )
 
@@ -168,7 +170,10 @@ function fieldError(field: string): string | undefined {
 
 <template>
   <aside class="entry-editor" data-testid="entry-editor">
-    <h2>{{ entry ? t.scheduleEditor : t.add }}</h2>
+    <header class="entry-editor__header">
+      <h2>{{ entry ? t.scheduleEditor : t.add }}</h2>
+      <AppButton v-if="entry" variant="ghost" @click="emit('clear')">{{ t.clearSelection }}</AppButton>
+    </header>
     <StateMessage
       v-if="errorMessages.length > 0"
       tone="error"
@@ -278,6 +283,9 @@ function fieldError(field: string): string | undefined {
       >
         {{ t.deleteEntry }}
       </ConfirmActionButton>
+      <AppButton v-if="entry" @click="emit('duplicate', entry)">
+        {{ t.duplicateEntry }}
+      </AppButton>
     </div>
   </aside>
 </template>
