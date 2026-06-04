@@ -29,6 +29,7 @@ const {
   selectedTeacherId,
   selectedSubjectId,
   selectedLessonType,
+  cardSort,
   cardsSearch,
   hideCompletedCards,
   requiresComputerRoomOnly,
@@ -204,6 +205,15 @@ function selectSubject(value: string): void {
                 <option value="laboratory">{{ t.lessonTypes.laboratory }}</option>
                 <option value="seminar">{{ t.lessonTypes.seminar }}</option>
                 <option value="practical">{{ t.lessonTypes.practical }}</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field__label">{{ t.orderBy }}</span>
+              <select v-model="cardSort" class="field__control">
+                <option value="remaining">{{ t.cardOrder.remaining }}</option>
+                <option value="subject">{{ t.cardOrder.subject }}</option>
+                <option value="group">{{ t.cardOrder.group }}</option>
+                <option value="teacher">{{ t.cardOrder.teacher }}</option>
               </select>
             </label>
             <label class="inline-toggle">

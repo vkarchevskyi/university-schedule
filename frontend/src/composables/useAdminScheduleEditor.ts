@@ -39,6 +39,8 @@ interface PendingPlacement {
   selectedRoomId: number
 }
 
+type LessonCardSort = 'remaining' | 'subject' | 'group' | 'teacher'
+
 export function useAdminScheduleEditor(scheduleId: number) {
   const { t } = useAdminI18n()
   const schedule = ref<AdminSchedule | null>(null)
@@ -52,6 +54,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const selectedTeacherId = ref<number | null>(null)
   const selectedSubjectId = ref<number | null>(null)
   const selectedLessonType = ref('')
+  const cardSort = ref<LessonCardSort>('remaining')
   const cardsSearch = ref('')
   const hideCompletedCards = ref(true)
   const requiresComputerRoomOnly = ref(false)
@@ -147,12 +150,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
           .toLocaleLowerCase()
           .includes(query)
       })
-      .sort(
-        (left, right) =>
-          right.remainingLessonCount - left.remainingLessonCount ||
-          left.group.name.localeCompare(right.group.name) ||
-          left.subject.name.localeCompare(right.subject.name),
-      ),
+      .sort(compareLessonCards),
   )
   const filteredEntries = computed(() => {
     if (selectedGroupId.value === null || schedule.value === null) {
@@ -569,6 +567,36 @@ export function useAdminScheduleEditor(scheduleId: number) {
     return { title: '', message: null, details: [] }
   }
 
+  function compareLessonCards(left: LessonCard, right: LessonCard): number {
+    const byRemaining =
+      right.remainingLessonCount - left.remainingLessonCount ||
+      left.group.name.localeCompare(right.group.name) ||
+      left.subject.name.localeCompare(right.subject.name)
+    const bySubject =
+      left.subject.name.localeCompare(right.subject.name) ||
+      left.group.name.localeCompare(right.group.name) ||
+      right.remainingLessonCount - left.remainingLessonCount
+    const byGroup =
+      left.group.name.localeCompare(right.group.name) ||
+      left.subject.name.localeCompare(right.subject.name) ||
+      right.remainingLessonCount - left.remainingLessonCount
+    const leftTeacher = `${left.teacher.lastName} ${left.teacher.firstName}`
+    const rightTeacher = `${right.teacher.lastName} ${right.teacher.firstName}`
+    const byTeacher =
+      leftTeacher.localeCompare(rightTeacher) ||
+      left.subject.name.localeCompare(right.subject.name) ||
+      right.remainingLessonCount - left.remainingLessonCount
+
+    return (
+      {
+        remaining: byRemaining,
+        subject: bySubject,
+        group: byGroup,
+        teacher: byTeacher,
+      } satisfies Record<LessonCardSort, number>
+    )[cardSort.value]
+  }
+
   return {
     schedule,
     cards,
@@ -581,6 +609,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     selectedTeacherId,
     selectedSubjectId,
     selectedLessonType,
+    cardSort,
     cardsSearch,
     hideCompletedCards,
     requiresComputerRoomOnly,
