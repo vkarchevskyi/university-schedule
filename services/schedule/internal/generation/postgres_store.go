@@ -359,7 +359,7 @@ func (store *PostgresStore) loadRooms(ctx context.Context) ([]Room, error) {
 
 func (store *PostgresStore) loadTimeSlots(ctx context.Context) ([]TimeSlot, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT id, to_char(starts_at, 'HH24:MI:SS'), to_char(ends_at, 'HH24:MI:SS')
+		SELECT id, number, to_char(starts_at, 'HH24:MI:SS'), to_char(ends_at, 'HH24:MI:SS')
 		FROM time_slots
 		ORDER BY number ASC, id ASC
 	`)
@@ -371,7 +371,7 @@ func (store *PostgresStore) loadTimeSlots(ctx context.Context) ([]TimeSlot, erro
 	slots := make([]TimeSlot, 0)
 	for rows.Next() {
 		var slot TimeSlot
-		if err := rows.Scan(&slot.ID, &slot.StartsAt, &slot.EndsAt); err != nil {
+		if err := rows.Scan(&slot.ID, &slot.Number, &slot.StartsAt, &slot.EndsAt); err != nil {
 			return nil, fmt.Errorf("scan time slot: %w", err)
 		}
 

@@ -8,10 +8,16 @@ import (
 )
 
 const (
-	minimumQualityScore = 80
-	firstScheduleDay    = 1
-	lastScheduleDay     = 5
+	minimumQualityScore     = 80
+	firstScheduleDay        = 1
+	lastScheduleDay         = 5
+	maxPlacementSearchNodes = 200000
 )
+
+type placementRequest struct {
+	load       TeachingLoad
+	weekParity int
+}
 
 type Input struct {
 	TeachingLoads []TeachingLoad
@@ -40,26 +46,9 @@ func (generator Generator) Generate(input Input) ([]CandidateEntry, int, string,
 		return nil, 0, "failed", errors.New("no time slots are available")
 	}
 
-	entries := make([]CandidateEntry, 0)
-
-	for _, load := range input.TeachingLoads {
-		remaining := load.RequiredLessonCount
-		for remaining > 0 {
-			weekParity := 1
-			contribution := 1
-			if remaining >= 2 {
-				weekParity = 3
-				contribution = 2
-			}
-
-			entry, ok := generator.place(load, weekParity, entries, input)
-			if !ok {
-				return nil, 0, "failed", fmt.Errorf("cannot place teaching load %d", load.ID)
-			}
-
-			entries = append(entries, entry)
-			remaining -= contribution
-		}
+	entries, failedLoadID, ok := generator.construct(input)
+	if !ok {
+		return nil, 0, "failed", fmt.Errorf("cannot place teaching load %d", failedLoadID)
 	}
 
 	entries = generator.optimize(entries, input)
@@ -82,6 +71,131 @@ func (generator Generator) Generate(input Input) ([]CandidateEntry, int, string,
 	status := "acceptable"
 
 	return entries, score, status, nil
+}
+
+func (generator Generator) construct(input Input) ([]CandidateEntry, int64, bool) {
+	requests := placementRequests(input.TeachingLoads)
+	for _, request := range requests {
+		if len(feasibleCandidates(request, nil, input)) == 0 {
+			return nil, request.load.ID, false
+		}
+	}
+
+	entries := make([]CandidateEntry, 0, len(requests))
+	placed := make([]bool, len(requests))
+	searched := 0
+	failedLoadID := int64(0)
+
+	var backtrack func() bool
+	backtrack = func() bool {
+		if len(entries) == len(requests) {
+			return true
+		}
+		searched++
+		if searched > maxPlacementSearchNodes {
+			return false
+		}
+
+		bestIndex := -1
+		var bestCandidates []CandidateEntry
+		for index, request := range requests {
+			if placed[index] {
+				continue
+			}
+
+			candidates := feasibleCandidates(request, entries, input)
+			if len(candidates) == 0 {
+				failedLoadID = request.load.ID
+				return false
+			}
+			if bestIndex == -1 || len(candidates) < len(bestCandidates) {
+				bestIndex = index
+				bestCandidates = candidates
+			}
+		}
+
+		placed[bestIndex] = true
+		for _, candidate := range bestCandidates {
+			entries = append(entries, candidate)
+			if backtrack() {
+				return true
+			}
+			entries = entries[:len(entries)-1]
+		}
+		placed[bestIndex] = false
+		failedLoadID = requests[bestIndex].load.ID
+
+		return false
+	}
+
+	if backtrack() {
+		return entries, 0, true
+	}
+	if failedLoadID == 0 && len(requests) > 0 {
+		failedLoadID = requests[0].load.ID
+	}
+
+	return nil, failedLoadID, false
+}
+
+func placementRequests(loads []TeachingLoad) []placementRequest {
+	requests := make([]placementRequest, 0, len(loads))
+	for _, load := range loads {
+		remaining := load.RequiredLessonCount
+		for remaining > 0 {
+			weekParity := 1
+			contribution := 1
+			if remaining >= 2 {
+				weekParity = 3
+				contribution = 2
+			}
+
+			requests = append(requests, placementRequest{load: load, weekParity: weekParity})
+			remaining -= contribution
+		}
+	}
+
+	return requests
+}
+
+func feasibleCandidates(request placementRequest, entries []CandidateEntry, input Input) []CandidateEntry {
+	candidates := make([]CandidateEntry, 0)
+	for day := firstScheduleDay; day <= lastScheduleDay; day++ {
+		for _, slot := range input.TimeSlots {
+			for _, room := range input.Rooms {
+				if room.Capacity < request.load.StudentCount {
+					continue
+				}
+				if !roomMatchesRequirement(room, request.load.RequiresComputerRoom) {
+					continue
+				}
+
+				entry := CandidateEntry{
+					TeachingLoadID:       request.load.ID,
+					GroupID:              request.load.GroupID,
+					SubjectID:            request.load.SubjectID,
+					TeacherID:            request.load.TeacherID,
+					LessonType:           request.load.LessonType,
+					RoomID:               room.ID,
+					RoomType:             room.Type,
+					RoomCapacity:         room.Capacity,
+					TimeSlotID:           slot.ID,
+					TimeSlotNumber:       slot.Number,
+					TimeSlotStartsAt:     slot.StartsAt,
+					TimeSlotEndsAt:       slot.EndsAt,
+					DayOfWeek:            day,
+					WeekParity:           request.weekParity,
+					StudentCount:         request.load.StudentCount,
+					RequiresComputerRoom: request.load.RequiresComputerRoom,
+				}
+				if !conflicts(entry, entries) && !violatesTeacherUnavailability(entry, input.Unavailable) {
+					candidates = append(candidates, entry)
+				}
+			}
+		}
+	}
+
+	return candidates
 }
 
 func (generator Generator) optimize(entries []CandidateEntry, input Input) []CandidateEntry {
@@ -130,6 +244,7 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 					candidate := cloneEntries(entries)
 					candidate[index].DayOfWeek = day
 					candidate[index].TimeSlotID = slot.ID
+					candidate[index].TimeSlotNumber = slot.Number
 					candidate[index].TimeSlotStartsAt = slot.StartsAt
 					candidate[index].TimeSlotEndsAt = slot.EndsAt
 					candidate[index].RoomID = room.ID
@@ -154,51 +269,13 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 	return best, bestMove, best != nil
 }
 
-func (generator Generator) place(load TeachingLoad, weekParity int, entries []CandidateEntry, input Input) (CandidateEntry, bool) {
-	for day := firstScheduleDay; day <= lastScheduleDay; day++ {
-		for _, slot := range input.TimeSlots {
-			for _, room := range input.Rooms {
-				if room.Capacity < load.StudentCount {
-					continue
-				}
-				if !roomMatchesRequirement(room, load.RequiresComputerRoom) {
-					continue
-				}
-
-				entry := CandidateEntry{
-					TeachingLoadID:       load.ID,
-					GroupID:              load.GroupID,
-					SubjectID:            load.SubjectID,
-					TeacherID:            load.TeacherID,
-					LessonType:           load.LessonType,
-					RoomID:               room.ID,
-					RoomType:             room.Type,
-					RoomCapacity:         room.Capacity,
-					TimeSlotID:           slot.ID,
-					TimeSlotStartsAt:     slot.StartsAt,
-					TimeSlotEndsAt:       slot.EndsAt,
-					DayOfWeek:            day,
-					WeekParity:           weekParity,
-					StudentCount:         load.StudentCount,
-					RequiresComputerRoom: load.RequiresComputerRoom,
-				}
-				if !conflicts(entry, entries) && !violatesTeacherUnavailability(entry, input.Unavailable) {
-					return entry, true
-				}
-			}
-		}
-	}
-
-	return CandidateEntry{}, false
-}
-
 func roomMatchesRequirement(room Room, requiresComputerRoom bool) bool {
 	return !requiresComputerRoom || room.Type == "computer"
 }
 
 func conflicts(candidate CandidateEntry, entries []CandidateEntry) bool {
 	for _, entry := range entries {
-		if candidate.DayOfWeek != entry.DayOfWeek || candidate.TimeSlotID != entry.TimeSlotID || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
+		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
 		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID || candidate.GroupID == entry.GroupID {
@@ -214,7 +291,7 @@ func conflictsWithOthers(candidate CandidateEntry, entries []CandidateEntry, can
 		if index == candidateIndex {
 			continue
 		}
-		if candidate.DayOfWeek != entry.DayOfWeek || candidate.TimeSlotID != entry.TimeSlotID || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
+		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
 		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID || candidate.GroupID == entry.GroupID {
@@ -223,6 +300,16 @@ func conflictsWithOthers(candidate CandidateEntry, entries []CandidateEntry, can
 	}
 
 	return false
+}
+
+func candidateTimeRangesOverlap(left CandidateEntry, right CandidateEntry) bool {
+	leftStart, leftEnd, leftOK := validation.ParseRange(left.TimeSlotStartsAt, left.TimeSlotEndsAt)
+	rightStart, rightEnd, rightOK := validation.ParseRange(right.TimeSlotStartsAt, right.TimeSlotEndsAt)
+	if !leftOK || !rightOK {
+		return true
+	}
+
+	return validation.TimeRangesOverlap(leftStart, leftEnd, rightStart, rightEnd)
 }
 
 func violatesTeacherUnavailability(candidate CandidateEntry, rules []validation.TeacherUnavailability) bool {
@@ -266,7 +353,7 @@ func qualityScore(entries []CandidateEntry) int {
 
 	lateEntries := 0
 	for _, entry := range entries {
-		if entry.TimeSlotID > 5 {
+		if entry.TimeSlotNumber > 5 {
 			lateEntries++
 		}
 	}

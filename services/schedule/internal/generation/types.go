@@ -53,6 +53,7 @@ type Room struct {
 
 type TimeSlot struct {
 	ID       int64
+	Number   int
 	StartsAt string
 	EndsAt   string
 }
@@ -67,6 +68,7 @@ type CandidateEntry struct {
 	RoomType             string
 	RoomCapacity         int
 	TimeSlotID           int64
+	TimeSlotNumber       int
 	TimeSlotStartsAt     string
 	TimeSlotEndsAt       string
 	DayOfWeek            int
