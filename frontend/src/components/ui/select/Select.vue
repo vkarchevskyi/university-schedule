@@ -4,6 +4,7 @@ import {
   SelectRoot,
   SelectValue,
   SelectTrigger,
+  SelectPortal,
   SelectContent,
   SelectItem,
   SelectItemText,
@@ -35,34 +36,36 @@ const emit = defineEmits<{
       v-bind="$attrs"
       :class="
         cn(
-          'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
           $props.class,
         )
       "
     >
       <SelectValue :placeholder="placeholder" />
     </SelectTrigger>
-    <SelectContent
-      position="popper"
-      :class="
-        cn(
-          'z-50 min-w-(--reka-select-trigger-width) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md',
-        )
-      "
-    >
-      <SelectViewport class="p-1">
-        <SelectItem
-          v-for="option in options"
-          :key="option.id"
-          :value="String(option.id)"
-          class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-        >
-          <SelectItemText>
-            {{ option.label }}
-            <template v-if="option.description"> - {{ option.description }}</template>
-          </SelectItemText>
-        </SelectItem>
-      </SelectViewport>
-    </SelectContent>
+    <SelectPortal>
+      <SelectContent
+        position="popper"
+        :class="
+          cn(
+            'z-50 min-w-(--reka-select-trigger-width) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md',
+          )
+        "
+      >
+        <SelectViewport class="p-1">
+          <SelectItem
+            v-for="option in options"
+            :key="option.id"
+            :value="String(option.id)"
+            class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+          >
+            <SelectItemText>
+              {{ option.label }}
+              <template v-if="option.description"> - {{ option.description }}</template>
+            </SelectItemText>
+          </SelectItem>
+        </SelectViewport>
+      </SelectContent>
+    </SelectPortal>
   </SelectRoot>
 </template>
