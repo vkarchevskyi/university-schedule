@@ -81,7 +81,10 @@ async function openExamSchedule(id: number): Promise<void> {
                   <td>{{ job.generatedScheduleId === null ? t.notAvailable : `#${job.generatedScheduleId}` }}</td>
                   <td>
                     <span v-if="job.errorMessage" class="field-error">{{ job.errorMessage }}</span>
-                    <span v-else>{{ diagnosticsText(job.diagnostics) }}</span>
+                    <details v-else>
+                      <summary>{{ t.payloadDetails }}</summary>
+                      <pre>{{ diagnosticsText(job.diagnostics) }}</pre>
+                    </details>
                   </td>
                   <td>
                     <AppButton
@@ -135,7 +138,10 @@ async function openExamSchedule(id: number): Promise<void> {
                   </td>
                   <td>
                     <span v-if="job.errorMessage" class="field-error">{{ job.errorMessage }}</span>
-                    <span v-else>{{ diagnosticsText(job.diagnostics) }}</span>
+                    <details v-else>
+                      <summary>{{ t.payloadDetails }}</summary>
+                      <pre>{{ diagnosticsText(job.diagnostics) }}</pre>
+                    </details>
                   </td>
                   <td>
                     <AppButton

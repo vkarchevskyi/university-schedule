@@ -32,6 +32,7 @@ function itemsFor(date: string): ScheduleItem[] {
           <ScheduleCard :item="item" />
         </div>
       </div>
+      <p v-else class="mobile-schedule__empty">{{ labels.noClasses }}</p>
     </section>
   </div>
 </template>

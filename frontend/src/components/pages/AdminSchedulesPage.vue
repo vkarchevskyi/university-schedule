@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import StatusBadge from '@/components/atoms/StatusBadge.vue'
 import GenerationJobPanel from '@/components/molecules/GenerationJobPanel.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import { useAdminSchedules } from '@/composables/useAdminSchedules'
@@ -20,12 +23,27 @@ const {
   startGeneration,
   openSchedule,
 } = useAdminSchedules()
+
+const schedulesBySemester = computed(() => {
+  const map = new Map<number, typeof schedules.value>()
+
+  for (const schedule of schedules.value) {
+    map.set(schedule.semesterId, [...(map.get(schedule.semesterId) ?? []), schedule])
+  }
+
+  return Array.from(map.entries())
+})
 </script>
 
 <template>
   <AdminLayout>
-    <section class="admin-dashboard">
-      <h1>{{ t.schedulesTitle }}</h1>
+    <section class="admin-dashboard schedule-review-page">
+      <header class="admin-page-header">
+        <div>
+          <h1>{{ t.schedulesTitle }}</h1>
+          <p>{{ t.scheduleQueue }}</p>
+        </div>
+      </header>
       <StateMessage v-if="error" tone="error" :title="error" />
       <StateMessage v-else-if="isLoading" :title="t.loading" />
       <template v-else>
@@ -57,25 +75,25 @@ const {
           open-testid="open-generated-schedule"
           @open="openSchedule"
         />
-        <StateMessage
-          v-if="schedules.length === 0"
-          :title="t.noSchedules"
-          data-testid="no-schedules"
-        />
-        <div v-else class="schedule-list" data-testid="schedule-list">
-          <article v-for="schedule in schedules" :key="schedule.id" class="schedule-list__item">
-            <div>
-              <strong>#{{ schedule.id }} · {{ t.scheduleStatuses[schedule.status] ?? schedule.status }}</strong>
-              <span>{{ schedule.validFrom }} - {{ schedule.validTo }}</span>
-            </div>
-            <AppButton
-              variant="secondary"
-              data-testid="open-schedule"
-              @click="openSchedule(schedule.id)"
-            >
-              {{ t.openSchedule }}
-            </AppButton>
-          </article>
+        <StateMessage v-if="schedules.length === 0" :title="t.noSchedules" data-testid="no-schedules" />
+        <div v-else class="schedule-review-list" data-testid="schedule-list">
+          <section v-for="[semesterId, semesterSchedules] in schedulesBySemester" :key="semesterId" class="schedule-review-group">
+            <h2>{{ t.semester }} #{{ semesterId }}</h2>
+            <article v-for="schedule in semesterSchedules" :key="schedule.id" class="review-card">
+              <div>
+                <strong>#{{ schedule.id }}</strong>
+                <span>{{ schedule.validFrom }} - {{ schedule.validTo }}</span>
+              </div>
+              <StatusBadge :tone="schedule.status === 'published' ? 'info' : 'warning'">
+                {{ t.scheduleStatuses[schedule.status] ?? schedule.status }}
+              </StatusBadge>
+              <span>{{ t.entries }}: {{ schedule.entries.length }}</span>
+              <span>{{ schedule.status === 'generated' ? t.generatedDraftLabel : t.manualDraft }}</span>
+              <AppButton variant="secondary" data-testid="open-schedule" @click="openSchedule(schedule.id)">
+                {{ t.openSchedule }}
+              </AppButton>
+            </article>
+          </section>
         </div>
       </template>
     </section>

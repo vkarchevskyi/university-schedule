@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppButton from '@/components/atoms/AppButton.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import StatusBadge from '@/components/atoms/StatusBadge.vue'
 import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
 import GenerationJobPanel from '@/components/molecules/GenerationJobPanel.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
@@ -55,12 +56,17 @@ const {
         @open="openSchedule"
       />
 
-      <div v-if="!isLoading" class="schedule-list" data-testid="exam-schedule-list">
-        <article v-for="schedule in schedules" :key="schedule.id" class="schedule-list__item">
+      <div v-if="!isLoading" class="schedule-review-list" data-testid="exam-schedule-list">
+        <StateMessage v-if="schedules.length === 0" :title="t.noSchedules" />
+        <article v-for="schedule in schedules" v-else :key="schedule.id" class="review-card">
           <div>
-            <strong>#{{ schedule.id }} · {{ schedule.status }}</strong>
+            <strong>#{{ schedule.id }}</strong>
             <span>{{ t.semester }} #{{ schedule.semesterId }}</span>
           </div>
+          <StatusBadge :tone="schedule.status === 'published' ? 'info' : 'warning'">
+            {{ schedule.status }}
+          </StatusBadge>
+          <span>{{ t.entries }}: {{ schedule.entries.length }}</span>
           <div class="table-actions">
             <AppButton @click="openSchedule(schedule.id)">{{ t.openSchedule }}</AppButton>
             <ConfirmActionButton :message="t.deleteConfirm" @confirm="removeSchedule(schedule.id)">
