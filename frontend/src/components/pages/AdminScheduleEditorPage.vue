@@ -274,7 +274,7 @@ function selectSubject(value: string): void {
           <ScheduleEntryEditor
             :entry="selectedEntry"
             :groups="groups"
-            :lesson-cards="filteredCards"
+            :lesson-cards="cards"
             :rooms="rooms"
             :subjects="subjects"
             :teachers="teachers"
