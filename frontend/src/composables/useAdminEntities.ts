@@ -12,7 +12,7 @@ import type {
 } from '@/types/adminEntities'
 
 export function useAdminEntities(config: EntityConfig) {
-  const { t } = useAdminI18n()
+  const { t, label } = useAdminI18n()
   const items = ref<AdminEntity[]>([])
   const lookups = ref<EntityLookups>({})
   const editing = ref<AdminEntity | null>(null)
@@ -116,7 +116,7 @@ export function useAdminEntities(config: EntityConfig) {
 
   function fieldOptions(field: EntityField): Array<{ value: string | number; label: string }> {
     if (field.options !== undefined) {
-      return field.options
+      return field.options.map((option) => ({ value: option.value, label: label(option.labelKey) }))
     }
 
     if (field.lookup === undefined) {
@@ -134,14 +134,20 @@ export function useAdminEntities(config: EntityConfig) {
     const value = item[key]
 
     if (field?.options !== undefined) {
-      return field.options.find((option) => option.value === value)?.label ?? String(value ?? '')
+      const option = field.options.find((candidate) => candidate.value === value)
+      return option === undefined ? String(value ?? '') : label(option.labelKey)
     }
 
     if (field?.lookup !== undefined && typeof value === 'number') {
       return labelFor((lookups.value[field.lookup] ?? []).find((lookup) => lookup.id === value))
     }
 
-    return String(value ?? '')
+    const display = String(value ?? '')
+    if (display === 'yes' || display === 'no') {
+      return display === 'yes' ? t.value.yes : t.value.no
+    }
+
+    return display
   }
 
   function initialValues(item: AdminEntity = {}): Record<string, string | number | boolean> {

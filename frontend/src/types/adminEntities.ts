@@ -6,20 +6,21 @@ export type FieldType = 'text' | 'number' | 'date' | 'time' | 'select' | 'boolea
 
 export interface EntityField {
   key: string
-  label: string
+  labelKey: string
   type: FieldType
   required?: boolean
-  options?: Array<{ value: string | number; label: string }>
+  options?: Array<{ value: string | number; labelKey: string }>
   lookup?: 'academicYears' | 'semesters' | 'groups' | 'teachers' | 'subjects'
 }
 
 export interface EntityConfig {
   key: string
-  title: string
+  titleKey: string
+  hintKey: string
   routeName: string
   endpoint: string
   fields: EntityField[]
-  columns: Array<{ key: string; label: string; format?: (value: unknown, row: AdminEntity) => string }>
+  columns: Array<{ key: string; labelKey: string; format?: (value: unknown, row: AdminEntity) => string }>
 }
 
 export type AdminEntity = Record<string, unknown> & { id?: number }
