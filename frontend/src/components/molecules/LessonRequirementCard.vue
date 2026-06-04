@@ -19,6 +19,7 @@ function teacherName(card: LessonCard): string {
   <article
     :class="[
       'lesson-requirement-card',
+      `lesson-requirement-card--${card.lessonType}`,
       { 'lesson-requirement-card--done': card.remainingLessonCount <= 0 || disabled },
     ]"
     :draggable="card.remainingLessonCount > 0 && !disabled"
@@ -30,9 +31,15 @@ function teacherName(card: LessonCard): string {
       $event.dataTransfer?.setData('application/json', JSON.stringify(card))
     "
   >
-    <strong>{{ card.subject.name }}</strong>
-    <span>{{ labels.lessonTypes[card.lessonType] ?? card.lessonType }}</span>
+    <header class="lesson-requirement-card__header">
+      <strong>{{ card.subject.name }}</strong>
+      <span>{{ labels.lessonTypes[card.lessonType] ?? card.lessonType }}</span>
+    </header>
     <small>{{ card.group.name }} · {{ teacherName(card) }}</small>
+    <div class="lesson-requirement-card__progress">
+      <span>{{ card.scheduledLessonCount }} / {{ card.requiredLessonCount }}</span>
+      <progress :value="card.scheduledLessonCount" :max="card.requiredLessonCount"></progress>
+    </div>
     <dl>
       <div>
         <dt>{{ t.required }}</dt>

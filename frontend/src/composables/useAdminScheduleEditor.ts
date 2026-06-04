@@ -49,12 +49,19 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const subjects = ref<AdminSubject[]>([])
   const timeSlots = ref<AdminTimeSlot[]>([])
   const selectedGroupId = ref<number | null>(null)
+  const selectedTeacherId = ref<number | null>(null)
+  const selectedSubjectId = ref<number | null>(null)
+  const selectedLessonType = ref('')
+  const cardsSearch = ref('')
+  const hideCompletedCards = ref(true)
+  const requiresComputerRoomOnly = ref(false)
   const selectedEntry = ref<AdminScheduleEntry | null>(null)
   const pendingPlacement = ref<PendingPlacement | null>(null)
   const conflicts = ref<ScheduleValidationConflict[]>([])
   const entryErrors = ref<Record<string, string>>({})
   const errorEntryIds = ref<number[]>([])
   const message = ref<string | null>(null)
+  const lastValidationState = ref<'passed' | 'failed' | null>(null)
   const error = ref<string | null>(null)
   const actionError = ref<{ title: string; message: string | null; details: string[] }>({
     title: '',
@@ -64,22 +71,89 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const isLoading = ref(true)
 
   const isReadOnly = computed(() => schedule.value?.status === 'published')
+  const remainingLessonCount = computed(() =>
+    cards.value.reduce((total, card) => total + Math.max(card.remainingLessonCount, 0), 0),
+  )
+  const scheduledLessonCount = computed(() =>
+    cards.value.reduce((total, card) => total + Math.max(card.scheduledLessonCount, 0), 0),
+  )
+  const requiredLessonCount = computed(() =>
+    cards.value.reduce((total, card) => total + Math.max(card.requiredLessonCount, 0), 0),
+  )
+  const conflictCount = computed(() => conflicts.value.length)
+  const canPublish = computed(
+    () =>
+      !isReadOnly.value &&
+      lastValidationState.value === 'passed' &&
+      conflictCount.value === 0 &&
+      remainingLessonCount.value === 0,
+  )
+  const publishReadinessLabel = computed(() => {
+    if (isReadOnly.value) {
+      return t.value.published
+    }
+
+    if (conflictCount.value > 0 || lastValidationState.value === 'failed') {
+      return t.value.publishBlocked
+    }
+
+    if (lastValidationState.value !== 'passed') {
+      return t.value.needsValidation
+    }
+
+    return remainingLessonCount.value === 0 ? t.value.readyToPublish : t.value.remainingLessons
+  })
 
   const pendingRoomOptions = computed(() => pendingPlacement.value?.roomOptions ?? [])
   const groupOptions = computed<LookupOption[]>(() =>
     groups.value.map((group) => ({
       id: group.id,
       label: group.name,
-      description: `${group.speciality}, ${group.course}`,
+      description: '',
     })),
   )
-  const filteredCards = computed(() => {
-    if (selectedGroupId.value === null) {
-      return cards.value
-    }
+  const teacherOptions = computed<LookupOption[]>(() =>
+    teachers.value.map((teacher) => ({
+      id: teacher.id,
+      label: `${teacher.firstName} ${teacher.lastName}`,
+      description: '',
+    })),
+  )
+  const subjectOptions = computed<LookupOption[]>(() =>
+    subjects.value.map((subject) => ({ id: subject.id, label: subject.name, description: '' })),
+  )
+  const filteredCards = computed(() =>
+    cards.value
+      .filter((card) => selectedGroupId.value === null || card.group.id === selectedGroupId.value)
+      .filter((card) => selectedTeacherId.value === null || card.teacher.id === selectedTeacherId.value)
+      .filter((card) => selectedSubjectId.value === null || card.subject.id === selectedSubjectId.value)
+      .filter((card) => selectedLessonType.value === '' || card.lessonType === selectedLessonType.value)
+      .filter((card) => !hideCompletedCards.value || card.remainingLessonCount > 0)
+      .filter((card) => !requiresComputerRoomOnly.value || card.requiresComputerRoom)
+      .filter((card) => {
+        const query = cardsSearch.value.trim().toLocaleLowerCase()
 
-    return cards.value.filter((card) => card.group.id === selectedGroupId.value)
-  })
+        if (query === '') {
+          return true
+        }
+
+        return [
+          card.subject.name,
+          card.group.name,
+          `${card.teacher.firstName} ${card.teacher.lastName}`,
+          card.lessonType,
+        ]
+          .join(' ')
+          .toLocaleLowerCase()
+          .includes(query)
+      })
+      .sort(
+        (left, right) =>
+          right.remainingLessonCount - left.remainingLessonCount ||
+          left.group.name.localeCompare(right.group.name) ||
+          left.subject.name.localeCompare(right.subject.name),
+      ),
+  )
   const filteredEntries = computed(() => {
     if (selectedGroupId.value === null || schedule.value === null) {
       return schedule.value?.entries ?? []
@@ -242,6 +316,20 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
+  async function duplicateEntry(entry: AdminScheduleEntry): Promise<void> {
+    await createEntry({
+      teachingLoadIds: entry.teachingLoadIds,
+      subjectId: entry.subjectId,
+      teacherId: entry.teacherId,
+      lessonType: entry.lessonType,
+      roomId: entry.roomId,
+      timeSlotId: entry.timeSlotId,
+      dayOfWeek: entry.dayOfWeek,
+      weekParity: entry.weekParity,
+      groupIds: entry.groupIds,
+    })
+  }
+
   async function moveEntry(
     entry: AdminScheduleEntry,
     dayOfWeek: number,
@@ -295,6 +383,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     try {
       const result = await validateSchedule(scheduleId)
       conflicts.value = result.conflicts
+      lastValidationState.value = result.valid ? 'passed' : 'failed'
       message.value = result.valid ? t.value.validationPassed : t.value.validationFailed
     } catch (exception) {
       handleActionError(exception)
@@ -305,6 +394,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     try {
       const result = await validateSchedule(scheduleId)
       conflicts.value = result.conflicts
+      lastValidationState.value = result.valid ? 'passed' : 'failed'
 
       if (!result.valid) {
         message.value = t.value.cannotPublishInvalid
@@ -488,6 +578,12 @@ export function useAdminScheduleEditor(scheduleId: number) {
     subjects,
     timeSlots,
     selectedGroupId,
+    selectedTeacherId,
+    selectedSubjectId,
+    selectedLessonType,
+    cardsSearch,
+    hideCompletedCards,
+    requiresComputerRoomOnly,
     selectedEntry,
     pendingPlacement,
     conflicts,
@@ -498,8 +594,16 @@ export function useAdminScheduleEditor(scheduleId: number) {
     actionError,
     isLoading,
     isReadOnly,
+    remainingLessonCount,
+    scheduledLessonCount,
+    requiredLessonCount,
+    conflictCount,
+    canPublish,
+    publishReadinessLabel,
     pendingRoomOptions,
     groupOptions,
+    teacherOptions,
+    subjectOptions,
     filteredCards,
     filteredEntries,
     place,
@@ -509,6 +613,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     moveEntry,
     saveEntry,
     removeEntry,
+    duplicateEntry,
     validate,
     publish,
     clearActionError,
