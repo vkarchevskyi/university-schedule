@@ -59,13 +59,13 @@ Soft constraints should produce a score and explanation so administrators can un
 2. API validates that active teaching-load requirements, rooms, time slots, and teacher-subject links exist.
 3. API sends message to RabbitMQ.
 4. Go worker loads input data.
-5. Go worker generates a candidate schedule using CSP for feasible construction and Tabu search for optimization.
+5. Go worker generates a candidate schedule using bounded CSP/backtracking for feasible construction and Tabu search for optimization.
 6. Go worker validates hard constraints.
 7. Go worker writes generated entries directly to PostgreSQL as a draft or generated schedule.
 8. API exposes status and result to admin.
 9. Admin reviews and publishes.
 
-The first implementation may use deterministic CSP placement with a bounded score calculation before deeper optimization is tuned against real datasets. A generated draft is acceptable only when hard validation passes and the quality score is at least 80/100.
+Construction expands teaching-load requirements into placement variables, builds each variable's domain from valid day, slot, room, capacity, room-type, and teacher-availability combinations, and uses deterministic bounded backtracking to satisfy hard constraints. When a partial assignment blocks a more constrained requirement, the generator must reconsider earlier placements instead of failing on first-fit order. After a feasible assignment exists, Tabu search may move entries within hard-valid neighborhoods to improve soft-constraint quality. A generated draft is acceptable only when hard validation passes and the quality score is at least 80/100.
 
 ## Validation Workflow
 
@@ -112,6 +112,6 @@ Use cases:
 ## Decisions
 
 - Go writes generated entries directly to PostgreSQL.
-- Generation uses CSP for feasible construction and Tabu search for optimization.
+- Generation uses bounded CSP/backtracking for feasible construction and Tabu search for optimization.
 - Validation uses CSP-style hard-constraint checking.
 - Initial generated-draft quality target: no hard conflicts and at least 80/100 soft score. Tune later.

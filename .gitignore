@@ -4,3 +4,4 @@ docker/.env
 frontend/.env
 rest-api/.env.local
 services/schedule/.env
+services/schedule/.gocache/
