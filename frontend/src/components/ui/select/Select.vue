@@ -61,8 +61,10 @@ const emit = defineEmits<{
           >
             <SelectItemText>
               {{ option.label }}
-              <template v-if="option.description"> - {{ option.description }}</template>
             </SelectItemText>
+            <small v-if="option.description" class="ml-2 truncate text-muted-foreground">
+              {{ option.description }}
+            </small>
           </SelectItem>
         </SelectViewport>
       </SelectContent>
