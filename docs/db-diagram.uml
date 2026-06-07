@@ -7,27 +7,27 @@ skinparam nodesep 40
 entity users {
   * id : bigint <<PK>>
   --
-  * first_name : varchar
-  * last_name : varchar
-  * email : varchar
-  * password_hash : varchar
-  * role : varchar
-  * created_at : timestamp
+  * first_name : character varying
+  * last_name : character varying
+  * email : character varying <<UQ>>
+  * password_hash : character varying
+  * created_at : timestamp without time zone
+  * role : character varying = 'admin'
 }
 
 entity telegram_subscriptions {
   * id : bigint <<PK>>
   --
   * telegram_chat_id : bigint
-  * entity_type : varchar
+  * entity_type : character varying
   * entity_id : bigint
-  * created_at : timestamp
+  * created_at : timestamp without time zone
 }
 
 entity academic_years {
   * id : bigint <<PK>>
   --
-  * name : varchar
+  * name : character varying
   * starts_at : date
   * ends_at : date
 }
@@ -36,42 +36,42 @@ entity semesters {
   * id : bigint <<PK>>
   --
   * academic_year_id : bigint <<FK>>
-  * number : int
+  * number : integer
   * starts_at : date
   * ends_at : date
-  * first_week_parity : tinyint
+  * first_week_parity : smallint
 }
 
 entity groups {
   * id : bigint <<PK>>
   --
-  * name : varchar
-  * speciality : varchar
-  * course : int
-  * student_count : int
+  * name : character varying
+  * speciality : character varying
+  * course : integer
+  * student_count : integer
 }
 
 entity teachers {
   * id : bigint <<PK>>
   --
-  * first_name : varchar
-  * last_name : varchar
-  * department : varchar
+  * first_name : character varying
+  * last_name : character varying
+  * department : character varying
 }
 
 entity teacher_unavailability {
   * id : bigint <<PK>>
   --
   * teacher_id : bigint <<FK>>
-  * day_of_week : int
-  * unavailable_from : time
-  * unavailable_to : time
+  * day_of_week : smallint
+  * unavailable_from : time without time zone
+  * unavailable_to : time without time zone
 }
 
 entity subjects {
   * id : bigint <<PK>>
   --
-  * name : varchar
+  * name : character varying
 }
 
 entity teacher_subjects {
@@ -88,72 +88,72 @@ entity teaching_loads {
   * group_id : bigint <<FK>>
   * subject_id : bigint <<FK>>
   * teacher_id : bigint <<FK>>
-  * lesson_type : tinyint
-  * required_lesson_count : int
-  * requires_computer_room : boolean
-  * created_at : timestamp
-  * updated_at : timestamp
-  deleted_at : timestamp
+  * lesson_type : smallint
+  * required_lesson_count : integer
+  * created_at : timestamp without time zone
+  * updated_at : timestamp without time zone
+  deleted_at : timestamp without time zone
+  * requires_computer_room : boolean = false
 }
 
 entity rooms {
   * id : bigint <<PK>>
   --
-  * name : varchar
-  * type : varchar (lecture|computer)
-  * capacity : int
+  * name : character varying
+  * type : character varying <<CHECK lecture|computer>>
+  * capacity : integer
 }
 
 entity time_slots {
   * id : bigint <<PK>>
   --
-  * number : int
-  * starts_at : time
-  * ends_at : time
+  * number : integer
+  * starts_at : time without time zone
+  * ends_at : time without time zone
 }
 
 entity schedules {
   * id : bigint <<PK>>
   --
   * semester_id : bigint <<FK>>
-  * status : varchar
+  * status : character varying
   * valid_from : date
   * valid_to : date
   * created_by : bigint <<FK>>
-  * created_at : timestamp
-  published_at : timestamp
+  * created_at : timestamp without time zone
+  published_at : timestamp without time zone
 }
 
 entity schedule_generation_jobs {
-  * id : varchar <<PK>>
+  * id : character varying(36) <<PK>>
   --
   * semester_id : bigint <<FK>>
   * requested_by : bigint <<FK>>
-  * status : varchar
+  * status : character varying
   generated_schedule_id : bigint <<FK>>
-  quality_score : int
-  quality_status : varchar
+  quality_score : integer
+  quality_status : character varying(32)
   error_message : text
   diagnostics : json
-  * created_at : timestamp
-  started_at : timestamp
-  finished_at : timestamp
+  * created_at : timestamp without time zone
+  started_at : timestamp without time zone
+  finished_at : timestamp without time zone
 }
 
 entity exam_schedule_generation_jobs {
-  * id : varchar <<PK>>
+  * id : character varying(36) <<PK>>
   --
   * semester_id : bigint <<FK>>
   * requested_by : bigint <<FK>>
-  * status : varchar
+  * status : character varying
   generated_exam_schedule_id : bigint <<FK>>
-  quality_score : int
-  quality_status : varchar
+  quality_score : integer
+  quality_status : character varying(32)
   error_message : text
   diagnostics : json
-  * created_at : timestamp
-  started_at : timestamp
-  finished_at : timestamp
+  * created_at : timestamp without time zone
+  started_at : timestamp without time zone
+  finished_at : timestamp without time zone
 }
 
 entity schedule_entries {
@@ -162,11 +162,11 @@ entity schedule_entries {
   * schedule_id : bigint <<FK>>
   * subject_id : bigint <<FK>>
   * teacher_id : bigint <<FK>>
-  * lesson_type : tinyint
+  * lesson_type : smallint
   * room_id : bigint <<FK>>
   * time_slot_id : bigint <<FK>>
-  * day_of_week : int
-  * week_parity : tinyint
+  * day_of_week : smallint
+  * week_parity : smallint
 }
 
 entity schedule_entry_groups {
@@ -186,7 +186,7 @@ entity lessons {
   * lesson_date : date
   * subject_id : bigint <<FK>>
   * teacher_id : bigint <<FK>>
-  * lesson_type : tinyint
+  * lesson_type : smallint
   * room_id : bigint <<FK>>
   * time_slot_id : bigint <<FK>>
   * is_cancelled : boolean
@@ -202,24 +202,24 @@ entity exam_schedules {
   * id : bigint <<PK>>
   --
   * semester_id : bigint <<FK>>
-  * status : tinyint
+  * status : smallint
   * created_by : bigint <<FK>>
-  * created_at : timestamp
-  published_at : timestamp
-  deleted_at : timestamp
+  * created_at : timestamp without time zone
+  published_at : timestamp without time zone
+  deleted_at : timestamp without time zone
 }
 
 entity exam_schedule_entries {
   * id : bigint <<PK>>
   --
   * exam_schedule_id : bigint <<FK>>
-  * type : tinyint
+  * type : smallint
   * subject_id : bigint <<FK>>
   * teacher_id : bigint <<FK>>
   * room_id : bigint <<FK>>
   * entry_date : date
-  * starts_at : time
-  deleted_at : timestamp
+  * starts_at : time without time zone
+  deleted_at : timestamp without time zone
 }
 
 entity exam_schedule_entry_groups {
@@ -231,10 +231,12 @@ entity action_log {
   * id : bigint <<PK>>
   --
   * user_id : bigint <<FK>>
-  * action : varchar
-  * entity_type : varchar
+  * action : character varying
+  * entity_type : character varying
   * entity_id : bigint
-  * created_at : timestamp
+  * created_at : timestamp without time zone
+  before_payload : json
+  after_payload : json
 }
 
 users ||--o{ action_log : "створює"
