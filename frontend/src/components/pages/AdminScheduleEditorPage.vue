@@ -7,6 +7,7 @@ import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
 import ConflictPanel from '@/components/molecules/ConflictPanel.vue'
 import ErrorModal from '@/components/molecules/ErrorModal.vue'
+import GenerationJobPanel from '@/components/molecules/GenerationJobPanel.vue'
 import LessonRequirementCard from '@/components/molecules/LessonRequirementCard.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import ScheduleEntryEditor from '@/components/organisms/ScheduleEntryEditor.vue'
@@ -66,6 +67,9 @@ const {
   validate,
   publish,
   clearActionError,
+  generationJob,
+  isGenerating,
+  completeGeneration,
 } = useAdminScheduleEditor(scheduleId)
 
 const conflictEntryIds = computed(() => conflicts.value.flatMap((conflict) => conflict.entryIds))
@@ -124,6 +128,15 @@ function selectSubject(value: string): void {
           <p>{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
         </div>
         <div class="schedule-editor-page__controls">
+          <AppButton
+            v-if="!isReadOnly && remainingLessonCount > 0"
+            variant="secondary"
+            data-testid="complete-generation"
+            :disabled="isGenerating"
+            @click="completeGeneration"
+          >
+            {{ t.completeGeneration }}
+          </AppButton>
           <AppButton variant="primary" data-testid="validate-schedule" @click="validate">
             {{ t.validate }}
           </AppButton>
@@ -132,6 +145,18 @@ function selectSubject(value: string): void {
           </AppButton>
         </div>
       </header>
+      <GenerationJobPanel
+        v-if="generationJob"
+        :status="generationJob.status"
+        :quality-score="generationJob.qualityScore"
+        :quality-status="generationJob.qualityStatus"
+        :diagnostics="generationJob.diagnostics"
+        :error-message="generationJob.errorMessage"
+        :generated-id="generationJob.generatedScheduleId"
+        :open-label="t.openGeneratedSchedule"
+        testid="editor-generation-job"
+        @open="() => {}"
+      />
       <section class="schedule-summary-bar" aria-label="Schedule summary">
         <article>
           <span>{{ t.status }}</span>

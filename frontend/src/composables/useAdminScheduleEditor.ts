@@ -16,6 +16,7 @@ import {
 } from '@/api/adminSchedule'
 import { ApiError } from '@/api/http'
 import { useAdminI18n } from '@/composables/useI18n'
+import { useScheduleGenerationJob } from '@/composables/useScheduleGenerationJob'
 import type {
   AdminRoom,
   AdminSchedule,
@@ -72,6 +73,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     details: [],
   })
   const isLoading = ref(true)
+  const { generationJob, isGenerating, startGeneration: runGeneration } = useScheduleGenerationJob()
 
   const isReadOnly = computed(() => schedule.value?.status === 'published')
   const remainingLessonCount = computed(() =>
@@ -597,6 +599,29 @@ export function useAdminScheduleEditor(scheduleId: number) {
     )[cardSort.value]
   }
 
+  async function completeGeneration(): Promise<void> {
+    if (schedule.value === null || schedule.value.semesterId === null || isReadOnly.value) {
+      return
+    }
+
+    clearActionError()
+    message.value = null
+
+    try {
+      const job = await runGeneration(schedule.value.semesterId, scheduleId, async () => {
+        await loadEditor()
+      })
+
+      if (job.status === 'completed') {
+        message.value = t.value.completeGenerationSuccess
+      } else if (job.errorMessage) {
+        showActionError(t.value.completeGenerationFailed, [job.errorMessage])
+      }
+    } catch (exception) {
+      handleActionError(exception)
+    }
+  }
+
   return {
     schedule,
     cards,
@@ -646,5 +671,8 @@ export function useAdminScheduleEditor(scheduleId: number) {
     validate,
     publish,
     clearActionError,
+    generationJob,
+    isGenerating,
+    completeGeneration,
   }
 }

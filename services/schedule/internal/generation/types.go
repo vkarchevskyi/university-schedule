@@ -4,6 +4,7 @@ type JobMessage struct {
 	JobID             string `json:"jobId"`
 	SemesterID        int64  `json:"semesterId"`
 	RequestedByUserID int64  `json:"requestedByUserId"`
+	BaseScheduleID    *int64 `json:"baseScheduleId,omitempty"`
 }
 
 type Result struct {

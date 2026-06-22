@@ -9,6 +9,7 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/notifications"
+	"github.com/vkarchevskyi/university-schedule/services/schedule/internal/validation"
 )
 
 type Worker struct {
@@ -92,7 +93,7 @@ func (worker Worker) Process(ctx context.Context, message JobMessage) error {
 	}
 	worker.publishJob(ctx, message.JobID)
 
-	input, err := worker.store.LoadInput(ctx, message.SemesterID)
+	input, err := worker.store.LoadInput(ctx, message.SemesterID, message.BaseScheduleID)
 	if err != nil {
 		return err
 	}
@@ -102,13 +103,19 @@ func (worker Worker) Process(ctx context.Context, message JobMessage) error {
 		return err
 	}
 
+	diagnostics := map[string]any{
+		"generatedEntryCount": len(entries),
+		"minimumQualityScore": minimumQualityScore,
+		"seedEntryCount":      len(input.SeedEntries),
+	}
+	if message.BaseScheduleID != nil {
+		diagnostics["remainingLessonCountBefore"] = remainingLessonCount(input.AllTeachingLoads, input.SeedEntries)
+	}
+
 	result := Result{
 		QualityScore:  score,
 		QualityStatus: status,
-		Diagnostics: map[string]any{
-			"generatedEntryCount": len(entries),
-			"minimumQualityScore": minimumQualityScore,
-		},
+		Diagnostics:   diagnostics,
 	}
 
 	_, err = worker.store.CompleteJobWithDraftSchedule(ctx, message, entries, result)
@@ -139,4 +146,21 @@ func (worker Worker) publishJob(ctx context.Context, jobID string) {
 	}); err != nil {
 		log.Printf("publish schedule generation notification: %v", err)
 	}
+}
+
+func remainingLessonCount(loads []TeachingLoad, seedEntries []CandidateEntry) int {
+	scheduledCounts := make(map[int64]int)
+	for _, entry := range seedEntries {
+		scheduledCounts[entry.TeachingLoadID] += validation.LessonCountFromWeekParity(entry.WeekParity)
+	}
+
+	remaining := 0
+	for _, load := range loads {
+		left := load.RequiredLessonCount - scheduledCounts[load.ID]
+		if left > 0 {
+			remaining += left
+		}
+	}
+
+	return remaining
 }

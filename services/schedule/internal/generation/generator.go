@@ -20,11 +20,13 @@ type placementRequest struct {
 }
 
 type Input struct {
-	TeachingLoads []TeachingLoad
-	Rooms         []Room
-	TimeSlots     []TimeSlot
-	Assignments   []validation.TeacherSubject
-	Unavailable   []validation.TeacherUnavailability
+	TeachingLoads    []TeachingLoad
+	AllTeachingLoads []TeachingLoad
+	SeedEntries      []CandidateEntry
+	Rooms            []Room
+	TimeSlots        []TimeSlot
+	Assignments      []validation.TeacherSubject
+	Unavailable      []validation.TeacherUnavailability
 }
 
 type Generator struct {
@@ -36,7 +38,7 @@ func NewGenerator(validator validation.Validator) Generator {
 }
 
 func (generator Generator) Generate(input Input) ([]CandidateEntry, int, string, error) {
-	if len(input.TeachingLoads) == 0 {
+	if len(input.TeachingLoads) == 0 && len(input.SeedEntries) == 0 {
 		return nil, 0, "failed", errors.New("semester has no active teaching loads")
 	}
 	if len(input.Rooms) == 0 {
@@ -46,37 +48,46 @@ func (generator Generator) Generate(input Input) ([]CandidateEntry, int, string,
 		return nil, 0, "failed", errors.New("no time slots are available")
 	}
 
-	entries, failedLoadID, ok := generator.construct(input)
+	newEntries, failedLoadID, ok := generator.construct(input)
 	if !ok {
 		return nil, 0, "failed", fmt.Errorf("cannot place teaching load %d", failedLoadID)
 	}
 
-	entries = generator.optimize(entries, input)
+	newEntries = generator.optimize(newEntries, input)
+	allEntries := append(cloneEntries(input.SeedEntries), newEntries...)
+	validationLoads := input.AllTeachingLoads
+	if len(validationLoads) == 0 {
+		validationLoads = input.TeachingLoads
+	}
 	schedule := validation.Schedule{
-		Entries:                    validationEntries(entries),
-		TeachingLoads:              validationTeachingLoads(input.TeachingLoads),
+		Entries:                    validationEntries(allEntries),
+		TeachingLoads:              validationTeachingLoads(validationLoads),
 		TeacherSubjectAssignments:  input.Assignments,
 		TeacherUnavailabilityRules: input.Unavailable,
 	}
 	result := generator.validator.Validate(schedule)
 	if !result.Valid {
-		return entries, 0, "failed", fmt.Errorf("generated schedule has %d hard conflicts", len(result.Conflicts))
+		return allEntries, 0, "failed", fmt.Errorf("generated schedule has %d hard conflicts", len(result.Conflicts))
 	}
 
-	score := qualityScore(entries)
+	score := qualityScore(allEntries)
 	if score < minimumQualityScore {
-		return entries, score, "low_quality", fmt.Errorf("generated schedule quality score %d is below minimum %d", score, minimumQualityScore)
+		return allEntries, score, "low_quality", fmt.Errorf("generated schedule quality score %d is below minimum %d", score, minimumQualityScore)
 	}
 
 	status := "acceptable"
 
-	return entries, score, status, nil
+	return newEntries, score, status, nil
 }
 
 func (generator Generator) construct(input Input) ([]CandidateEntry, int64, bool) {
 	requests := placementRequests(input.TeachingLoads)
+	if len(requests) == 0 {
+		return []CandidateEntry{}, 0, true
+	}
+
 	for _, request := range requests {
-		if len(feasibleCandidates(request, nil, input)) == 0 {
+		if len(feasibleCandidates(request, input.SeedEntries, input)) == 0 {
 			return nil, request.load.ID, false
 		}
 	}
@@ -103,7 +114,7 @@ func (generator Generator) construct(input Input) ([]CandidateEntry, int64, bool
 				continue
 			}
 
-			candidates := feasibleCandidates(request, entries, input)
+			candidates := feasibleCandidates(request, append(input.SeedEntries, entries...), input)
 			if len(candidates) == 0 {
 				failedLoadID = request.load.ID
 				return false
@@ -143,10 +154,10 @@ func placementRequests(loads []TeachingLoad) []placementRequest {
 	for _, load := range loads {
 		remaining := load.RequiredLessonCount
 		for remaining > 0 {
-			weekParity := 1
+			weekParity := validation.WeekParityOdd
 			contribution := 1
 			if remaining >= 2 {
-				weekParity = 3
+				weekParity = validation.WeekParityBoth
 				contribution = 2
 			}
 
@@ -199,12 +210,16 @@ func feasibleCandidates(request placementRequest, entries []CandidateEntry, inpu
 }
 
 func (generator Generator) optimize(entries []CandidateEntry, input Input) []CandidateEntry {
+	if len(entries) == 0 {
+		return entries
+	}
+
 	best := cloneEntries(entries)
 	current := cloneEntries(entries)
 	tabu := make(map[string]int)
 
 	for iteration := 0; iteration < 25; iteration++ {
-		candidate, move, ok := bestNeighbor(current, input, tabu, iteration)
+		candidate, move, ok := bestNeighbor(current, input.SeedEntries, input, tabu, iteration)
 		if !ok {
 			break
 		}
@@ -212,7 +227,7 @@ func (generator Generator) optimize(entries []CandidateEntry, input Input) []Can
 		current = candidate
 		tabu[move] = iteration + 5
 
-		if qualityScore(current) > qualityScore(best) {
+		if qualityScore(append(cloneEntries(input.SeedEntries), current...)) > qualityScore(append(cloneEntries(input.SeedEntries), best...)) {
 			best = cloneEntries(current)
 		}
 	}
@@ -220,7 +235,7 @@ func (generator Generator) optimize(entries []CandidateEntry, input Input) []Can
 	return best
 }
 
-func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, iteration int) ([]CandidateEntry, string, bool) {
+func bestNeighbor(entries []CandidateEntry, seedEntries []CandidateEntry, input Input, tabu map[string]int, iteration int) ([]CandidateEntry, string, bool) {
 	bestScore := -1
 	bestMove := ""
 	var best []CandidateEntry
@@ -251,11 +266,12 @@ func bestNeighbor(entries []CandidateEntry, input Input, tabu map[string]int, it
 					candidate[index].RoomType = room.Type
 					candidate[index].RoomCapacity = room.Capacity
 
-					if conflictsWithOthers(candidate[index], candidate, index) || violatesTeacherUnavailability(candidate[index], input.Unavailable) {
+					combined := append(cloneEntries(seedEntries), candidate...)
+					if conflictsWithOthers(candidate[index], combined, index+len(seedEntries)) || violatesTeacherUnavailability(candidate[index], input.Unavailable) {
 						continue
 					}
 
-					score := qualityScore(candidate)
+					score := qualityScore(combined)
 					if score > bestScore {
 						bestScore = score
 						bestMove = move
@@ -343,7 +359,7 @@ func cloneEntries(entries []CandidateEntry) []CandidateEntry {
 }
 
 func weekParityOverlaps(left int, right int) bool {
-	return left == 3 || right == 3 || left == right
+	return validation.WeekParityOverlapsInt(left, right)
 }
 
 func qualityScore(entries []CandidateEntry) int {

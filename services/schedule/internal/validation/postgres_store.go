@@ -331,12 +331,12 @@ func LessonTypeName(value int) string {
 
 func WeekParityName(value int) string {
 	switch value {
-	case 1:
-		return "odd"
-	case 2:
-		return "even"
-	case 3:
-		return "both"
+	case WeekParityOdd:
+		return WeekParityNameOdd
+	case WeekParityEven:
+		return WeekParityNameEven
+	case WeekParityBoth:
+		return WeekParityNameBoth
 	default:
 		return "unknown"
 	}

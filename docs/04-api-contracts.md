@@ -391,9 +391,14 @@ Request:
 
 ```json
 {
-  "semesterId": 1
+  "semesterId": 1,
+  "scheduleId": 12
 }
 ```
+
+`scheduleId` is optional. When omitted, the worker creates a new draft schedule for the semester. When provided, the worker completes an existing draft by keeping current entries fixed and generating only the remaining teaching-load lessons into the same schedule.
+
+Before queueing a completion job, the API validates that the schedule exists, belongs to the selected semester, is still a draft, and has at least one teaching load with remaining lesson count greater than zero.
 
 Response:
 
@@ -432,7 +437,9 @@ Response:
   "errorMessage": null,
   "diagnostics": {
     "generatedEntryCount": 24,
-    "minimumQualityScore": 80
+    "minimumQualityScore": 80,
+    "seedEntryCount": 6,
+    "remainingLessonCountBefore": 18
   },
   "createdAt": "2026-05-13T12:00:00+00:00",
   "startedAt": "2026-05-13T12:00:01+00:00",

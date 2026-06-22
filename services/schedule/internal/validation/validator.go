@@ -346,15 +346,11 @@ func entryIDsForTeachingLoad(entries []ScheduleEntry, teachingLoadID int64) []in
 }
 
 func lessonCount(weekParity string) int {
-	if weekParity == "both" {
-		return 2
-	}
-
-	return 1
+	return LessonCountFromWeekParityName(weekParity)
 }
 
 func weekParityOverlaps(left string, right string) bool {
-	return left == "both" || right == "both" || left == right
+	return left == WeekParityNameBoth || right == WeekParityNameBoth || left == right
 }
 
 func hasInt64Overlap(left []int64, right []int64) bool {

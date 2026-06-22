@@ -13,5 +13,8 @@ final readonly class ScheduleGenerationRequestDto
         #[Assert\Type('integer')]
         #[Assert\Positive]
         public ?int $semesterId = null,
+        #[Assert\Type('integer')]
+        #[Assert\Positive]
+        public ?int $scheduleId = null,
     ) {}
 }

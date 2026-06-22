@@ -108,10 +108,18 @@ export function publishSchedule(scheduleId: number): Promise<AdminSchedule> {
   })
 }
 
-export function generateSchedule(semesterId: number): Promise<ScheduleGenerationJob> {
+export function generateSchedule(
+  semesterId: number,
+  scheduleId?: number,
+): Promise<ScheduleGenerationJob> {
+  const body: { semesterId: number; scheduleId?: number } = { semesterId }
+  if (scheduleId !== undefined) {
+    body.scheduleId = scheduleId
+  }
+
   return requestJson('/api/admin/schedules/generate', {
     method: 'POST',
-    body: JSON.stringify({ semesterId }),
+    body: JSON.stringify(body),
     authenticated: true,
   })
 }

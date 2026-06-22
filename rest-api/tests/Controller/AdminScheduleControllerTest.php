@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Entity\Schedule;
 use App\Entity\User;
+use App\Enum\ScheduleStatus;
 use App\Enum\UserRole;
 use App\Entity\ActionLog;
 use App\Tests\Double\FakeScheduleGenerationPublisher;
@@ -457,6 +459,56 @@ final class AdminScheduleControllerTest extends WebTestCase
         ], 422);
 
         self::assertArrayHasKey('semesterId', $this->objectValue($result, 'errors'));
+        self::assertNull(FakeScheduleGenerationPublisher::$message);
+    }
+
+    public function testAdminCanStartScheduleCompletionGenerationJob(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+
+        $job = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+            'scheduleId' => $this->intValue($schedule, 'id'),
+        ], 202);
+
+        self::assertSame('queued', $this->stringValue($job, 'status'));
+        self::assertNotNull(FakeScheduleGenerationPublisher::$message);
+        self::assertSame($this->intValue($schedule, 'id'), FakeScheduleGenerationPublisher::$message['baseScheduleId'] ?? null);
+    }
+
+    public function testScheduleCompletionGenerationRejectsPublishedSchedule(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+        $scheduleEntity = $this->entityManager->find(Schedule::class, $this->intValue($schedule, 'id'));
+        self::assertInstanceOf(Schedule::class, $scheduleEntity);
+        $scheduleEntity->setStatus(ScheduleStatus::Published);
+        $this->entityManager->flush();
+
+        $result = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+            'scheduleId' => $this->intValue($schedule, 'id'),
+        ], 422);
+
+        self::assertArrayHasKey('scheduleId', $this->objectValue($result, 'errors'));
+        self::assertNull(FakeScheduleGenerationPublisher::$message);
+    }
+
+    public function testScheduleCompletionGenerationRejectsCompleteSchedule(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $this->requestJson('PATCH', sprintf('/api/admin/teaching-loads/%d', $fixtures->teachingLoadId), [
+            'requiredLessonCount' => 2,
+        ]);
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+
+        $result = $this->requestJson('POST', '/api/admin/schedules/generate', [
+            'semesterId' => $fixtures->semesterId,
+            'scheduleId' => $this->intValue($schedule, 'id'),
+        ], 422);
+
+        self::assertArrayHasKey('scheduleId', $this->objectValue($result, 'errors'));
         self::assertNull(FakeScheduleGenerationPublisher::$message);
     }
 

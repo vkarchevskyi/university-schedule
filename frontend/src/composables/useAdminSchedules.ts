@@ -1,16 +1,10 @@
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { subscribeToGenerationJob } from '@/api/generationNotifications'
-import {
-  createSchedule,
-  generateSchedule,
-  getGenerationJob,
-  listSchedules,
-  listSemesters,
-} from '@/api/adminSchedule'
+import { createSchedule, listSchedules, listSemesters } from '@/api/adminSchedule'
 import { useAdminI18n } from '@/composables/useI18n'
-import type { AdminSchedule, AdminSemester, ScheduleGenerationJob } from '@/types/adminSchedule'
+import { useScheduleGenerationJob } from '@/composables/useScheduleGenerationJob'
+import type { AdminSchedule, AdminSemester } from '@/types/adminSchedule'
 
 export function useAdminSchedules() {
   const router = useRouter()
@@ -20,8 +14,7 @@ export function useAdminSchedules() {
   const selectedSemesterId = ref<number | null>(null)
   const isLoading = ref(true)
   const error = ref<string | null>(null)
-  const generationJob = ref<ScheduleGenerationJob | null>(null)
-  let stopGenerationNotifications: (() => void) | null = null
+  const { generationJob, startGeneration: runGeneration } = useScheduleGenerationJob()
 
   const semesterOptions = computed(() =>
     semesters.value.map((semester) => ({
@@ -32,7 +25,6 @@ export function useAdminSchedules() {
   )
 
   onMounted(load)
-  onUnmounted(() => stopGenerationNotifications?.())
 
   async function load(): Promise<void> {
     isLoading.value = true
@@ -73,68 +65,9 @@ export function useAdminSchedules() {
       return
     }
 
-    generationJob.value = await generateSchedule(selectedSemesterId.value)
-    await waitForGeneration(generationJob.value.id)
-  }
-
-  async function waitForGeneration(jobId: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      let resolved = false
-      const fallbackTimeout = window.setTimeout(startPollingFallback, 10000)
-
-      function finish(): void {
-        if (resolved) {
-          return
-        }
-        resolved = true
-        window.clearTimeout(fallbackTimeout)
-        stopGenerationNotifications?.()
-        stopGenerationNotifications = null
-        resolve()
-      }
-
-      async function startPollingFallback(): Promise<void> {
-        if (resolved) {
-          return
-        }
-        await pollGeneration(jobId)
-        finish()
-      }
-
-      stopGenerationNotifications = subscribeToGenerationJob<ScheduleGenerationJob>(
-        'schedule_generation_job',
-        jobId,
-        async ({ job }) => {
-          generationJob.value = job
-
-          if (job.status === 'completed' || job.status === 'failed') {
-            if (job.generatedScheduleId !== null) {
-              await load()
-            }
-            finish()
-          }
-        },
-        startPollingFallback,
-      )
+    await runGeneration(selectedSemesterId.value, undefined, async () => {
+      await load()
     })
-  }
-
-  async function pollGeneration(jobId: string): Promise<void> {
-    const terminal = new Set(['completed', 'failed'])
-
-    for (let attempt = 0; attempt < 10; attempt += 1) {
-      const job = await getGenerationJob(jobId)
-      generationJob.value = job
-
-      if (terminal.has(job.status)) {
-        if (job.generatedScheduleId !== null) {
-          await load()
-        }
-        return
-      }
-
-      await new Promise((resolve) => window.setTimeout(resolve, 1000))
-    }
   }
 
   async function openSchedule(id: number): Promise<void> {

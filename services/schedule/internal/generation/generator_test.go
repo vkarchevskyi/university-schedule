@@ -263,6 +263,96 @@ func TestGeneratorFailsLowQualitySchedule(t *testing.T) {
 	}
 }
 
+func TestGeneratorCompletesRemainingPlacementWithSeed(t *testing.T) {
+	generator := NewGenerator(validation.NewValidator())
+	seed := []CandidateEntry{{
+		TeachingLoadID:   1,
+		GroupID:          1,
+		SubjectID:        1,
+		TeacherID:        1,
+		LessonType:       2,
+		RoomID:           1,
+		RoomType:         "lecture",
+		RoomCapacity:     30,
+		TimeSlotID:       1,
+		TimeSlotNumber:   1,
+		TimeSlotStartsAt: "08:30:00",
+		TimeSlotEndsAt:   "09:50:00",
+		DayOfWeek:        1,
+		WeekParity:       1,
+		StudentCount:     20,
+	}}
+
+	entries, _, status, err := generator.Generate(Input{
+		TeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 1, StudentCount: 20},
+		},
+		AllTeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 2, StudentCount: 20},
+		},
+		SeedEntries: seed,
+		Rooms:       []Room{{ID: 1, Capacity: 30}},
+		TimeSlots: []TimeSlot{
+			{ID: 1, Number: 1, StartsAt: "08:30:00", EndsAt: "09:50:00"},
+			{ID: 2, Number: 2, StartsAt: "10:00:00", EndsAt: "11:20:00"},
+		},
+		Assignments: []validation.TeacherSubject{{TeacherID: 1, SubjectID: 1}},
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if status != "acceptable" {
+		t.Fatalf("status = %q, want acceptable", status)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("len(entries) = %d, want 1 new entry", len(entries))
+	}
+	if entries[0].DayOfWeek == 1 && entries[0].TimeSlotID == 1 {
+		t.Fatalf("new entry overlaps seed placement: %#v", entries[0])
+	}
+}
+
+func TestGeneratorFailsWhenSeedBlocksAllRemainingPlacements(t *testing.T) {
+	generator := NewGenerator(validation.NewValidator())
+
+	_, _, _, err := generator.Generate(Input{
+		TeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 1, StudentCount: 20},
+		},
+		AllTeachingLoads: []TeachingLoad{
+			{ID: 1, GroupID: 1, SubjectID: 1, TeacherID: 1, LessonType: 2, RequiredLessonCount: 2, StudentCount: 20},
+		},
+		SeedEntries: []CandidateEntry{{
+			TeachingLoadID:   1,
+			GroupID:          1,
+			SubjectID:        1,
+			TeacherID:        1,
+			LessonType:       2,
+			RoomID:           1,
+			RoomCapacity:     30,
+			TimeSlotID:       1,
+			TimeSlotNumber:   1,
+			TimeSlotStartsAt: "08:30:00",
+			TimeSlotEndsAt:   "09:50:00",
+			DayOfWeek:        1,
+			WeekParity:       1,
+			StudentCount:     20,
+		}},
+		Rooms:     []Room{{ID: 1, Capacity: 30}},
+		TimeSlots: []TimeSlot{{ID: 1, Number: 1, StartsAt: "08:30:00", EndsAt: "09:50:00"}},
+		Assignments: []validation.TeacherSubject{{TeacherID: 1, SubjectID: 1}},
+		Unavailable: []validation.TeacherUnavailability{
+			{TeacherID: 1, DayOfWeek: 2, UnavailableFrom: "08:00:00", UnavailableTo: "12:00:00"},
+			{TeacherID: 1, DayOfWeek: 3, UnavailableFrom: "08:00:00", UnavailableTo: "12:00:00"},
+			{TeacherID: 1, DayOfWeek: 4, UnavailableFrom: "08:00:00", UnavailableTo: "12:00:00"},
+			{TeacherID: 1, DayOfWeek: 5, UnavailableFrom: "08:00:00", UnavailableTo: "12:00:00"},
+		},
+	})
+	if err == nil {
+		t.Fatal("Generate() error = nil, want placement failure")
+	}
+}
+
 func mustParseRange(t *testing.T, entry CandidateEntry) (start, end time.Time) {
 	t.Helper()
 

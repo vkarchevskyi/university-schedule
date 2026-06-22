@@ -346,6 +346,71 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   await expect(page.getByTestId('schedule-entry')).toHaveCount(0)
 })
 
+test('completes remaining lessons from the schedule editor', async ({ page }) => {
+  let generationRequest: { semesterId?: number; scheduleId?: number } = {}
+
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page)
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.route('**/api/admin/schedules/generate', async (route) => {
+    generationRequest = (await route.request().postDataJSON()) as {
+      semesterId?: number
+      scheduleId?: number
+    }
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...scheduleGenerationJob('running'),
+        id: 'completion-job-1',
+      }),
+    })
+  })
+
+  await page.route('**/api/admin/generation-jobs/completion-job-1', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...scheduleGenerationJob('completed'),
+        id: 'completion-job-1',
+        generatedScheduleId: 12,
+      }),
+    })
+  })
+
+  await page.route('**/api/admin/schedules/12/lesson-cards', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          {
+            teachingLoadId: 41,
+            group: { id: 1, name: 'КН-22' },
+            subject: { id: 4, name: 'Алгоритми' },
+            teacher: { id: 7, firstName: 'Іван', lastName: 'Петренко' },
+            lessonType: 'laboratory',
+            requiredLessonCount: 8,
+            scheduledLessonCount: 8,
+            remainingLessonCount: 0,
+          },
+        ],
+      }),
+    })
+  })
+
+  await page.goto('/admin/schedules/12')
+
+  await page.getByTestId('complete-generation').click()
+  await expect(page.getByTestId('editor-generation-job')).toContainText('completed')
+
+  expect(generationRequest.scheduleId).toBe(12)
+  expect(generationRequest.semesterId).toBe(1)
+  await expect(page.getByTestId('lesson-card-remaining')).toHaveText('0')
+})
+
 test('shows schedule entry create validation errors near the editor fields', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)

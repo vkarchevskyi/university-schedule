@@ -157,7 +157,7 @@ func (store *PostgresStore) LoadJob(ctx context.Context, jobID string) (JobResou
 	return job, nil
 }
 
-func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (Input, error) {
+func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64, baseScheduleID *int64) (Input, error) {
 	loads, err := store.loadTeachingLoads(ctx, semesterID)
 	if err != nil {
 		return Input{}, err
@@ -183,7 +183,28 @@ func (store *PostgresStore) LoadInput(ctx context.Context, semesterID int64) (In
 		return Input{}, err
 	}
 
-	return Input{TeachingLoads: loads, Rooms: rooms, TimeSlots: slots, Assignments: assignments, Unavailable: unavailable}, nil
+	allTeachingLoads := cloneTeachingLoads(loads)
+	seedEntries := []CandidateEntry{}
+	remainingLoads := loads
+
+	if baseScheduleID != nil {
+		seedEntries, err = store.loadSeedEntries(ctx, *baseScheduleID)
+		if err != nil {
+			return Input{}, err
+		}
+
+		remainingLoads = reduceTeachingLoads(loads, seedEntries)
+	}
+
+	return Input{
+		TeachingLoads:    remainingLoads,
+		AllTeachingLoads: allTeachingLoads,
+		SeedEntries:      seedEntries,
+		Rooms:            rooms,
+		TimeSlots:        slots,
+		Assignments:      assignments,
+		Unavailable:      unavailable,
+	}, nil
 }
 
 func (store *PostgresStore) CreateDraftSchedule(ctx context.Context, message JobMessage, entries []CandidateEntry) (int64, error) {
@@ -217,9 +238,17 @@ func (store *PostgresStore) CompleteJobWithDraftSchedule(ctx context.Context, me
 	}
 	defer tx.Rollback()
 
-	scheduleID, err := store.createDraftSchedule(ctx, tx, message, entries)
-	if err != nil {
-		return 0, err
+	var scheduleID int64
+	if message.BaseScheduleID != nil {
+		scheduleID = *message.BaseScheduleID
+		if err := store.appendScheduleEntries(ctx, tx, scheduleID, entries); err != nil {
+			return 0, err
+		}
+	} else {
+		scheduleID, err = store.createDraftSchedule(ctx, tx, message, entries)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	update, err := tx.ExecContext(ctx, `
@@ -267,31 +296,49 @@ func (store *PostgresStore) createDraftSchedule(ctx context.Context, tx *sql.Tx,
 	}
 
 	for _, entry := range entries {
-		var entryID int64
-		if err := tx.QueryRowContext(ctx, `
-			INSERT INTO schedule_entries (schedule_id, subject_id, teacher_id, lesson_type, room_id, time_slot_id, day_of_week, week_parity)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-			RETURNING id
-		`, scheduleID, entry.SubjectID, entry.TeacherID, entry.LessonType, entry.RoomID, entry.TimeSlotID, entry.DayOfWeek, entry.WeekParity).Scan(&entryID); err != nil {
-			return 0, fmt.Errorf("insert schedule entry: %w", err)
-		}
-
-		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO schedule_entry_groups (schedule_entry_id, group_id)
-			VALUES ($1, $2)
-		`, entryID, entry.GroupID); err != nil {
-			return 0, fmt.Errorf("insert schedule entry group: %w", err)
-		}
-
-		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO schedule_entry_teaching_loads (schedule_entry_id, teaching_load_id)
-			VALUES ($1, $2)
-		`, entryID, entry.TeachingLoadID); err != nil {
-			return 0, fmt.Errorf("insert schedule entry teaching load: %w", err)
+		if err := store.insertScheduleEntry(ctx, tx, scheduleID, entry); err != nil {
+			return 0, err
 		}
 	}
 
 	return scheduleID, nil
+}
+
+func (store *PostgresStore) appendScheduleEntries(ctx context.Context, tx *sql.Tx, scheduleID int64, entries []CandidateEntry) error {
+	for _, entry := range entries {
+		if err := store.insertScheduleEntry(ctx, tx, scheduleID, entry); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (store *PostgresStore) insertScheduleEntry(ctx context.Context, tx *sql.Tx, scheduleID int64, entry CandidateEntry) error {
+	var entryID int64
+	if err := tx.QueryRowContext(ctx, `
+		INSERT INTO schedule_entries (schedule_id, subject_id, teacher_id, lesson_type, room_id, time_slot_id, day_of_week, week_parity)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id
+	`, scheduleID, entry.SubjectID, entry.TeacherID, entry.LessonType, entry.RoomID, entry.TimeSlotID, entry.DayOfWeek, entry.WeekParity).Scan(&entryID); err != nil {
+		return fmt.Errorf("insert schedule entry: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO schedule_entry_groups (schedule_entry_id, group_id)
+		VALUES ($1, $2)
+	`, entryID, entry.GroupID); err != nil {
+		return fmt.Errorf("insert schedule entry group: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO schedule_entry_teaching_loads (schedule_entry_id, teaching_load_id)
+		VALUES ($1, $2)
+	`, entryID, entry.TeachingLoadID); err != nil {
+		return fmt.Errorf("insert schedule entry teaching load: %w", err)
+	}
+
+	return nil
 }
 
 func (store *PostgresStore) loadSemester(ctx context.Context, semesterID int64) (Semester, error) {
@@ -427,6 +474,97 @@ func (store *PostgresStore) loadTeacherUnavailability(ctx context.Context) ([]va
 	}
 
 	return unavailable, rows.Err()
+}
+
+func (store *PostgresStore) loadSeedEntries(ctx context.Context, scheduleID int64) ([]CandidateEntry, error) {
+	rows, err := store.db.QueryContext(ctx, `
+		SELECT
+			setl.teaching_load_id,
+			tl.group_id,
+			se.subject_id,
+			se.teacher_id,
+			se.lesson_type,
+			se.room_id,
+			r.type,
+			r.capacity,
+			se.time_slot_id,
+			ts.number,
+			to_char(ts.starts_at, 'HH24:MI:SS'),
+			to_char(ts.ends_at, 'HH24:MI:SS'),
+			se.day_of_week,
+			se.week_parity,
+			g.student_count,
+			tl.requires_computer_room
+		FROM schedule_entries se
+		INNER JOIN schedule_entry_teaching_loads setl ON setl.schedule_entry_id = se.id
+		INNER JOIN teaching_loads tl ON tl.id = setl.teaching_load_id
+		INNER JOIN groups g ON g.id = tl.group_id
+		INNER JOIN rooms r ON r.id = se.room_id
+		INNER JOIN time_slots ts ON ts.id = se.time_slot_id
+		INNER JOIN schedule_entry_groups seg ON seg.schedule_entry_id = se.id AND seg.group_id = tl.group_id
+		WHERE se.schedule_id = $1
+		ORDER BY se.id ASC, setl.teaching_load_id ASC
+	`, scheduleID)
+	if err != nil {
+		return nil, fmt.Errorf("load seed schedule entries: %w", err)
+	}
+	defer rows.Close()
+
+	entries := make([]CandidateEntry, 0)
+	for rows.Next() {
+		var entry CandidateEntry
+		if err := rows.Scan(
+			&entry.TeachingLoadID,
+			&entry.GroupID,
+			&entry.SubjectID,
+			&entry.TeacherID,
+			&entry.LessonType,
+			&entry.RoomID,
+			&entry.RoomType,
+			&entry.RoomCapacity,
+			&entry.TimeSlotID,
+			&entry.TimeSlotNumber,
+			&entry.TimeSlotStartsAt,
+			&entry.TimeSlotEndsAt,
+			&entry.DayOfWeek,
+			&entry.WeekParity,
+			&entry.StudentCount,
+			&entry.RequiresComputerRoom,
+		); err != nil {
+			return nil, fmt.Errorf("scan seed schedule entry: %w", err)
+		}
+
+		entries = append(entries, entry)
+	}
+
+	return entries, rows.Err()
+}
+
+func cloneTeachingLoads(loads []TeachingLoad) []TeachingLoad {
+	result := make([]TeachingLoad, len(loads))
+	copy(result, loads)
+
+	return result
+}
+
+func reduceTeachingLoads(loads []TeachingLoad, seedEntries []CandidateEntry) []TeachingLoad {
+	scheduledCounts := make(map[int64]int)
+	for _, entry := range seedEntries {
+		scheduledCounts[entry.TeachingLoadID] += validation.LessonCountFromWeekParity(entry.WeekParity)
+	}
+
+	remainingLoads := make([]TeachingLoad, 0, len(loads))
+	for _, load := range loads {
+		remaining := load.RequiredLessonCount - scheduledCounts[load.ID]
+		if remaining <= 0 {
+			continue
+		}
+
+		load.RequiredLessonCount = remaining
+		remainingLoads = append(remainingLoads, load)
+	}
+
+	return remainingLoads
 }
 
 func requireAffected(result sql.Result, notFound error) error {

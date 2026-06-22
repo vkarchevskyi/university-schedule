@@ -24,7 +24,7 @@ func TestRequireAffectedReportsMissingJob(t *testing.T) {
 }
 
 func TestCompleteJobWithDraftScheduleRollsBackWhenJobIsMissing(t *testing.T) {
-	generationFakeState = &fakeGenerationState{}
+	generationFakeState = &fakeGenerationState{failJobUpdate: true}
 	db, err := sql.Open("generation_fake_tx", "")
 	if err != nil {
 		t.Fatalf("open fake db: %v", err)
@@ -67,10 +67,57 @@ func TestCompleteJobWithDraftScheduleRollsBackWhenJobIsMissing(t *testing.T) {
 	}
 }
 
+func TestCompleteJobWithDraftScheduleAppendsToBaseSchedule(t *testing.T) {
+	generationFakeState = &fakeGenerationState{}
+	baseScheduleID := int64(55)
+	db, err := sql.Open("generation_fake_tx", "")
+	if err != nil {
+		t.Fatalf("open fake db: %v", err)
+	}
+	defer db.Close()
+
+	store := &PostgresStore{db: db}
+	scheduleID, err := store.CompleteJobWithDraftSchedule(context.Background(), JobMessage{
+		JobID:             "job-1",
+		SemesterID:        1,
+		RequestedByUserID: 2,
+		BaseScheduleID:    &baseScheduleID,
+	}, []CandidateEntry{
+		{
+			TeachingLoadID: 1,
+			GroupID:        1,
+			SubjectID:      1,
+			TeacherID:      1,
+			LessonType:     2,
+			RoomID:         1,
+			TimeSlotID:     1,
+			DayOfWeek:      1,
+			WeekParity:     1,
+		},
+	}, Result{
+		QualityScore:  100,
+		QualityStatus: "acceptable",
+		Diagnostics:   map[string]any{"generatedEntryCount": 1},
+	})
+	if err != nil {
+		t.Fatalf("CompleteJobWithDraftSchedule() error = %v", err)
+	}
+	if scheduleID != baseScheduleID {
+		t.Fatalf("scheduleID = %d, want %d", scheduleID, baseScheduleID)
+	}
+	if generationFakeState.scheduleInserts != 0 {
+		t.Fatalf("schedule inserts = %d, want 0 for append mode", generationFakeState.scheduleInserts)
+	}
+	if !generationFakeState.committed {
+		t.Fatal("transaction was not committed")
+	}
+}
+
 type fakeGenerationState struct {
 	committed       bool
 	rolledBack      bool
 	scheduleInserts int
+	failJobUpdate   bool
 }
 
 type fakeGenerationDriver struct{}
@@ -113,9 +160,13 @@ func (conn fakeGenerationConn) QueryContext(_ context.Context, query string, _ [
 	}
 }
 
-func (fakeGenerationConn) ExecContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Result, error) {
+func (conn fakeGenerationConn) ExecContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Result, error) {
 	if strings.Contains(query, "UPDATE schedule_generation_jobs") {
-		return fakeResult(0), nil
+		if conn.state.failJobUpdate {
+			return fakeResult(0), nil
+		}
+
+		return fakeResult(1), nil
 	}
 
 	return fakeResult(1), nil
