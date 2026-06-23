@@ -324,10 +324,16 @@ def fill_missing_rooms(entries: list[dict[str, object]]) -> None:
             entry['room'] = 'Дистанційно'
 
 
+def week_parity_lesson_count(week_parity: str) -> int:
+    """Match lesson-card progress: both weeks count as 2, odd/even as 1."""
+    return 2 if week_parity == 'both' else 1
+
+
 def build_teaching_loads(entries: list[dict[str, object]]) -> list[dict[str, object]]:
     counts: Counter[tuple[str, str, str, str, str, object]] = Counter()
 
     for entry in entries:
+        lesson_count = week_parity_lesson_count(str(entry.get('weekParity', 'both')))
         for group in entry['groups']:
             counts[
                 (
@@ -338,7 +344,7 @@ def build_teaching_loads(entries: list[dict[str, object]]) -> list[dict[str, obj
                     entry['lessonType'],
                     entry.get('subgroup'),
                 )
-            ] += 1
+            ] += lesson_count
 
     loads: list[dict[str, object]] = []
     seen: set[tuple[str, str, str, str, str, object]] = set()
@@ -431,6 +437,31 @@ def cell_has_lesson_content(sheet, row: int, column: int) -> bool:
     return bool(parse_cell(sheet.cell_value(row, column)))
 
 
+def is_subgroup_two_column(column: int, groups_by_col: dict[int, list[str]], sheet) -> bool:
+    header = str(sheet.cell_value(7, column)).strip()
+    if header not in ('', 'день'):
+        return False
+
+    previous_column = column - 1
+    if previous_column not in groups_by_col:
+        return False
+
+    previous_header = str(sheet.cell_value(7, previous_column)).strip()
+    return previous_header not in ('', 'день') and groups_by_col[column] == groups_by_col[previous_column]
+
+
+def has_subgroup_two_extension(column: int, groups_by_col: dict[int, list[str]], sheet) -> bool:
+    next_column = column + 1
+    if next_column not in groups_by_col:
+        return False
+
+    if groups_by_col[next_column] != groups_by_col[column]:
+        return False
+
+    next_header = str(sheet.cell_value(7, next_column)).strip()
+    return next_header in ('',)
+
+
 def apply_row_subgroup(
     sheet,
     row: int,
@@ -443,13 +474,11 @@ def apply_row_subgroup(
 
     header = str(sheet.cell_value(7, column)).strip()
     if header in ('', 'день'):
-        if column - 1 in groups_by_col and cell_has_lesson_content(sheet, row, column - 1):
+        if is_subgroup_two_column(column, groups_by_col, sheet):
             lesson['subgroup'] = 2
         return
 
-    next_column = column + 1
-    next_header = str(sheet.cell_value(7, next_column)).strip() if next_column < sheet.ncols else 'BLOCK'
-    if next_header in ('',) and cell_has_lesson_content(sheet, row, next_column):
+    if has_subgroup_two_extension(column, groups_by_col, sheet):
         lesson['subgroup'] = 1
 
 
