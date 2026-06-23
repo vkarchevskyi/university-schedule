@@ -558,6 +558,29 @@ test('duplicates a published schedule into an editable draft', async ({ page }) 
   await expect(page.getByTestId('entry-read-only-notice')).toHaveCount(0)
 })
 
+test('adds a second group to an existing schedule entry', async ({ page }) => {
+  let lastUpdatePayload: Partial<AdminScheduleEntryPayload> | null = null
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, {
+    initialEntries: [adminScheduleEntry()],
+    onUpdateEntry: (payload) => {
+      lastUpdatePayload = payload
+    },
+  })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.goto('/admin/schedules/12')
+  await page.getByTestId('schedule-entry-select').click()
+  await page.getByTestId('entry-groups').getByLabel('КН-23').check()
+  await page.getByTestId('save-entry').click()
+
+  await expect.poll(() => lastUpdatePayload?.groupIds ?? []).toEqual([1, 2])
+  await expect.poll(() => lastUpdatePayload?.teachingLoadIds ?? []).toEqual([44, 45])
+})
+
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -822,6 +845,7 @@ async function mockAdminScheduleManagement(
     initialEntries?: AdminScheduleEntry[]
     lessonCards?: LessonCardFixture[]
     onCreateEntry?: () => void
+    onUpdateEntry?: (payload: Partial<AdminScheduleEntryPayload>) => void
     published?: boolean
     rooms?: AdminRoomFixture[]
   } = {},
@@ -977,6 +1001,7 @@ async function mockAdminScheduleManagement(
     }
 
     const payload = (await route.request().postDataJSON()) as Partial<AdminScheduleEntryPayload>
+    options.onUpdateEntry?.(payload)
     entries = entries.map((entry) => ({ ...entry, ...payload }))
     await route.fulfill({
       contentType: 'application/json',
@@ -1476,7 +1501,8 @@ const lessonCard = {
   requiresComputerRoom: false,
   scheduledLessonCount: 0,
   remainingLessonCount: 8,
-} satisfies LessonCardFixture
+  subgroup: null,
+} satisfies LessonCardFixture & { subgroup: null }
 
 const secondLessonCard = {
   ...lessonCard,

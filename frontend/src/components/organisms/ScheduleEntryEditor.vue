@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import AppButton from '@/components/atoms/AppButton.vue'
 import AppSelect from '@/components/atoms/AppSelect.vue'
 import StateMessage from '@/components/atoms/StateMessage.vue'
+import CheckboxGroupField from '@/components/molecules/CheckboxGroupField.vue'
 import ConfirmActionButton from '@/components/molecules/ConfirmActionButton.vue'
 import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import { scheduleWeekdays } from '@/utils/date'
@@ -51,9 +52,11 @@ const timeSlotId = ref<number | null>(null)
 const dayOfWeek = ref<number>(1)
 const lessonType = ref<LessonType>('lecture')
 const weekParity = ref<WeekParity>('both')
-const groupId = ref<number | null>(null)
+const groupIds = ref<number[]>([])
+const teachingLoadIds = ref<number[]>([])
 const teachingLoadId = ref<number | null>(null)
 const subgroup = ref<number | null>(null)
+const isSyncingGroups = ref(false)
 
 const roomOptions = computed<LookupOption[]>(() =>
   props.rooms.map((room) => ({
@@ -75,12 +78,40 @@ const teacherOptions = computed<LookupOption[]>(() =>
   })),
 )
 
-const groupOptions = computed<LookupOption[]>(() =>
-  props.groups.map((group) => ({
-    id: group.id,
-    label: group.name,
-    description: '',
-  })),
+function matchesLessonContext(card: LessonCard): boolean {
+  return (
+    subjectId.value !== null &&
+    teacherId.value !== null &&
+    card.subject.id === subjectId.value &&
+    card.teacher.id === teacherId.value &&
+    card.lessonType === lessonType.value &&
+    (card.subgroup ?? null) === (subgroup.value ?? null)
+  )
+}
+
+const groupCheckboxOptions = computed(() => {
+  const hasLessonContext = subjectId.value !== null && teacherId.value !== null
+
+  return props.groups
+    .filter((group) => {
+      if (!hasLessonContext) {
+        return true
+      }
+
+      const hasMatchingCard = props.lessonCards.some(
+        (card) => card.group.id === group.id && matchesLessonContext(card),
+      )
+
+      return hasMatchingCard || groupIds.value.includes(group.id)
+    })
+    .map((group) => ({ id: group.id, label: group.name }))
+})
+
+const linkedGroupNames = computed(() =>
+  props.lessonCards
+    .filter((card) => teachingLoadIds.value.includes(card.teachingLoadId))
+    .map((card) => card.group.name)
+    .join(', '),
 )
 
 const timeSlotOptions = computed<LookupOption[]>(() =>
@@ -128,6 +159,28 @@ const subgroupOptions = computed(() => [
 
 const errorMessages = computed(() => Object.values(props.errors))
 
+function syncTeachingLoadsFromGroups(): void {
+  if (subjectId.value === null || teacherId.value === null) {
+    return
+  }
+
+  teachingLoadIds.value = props.lessonCards
+    .filter((card) => groupIds.value.includes(card.group.id) && matchesLessonContext(card))
+    .map((card) => card.teachingLoadId)
+}
+
+function pruneGroupsToLessonCards(): void {
+  if (subjectId.value === null || teacherId.value === null) {
+    return
+  }
+
+  const validGroupIds = new Set(
+    props.lessonCards.filter((card) => matchesLessonContext(card)).map((card) => card.group.id),
+  )
+  groupIds.value = groupIds.value.filter((id) => validGroupIds.has(id))
+  syncTeachingLoadsFromGroups()
+}
+
 watch(
   () => props.entry,
   (entry) => {
@@ -138,12 +191,26 @@ watch(
     dayOfWeek.value = entry?.dayOfWeek ?? 1
     lessonType.value = entry?.lessonType ?? 'lecture'
     weekParity.value = entry?.weekParity ?? 'both'
-    groupId.value = entry?.groupIds[0] ?? null
-    teachingLoadId.value = entry?.teachingLoadIds[0] ?? props.lessonCards[0]?.teachingLoadId ?? null
+    groupIds.value = entry?.groupIds ? [...entry.groupIds] : []
+    teachingLoadIds.value = entry?.teachingLoadIds ? [...entry.teachingLoadIds] : []
+    teachingLoadId.value =
+      entry?.teachingLoadIds[0] ?? props.lessonCards[0]?.teachingLoadId ?? null
     subgroup.value = entry?.subgroup ?? null
   },
   { immediate: true },
 )
+
+watch(groupIds, () => {
+  if (isSyncingGroups.value) {
+    return
+  }
+
+  syncTeachingLoadsFromGroups()
+}, { deep: true })
+
+watch([subjectId, teacherId, lessonType, subgroup], () => {
+  pruneGroupsToLessonCards()
+})
 
 watch(teachingLoadId, (id) => {
   if (props.entry !== null || id === null) {
@@ -157,9 +224,12 @@ watch(teachingLoadId, (id) => {
 
   subjectId.value = card.subject.id
   teacherId.value = card.teacher.id
-  groupId.value = card.group.id
   lessonType.value = card.lessonType
   subgroup.value = card.subgroup
+  isSyncingGroups.value = true
+  groupIds.value = [card.group.id]
+  teachingLoadIds.value = [card.teachingLoadId]
+  isSyncingGroups.value = false
 })
 
 function save(): void {
@@ -168,14 +238,14 @@ function save(): void {
     subjectId.value === null ||
     teacherId.value === null ||
     timeSlotId.value === null ||
-    groupId.value === null ||
-    teachingLoadId.value === null
+    groupIds.value.length === 0 ||
+    teachingLoadIds.value.length === 0
   ) {
     return
   }
 
   const payload: ScheduleEntryPayload = {
-    teachingLoadIds: [teachingLoadId.value],
+    teachingLoadIds: [...teachingLoadIds.value],
     subjectId: subjectId.value,
     teacherId: teacherId.value,
     lessonType: lessonType.value,
@@ -183,7 +253,7 @@ function save(): void {
     timeSlotId: timeSlotId.value,
     dayOfWeek: dayOfWeek.value,
     weekParity: weekParity.value,
-    groupIds: [groupId.value],
+    groupIds: [...groupIds.value],
     subgroup: subgroup.value,
   }
 
@@ -249,14 +319,23 @@ function fieldError(field: string): string | undefined {
       @update:model-value="teacherId = Number($event)"
     />
     <AppSelect
-      id="entry-group"
-      :label="t.group"
-      :model-value="groupId ?? ''"
-      :options="groupOptions"
+      id="entry-lesson-type"
+      :label="t.lessonType"
+      :model-value="lessonType"
+      :options="lessonTypeOptions"
+      :error="fieldError('lessonType')"
+      :disabled="readOnly"
+      @update:model-value="lessonType = $event as LessonType"
+    />
+    <CheckboxGroupField
+      v-model="groupIds"
+      data-testid="entry-groups"
+      :label="t.groups"
+      :options="groupCheckboxOptions"
       :error="fieldError('groupIds')"
       :disabled="readOnly"
-      @update:model-value="groupId = Number($event)"
     />
+    <small v-if="linkedGroupNames">{{ t.sharedClassGroups }}: {{ linkedGroupNames }}</small>
     <AppSelect
       id="entry-room"
       :label="t.room"
