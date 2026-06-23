@@ -39,9 +39,11 @@ final class AppFixtures extends Fixture
         }
 
         $academicYear = new AcademicYear('2025/2026', new \DateTimeImmutable('2025-09-01'), new \DateTimeImmutable('2026-06-30'));
-        $semester = new Semester($academicYear, 1, new \DateTimeImmutable('2025-09-01'), new \DateTimeImmutable('2026-01-31'), WeekParity::Odd);
+        $semesterOne = new Semester($academicYear, 1, new \DateTimeImmutable('2025-09-01'), new \DateTimeImmutable('2026-01-31'), WeekParity::Odd);
+        $semesterTwo = new Semester($academicYear, 2, new \DateTimeImmutable('2026-02-01'), new \DateTimeImmutable('2026-06-30'), WeekParity::Even);
         $manager->persist($academicYear);
-        $manager->persist($semester);
+        $manager->persist($semesterOne);
+        $manager->persist($semesterTwo);
 
         $groups = $this->persistGroups($manager);
         $this->persistRooms($manager);
@@ -73,20 +75,22 @@ final class AppFixtures extends Fixture
             $manager->persist($teacherSubject);
         }
 
-        foreach (self::teachingLoads() as $load) {
-            $manager->persist(new TeachingLoad(
-                $semester,
-                $groups[$load['group']],
-                $subjects[$load['subject']],
-                $teachers[$load['teacher']],
-                $this->lessonType($load['lessonType']),
-                $load['requiredLessonCount'],
-                false,
-                $now,
-                $now,
-                null,
-                $load['subgroup'],
-            ));
+        foreach ([$semesterOne, $semesterTwo] as $semester) {
+            foreach (self::teachingLoads() as $load) {
+                $manager->persist(new TeachingLoad(
+                    $semester,
+                    $groups[$load['group']],
+                    $subjects[$load['subject']],
+                    $teachers[$load['teacher']],
+                    $this->lessonType($load['lessonType']),
+                    $load['requiredLessonCount'],
+                    false,
+                    $now,
+                    $now,
+                    null,
+                    $load['subgroup'],
+                ));
+            }
         }
 
         $manager->flush();

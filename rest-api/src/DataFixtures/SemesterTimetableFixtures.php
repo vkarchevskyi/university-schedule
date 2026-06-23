@@ -21,8 +21,14 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-final class SemesterOneTimetableFixtures extends Fixture implements DependentFixtureInterface
+final class SemesterTimetableFixtures extends Fixture implements DependentFixtureInterface
 {
+    /** @var array<int, string> */
+    private const PUBLISHED_AT_BY_SEMESTER = [
+        1 => '2025-09-15T10:00:00+00:00',
+        2 => '2026-02-15T10:00:00+00:00',
+    ];
+
     public function getDependencies(): array
     {
         return [AppFixtures::class];
@@ -30,15 +36,38 @@ final class SemesterOneTimetableFixtures extends Fixture implements DependentFix
 
     public function load(ObjectManager $manager): void
     {
+        foreach (array_keys(self::PUBLISHED_AT_BY_SEMESTER) as $semesterNumber) {
+            $stats = $this->loadForSemester($manager, $semesterNumber);
+
+            fwrite(
+                STDERR,
+                sprintf(
+                    "SemesterTimetableFixtures: semester %d created %d entries, skipped group=%d room=%d timeSlot=%d teachingLoad=%d\n",
+                    $semesterNumber,
+                    $stats['created'],
+                    $stats['skipped']['group'],
+                    $stats['skipped']['room'],
+                    $stats['skipped']['timeSlot'],
+                    $stats['skipped']['teachingLoad'],
+                ),
+            );
+        }
+
+        $manager->flush();
+    }
+
+    /** @return array{created: int, skipped: array{group: int, room: int, timeSlot: int, teachingLoad: int}} */
+    private function loadForSemester(ObjectManager $manager, int $semesterNumber): array
+    {
         $data = SemesterOneTimetableData::load();
-        $semester = $this->semester($manager);
+        $semester = $this->semester($manager, $semesterNumber);
         $admin = $this->admin($manager);
         $groups = $this->groupsByName($manager);
         $rooms = $this->roomsByName($manager);
         $timeSlots = $this->timeSlotsByNumber($manager);
         $teachingLoads = $this->teachingLoadsByKey($manager, $semester);
 
-        $publishedAt = new \DateTimeImmutable('2025-09-15T10:00:00+00:00');
+        $publishedAt = new \DateTimeImmutable(self::PUBLISHED_AT_BY_SEMESTER[$semesterNumber]);
         $schedule = new Schedule(
             $semester,
             ScheduleStatus::Published,
@@ -134,34 +163,25 @@ final class SemesterOneTimetableFixtures extends Fixture implements DependentFix
             ++$created;
         }
 
-        $manager->flush();
-
-        fwrite(
-            STDERR,
-            sprintf(
-                "SemesterOneTimetableFixtures: created %d entries, skipped group=%d room=%d timeSlot=%d teachingLoad=%d\n",
-                $created,
-                $skipped['group'],
-                $skipped['room'],
-                $skipped['timeSlot'],
-                $skipped['teachingLoad'],
-            ),
-        );
+        return [
+            'created' => $created,
+            'skipped' => $skipped,
+        ];
     }
 
-    private function semester(ObjectManager $manager): Semester
+    private function semester(ObjectManager $manager, int $number): Semester
     {
         $semester = $manager->getRepository(Semester::class)->createQueryBuilder('semester')
             ->join('semester.academicYear', 'year')
             ->where('year.name = :yearName')
             ->andWhere('semester.number = :number')
             ->setParameter('yearName', '2025/2026')
-            ->setParameter('number', 1)
+            ->setParameter('number', $number)
             ->getQuery()
             ->getOneOrNullResult();
 
         if (!$semester instanceof Semester) {
-            throw new \RuntimeException('Semester 1 of academic year 2025/2026 was not found.');
+            throw new \RuntimeException(sprintf('Semester %d of academic year 2025/2026 was not found.', $number));
         }
 
         return $semester;

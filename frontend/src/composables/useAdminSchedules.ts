@@ -81,6 +81,7 @@ export function useAdminSchedules() {
 
   return {
     schedules,
+    semesters,
     selectedSemesterId,
     isLoading,
     error,

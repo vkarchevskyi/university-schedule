@@ -14,6 +14,7 @@ const { t } = useAdminI18n()
 
 const {
   schedules,
+  semesters,
   selectedSemesterId,
   isLoading,
   error,
@@ -32,8 +33,19 @@ const schedulesBySemester = computed(() => {
     map.set(schedule.semesterId, [...(map.get(schedule.semesterId) ?? []), schedule])
   }
 
-  return Array.from(map.entries())
+  return Array.from(map.entries()).sort(([leftId], [rightId]) => {
+    const leftNumber = semesters.value.find((semester) => semester.id === leftId)?.number ?? leftId
+    const rightNumber = semesters.value.find((semester) => semester.id === rightId)?.number ?? rightId
+
+    return leftNumber - rightNumber
+  })
 })
+
+function semesterLabel(semesterId: number): string {
+  const semester = semesters.value.find((item) => item.id === semesterId)
+
+  return semester ? `${t.value.semester} ${semester.number}` : `${t.value.semester} #${semesterId}`
+}
 </script>
 
 <template>
@@ -79,7 +91,7 @@ const schedulesBySemester = computed(() => {
         <StateMessage v-if="schedules.length === 0" :title="t.noSchedules" data-testid="no-schedules" />
         <div v-else class="schedule-review-list" data-testid="schedule-list">
           <section v-for="[semesterId, semesterSchedules] in schedulesBySemester" :key="semesterId" class="schedule-review-group">
-            <h2>{{ t.semester }} #{{ semesterId }}</h2>
+            <h2>{{ semesterLabel(semesterId) }}</h2>
             <article v-for="schedule in semesterSchedules" :key="schedule.id" class="review-card">
               <div>
                 <strong>#{{ schedule.id }}</strong>
