@@ -75,6 +75,8 @@ final class TelegramWebhookControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
         self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
         self::assertStringContainsString('Lab 1', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame('HTML', FakeTelegramSender::$messages[0]['parseMode']);
+        self::assertStringContainsString('<b>', FakeTelegramSender::$messages[0]['text']);
     }
 
     public function testScheduleCommandWithoutArgumentsStartsButtonFlow(): void
@@ -122,8 +124,9 @@ final class TelegramWebhookControllerTest extends WebTestCase
         $this->postCallback(sprintf('tg:week:group:%d:2026-05-18:-1', $fixtures->group->getId()));
 
         self::assertResponseStatusCodeSame(204);
-        self::assertStringContainsString('Розклад на тиждень з 2026-05-11', FakeTelegramSender::$messages[0]['text']);
+        self::assertStringContainsString('<b>Понеділок (11.05)</b>', FakeTelegramSender::$messages[0]['text']);
         self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame('HTML', FakeTelegramSender::$messages[0]['parseMode']);
     }
 
     public function testSubscribePreventsDuplicates(): void
@@ -235,8 +238,9 @@ final class TelegramWebhookControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(204);
         self::assertSame(1, FakeTelegramIntentParser::$calls);
-        self::assertStringContainsString('Розклад на тиждень з 2026-05-11', FakeTelegramSender::$messages[0]['text']);
+        self::assertStringContainsString('<b>Понеділок (11.05)</b>', FakeTelegramSender::$messages[0]['text']);
         self::assertStringContainsString('Programming', FakeTelegramSender::$messages[0]['text']);
+        self::assertSame('HTML', FakeTelegramSender::$messages[0]['parseMode']);
     }
 
     public function testFreeTextRoomScheduleLookupUsesAiIntent(): void

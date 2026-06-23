@@ -12,5 +12,6 @@ final readonly class TelegramMessage
     public function __construct(
         public string $text,
         public array $keyboard = [],
+        public ?string $parseMode = null,
     ) {}
 }

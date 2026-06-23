@@ -6,6 +6,7 @@ namespace App\Service\Telegram;
 
 use App\Exception\ApiException;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,9 +16,14 @@ final readonly class NutgramTelegramSender implements TelegramSenderInterface
     public function __construct(private string $telegramBotToken) {}
 
     /** @param list<list<TelegramInlineButton>> $keyboard */
-    public function sendMessage(int $chatId, string $text, array $keyboard = []): void
+    public function sendMessage(int $chatId, string $text, array $keyboard = [], ?string $parseMode = null): void
     {
-        $this->bot()->sendMessage($text, $chatId, reply_markup: $this->keyboard($keyboard));
+        $this->bot()->sendMessage(
+            $text,
+            $chatId,
+            parse_mode: $this->parseMode($parseMode),
+            reply_markup: $this->keyboard($keyboard),
+        );
     }
 
     public function answerCallbackQuery(string $callbackQueryId, ?string $text = null): void
@@ -32,6 +38,20 @@ final readonly class NutgramTelegramSender implements TelegramSenderInterface
         }
 
         return new Nutgram($this->telegramBotToken);
+    }
+
+    /** @param list<list<TelegramInlineButton>> $keyboard */
+    private function parseMode(?string $parseMode): ?ParseMode
+    {
+        if ($parseMode === null) {
+            return null;
+        }
+
+        return match (strtoupper($parseMode)) {
+            'HTML' => ParseMode::HTML,
+            'MARKDOWN', 'MARKDOWNV2' => ParseMode::MARKDOWN,
+            default => null,
+        };
     }
 
     /** @param list<list<TelegramInlineButton>> $keyboard */

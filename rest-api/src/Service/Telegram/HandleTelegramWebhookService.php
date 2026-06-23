@@ -6,6 +6,7 @@ namespace App\Service\Telegram;
 
 use App\Dto\PublicScheduleQueryDto;
 use App\Exception\ApiException;
+use App\Resource\Public\PublicScheduleResource;
 use App\Service\AI\AiParserUnavailableException;
 use App\Service\AI\TelegramIntent;
 use App\Service\AI\TelegramIntentParserInterface;
@@ -57,7 +58,7 @@ final readonly class HandleTelegramWebhookService
             $response = new TelegramMessage($this->validationMessage($exception));
         }
 
-        $this->sender->sendMessage($chatId, $response->text, $response->keyboard);
+        $this->sender->sendMessage($chatId, $response->text, $response->keyboard, $response->parseMode);
     }
 
     /** @param array<mixed, mixed> $callbackQuery */
@@ -81,13 +82,13 @@ final readonly class HandleTelegramWebhookService
             $this->sender->answerCallbackQuery($callbackQueryId, 'Запит не вдалося виконати.');
         }
 
-        $this->sender->sendMessage($chatId, $response->text, $response->keyboard);
+        $this->sender->sendMessage($chatId, $response->text, $response->keyboard, $response->parseMode);
     }
 
     private function response(int $chatId, string $text): TelegramMessage
     {
         if (!str_starts_with($text, '/')) {
-            return new TelegramMessage($this->freeText($chatId, $text));
+            return $this->freeText($chatId, $text);
         }
 
         $parts = preg_split('/\s+/', $text, 3) ?: [];
@@ -102,24 +103,24 @@ final readonly class HandleTelegramWebhookService
         };
     }
 
-    private function freeText(int $chatId, string $text): string
+    private function freeText(int $chatId, string $text): TelegramMessage
     {
         try {
             $intent = $this->intentParser->handle($text);
         } catch (AiParserUnavailableException) {
-            return 'AI-помічник тимчасово недоступний. Спробуйте пізніше або скористайтеся командою /schedule.';
+            return new TelegramMessage('AI-помічник тимчасово недоступний. Спробуйте пізніше або скористайтеся командою /schedule.');
         }
 
         if ($intent->confidence < self::AI_CONFIDENCE_THRESHOLD || $intent->intent === 'unknown') {
-            return $intent->clarificationQuestion ?? 'Уточніть, будь ласка, групу, викладача або аудиторію.';
+            return new TelegramMessage($intent->clarificationQuestion ?? 'Уточніть, будь ласка, групу, викладача або аудиторію.');
         }
 
         return match ($intent->intent) {
             'get_schedule' => $this->scheduleFromIntent($intent),
-            'subscribe' => $this->subscribeFromIntent($chatId, $intent),
-            'unsubscribe' => $this->unsubscribeFromIntent($chatId, $intent),
-            'help' => $this->help(),
-            default => $intent->clarificationQuestion ?? 'Уточніть, будь ласка, що саме потрібно зробити.',
+            'subscribe' => new TelegramMessage($this->subscribeFromIntent($chatId, $intent)),
+            'unsubscribe' => new TelegramMessage($this->unsubscribeFromIntent($chatId, $intent)),
+            'help' => new TelegramMessage($this->help()),
+            default => new TelegramMessage($intent->clarificationQuestion ?? 'Уточніть, будь ласка, що саме потрібно зробити.'),
         };
     }
 
@@ -222,12 +223,12 @@ final readonly class HandleTelegramWebhookService
         return $this->scheduleForTarget($target, $this->currentWeekStart());
     }
 
-    private function scheduleFromIntent(TelegramIntent $intent): string
+    private function scheduleFromIntent(TelegramIntent $intent): TelegramMessage
     {
         $target = $this->targetFromIntent($intent, allowRoom: true);
         $schedule = $this->publicSchedules->get(new PublicScheduleQueryDto($target->type, $target->id, $this->weekStartFromIntent($intent)));
 
-        return $this->formatter->handle($schedule);
+        return $this->scheduleMessage($schedule, $target, $this->weekStartFromIntent($intent));
     }
 
     /** @param list<string> $parts */
@@ -351,7 +352,16 @@ final readonly class HandleTelegramWebhookService
     {
         $schedule = $this->publicSchedules->get(new PublicScheduleQueryDto($target->type, $target->id, $weekStart));
 
-        return new TelegramMessage($this->formatter->handle($schedule), $this->weekNavigationKeyboard($target, $weekStart));
+        return $this->scheduleMessage($schedule, $target, $weekStart);
+    }
+
+    private function scheduleMessage(PublicScheduleResource $schedule, TelegramTarget $target, string $weekStart): TelegramMessage
+    {
+        return new TelegramMessage(
+            $this->formatter->handle($schedule),
+            $this->weekNavigationKeyboard($target, $weekStart),
+            'HTML',
+        );
     }
 
     /** @return list<list<TelegramInlineButton>> */

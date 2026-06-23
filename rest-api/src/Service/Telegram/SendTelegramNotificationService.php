@@ -27,10 +27,10 @@ final readonly class SendTelegramNotificationService
         }
 
         $schedule = $this->publicSchedules->get(new PublicScheduleQueryDto($targetType, $targetId, $this->currentWeekStart()));
-        $text = "Опубліковано оновлений розклад.\n" . $this->formatter->handle($schedule);
+        $text = "<b>Опубліковано оновлений розклад.</b>\n\n" . $this->formatter->handle($schedule);
 
         foreach ($this->subscriptions->list($targetType, $targetId) as $subscription) {
-            $this->sender->sendMessage($subscription->getTelegramChatId(), $text);
+            $this->sender->sendMessage($subscription->getTelegramChatId(), $text, [], 'HTML');
         }
     }
 

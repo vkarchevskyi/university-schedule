@@ -8,13 +8,13 @@ use App\Service\Telegram\TelegramSenderInterface;
 
 final class FakeTelegramSender implements TelegramSenderInterface
 {
-    /** @var list<array{chatId: int, text: string, keyboard: list<list<\App\Service\Telegram\TelegramInlineButton>>}> */
+    /** @var list<array{chatId: int, text: string, keyboard: list<list<\App\Service\Telegram\TelegramInlineButton>>, parseMode: string|null}> */
     public static array $messages = [];
 
     /** @param list<list<\App\Service\Telegram\TelegramInlineButton>> $keyboard */
-    public function sendMessage(int $chatId, string $text, array $keyboard = []): void
+    public function sendMessage(int $chatId, string $text, array $keyboard = [], ?string $parseMode = null): void
     {
-        self::$messages[] = ['chatId' => $chatId, 'text' => $text, 'keyboard' => $keyboard];
+        self::$messages[] = ['chatId' => $chatId, 'text' => $text, 'keyboard' => $keyboard, 'parseMode' => $parseMode];
     }
 
     /** @var list<array{id: string, text: string|null}> */
