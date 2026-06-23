@@ -32,6 +32,20 @@ final readonly class ScheduleAuditLoggerService
         );
     }
 
+    public function logScheduleDuplicated(Schedule $schedule, Schedule $sourceSchedule): void
+    {
+        $this->persist(
+            'schedule.duplicated',
+            'schedule',
+            $this->scheduleId($schedule),
+            [
+                'sourceScheduleId' => $sourceSchedule->getId(),
+                'entryCount' => $sourceSchedule->getEntries()->count(),
+            ],
+            $this->schedulePayload($schedule),
+        );
+    }
+
     public function logEntryCreated(ScheduleEntry $entry): void
     {
         $this->persist(

@@ -397,6 +397,33 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertArrayHasKey('status', $this->objectValue($result, 'errors'));
     }
 
+    public function testAdminCanDuplicatePublishedScheduleToDraft(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+        $sourceId = $this->intValue($schedule, 'id');
+
+        $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $sourceId));
+        $duplicate = $this->requestJson('POST', sprintf('/api/admin/schedules/%d/duplicate', $sourceId), expectedStatus: 201);
+
+        self::assertSame('draft', $this->stringValue($duplicate, 'status'));
+        self::assertNull($duplicate['publishedAt'] ?? null);
+        self::assertNotSame($sourceId, $this->intValue($duplicate, 'id'));
+        self::assertCount(1, $this->listValue($duplicate, 'entries'));
+
+        $entry = $this->objectAt($this->listValue($duplicate, 'entries'), 0);
+        self::assertSame(1, $this->intValue($entry, 'dayOfWeek'));
+        self::assertSame('both', $this->stringValue($entry, 'weekParity'));
+
+        $logs = $this->entityManager->getRepository(ActionLog::class)->findBy(['action' => 'schedule.duplicated']);
+        self::assertCount(1, $logs);
+        self::assertSame($sourceId, $logs[0]->getBeforePayload()['sourceScheduleId'] ?? null);
+
+        $original = $this->requestJson('GET', sprintf('/api/admin/schedules/%d', $sourceId));
+        self::assertSame('published', $this->stringValue($original, 'status'));
+        self::assertCount(1, $this->listValue($original, 'entries'));
+    }
+
     public function testAdminCanStartScheduleGenerationJob(): void
     {
         $fixtures = $this->createScheduleFixtures();

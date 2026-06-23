@@ -22,6 +22,7 @@ const {
   createDraft,
   startGeneration,
   openSchedule,
+  duplicateToDraft,
 } = useAdminSchedules()
 
 const schedulesBySemester = computed(() => {
@@ -91,6 +92,13 @@ const schedulesBySemester = computed(() => {
               <span>{{ schedule.status === 'generated' ? t.generatedDraftLabel : t.manualDraft }}</span>
               <AppButton variant="secondary" data-testid="open-schedule" @click="openSchedule(schedule.id)">
                 {{ t.openSchedule }}
+              </AppButton>
+              <AppButton
+                v-if="schedule.status === 'published'"
+                data-testid="duplicate-schedule"
+                @click="duplicateToDraft(schedule.id)"
+              >
+                {{ t.duplicateSchedule }}
               </AppButton>
             </article>
           </section>

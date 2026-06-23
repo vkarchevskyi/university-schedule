@@ -389,6 +389,10 @@ Publishes a valid schedule. Must fail if validation fails.
 
 Publishing delegates validation to the Go schedule service. A successful publish changes the schedule status to `published`, sets `publishedAt`, and writes an action-log entry.
 
+### POST `/api/admin/schedules/{id}/duplicate`
+
+Creates a new draft schedule by copying the source schedule's validity period and all entries (including groups, teaching loads, and subgroups). The source schedule is unchanged. A successful duplicate returns `201` with the new draft schedule resource and writes a `schedule.duplicated` action-log entry.
+
 ## Generation
 
 ### POST `/api/admin/schedules/generate`

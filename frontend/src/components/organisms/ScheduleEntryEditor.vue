@@ -30,6 +30,7 @@ const props = defineProps<{
   teachers: AdminTeacher[]
   timeSlots: AdminTimeSlot[]
   errors: Record<string, string>
+  readOnly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -97,6 +98,33 @@ const teachingLoadOptions = computed<LookupOption[]>(() =>
     description: `${card.teacher.firstName} ${card.teacher.lastName}`,
   })),
 )
+
+const dayOptions = computed(() =>
+  scheduleWeekdays.map((day) => ({
+    id: day,
+    label: publicLabels.value.days[day - 1] ?? String(day),
+    description: '',
+  })),
+)
+
+const lessonTypeOptions = computed(() => [
+  { id: 'lecture', label: publicLabels.value.lessonTypes.lecture, description: '' },
+  { id: 'laboratory', label: publicLabels.value.lessonTypes.laboratory, description: '' },
+  { id: 'seminar', label: publicLabels.value.lessonTypes.seminar, description: '' },
+  { id: 'practical', label: publicLabels.value.lessonTypes.practical, description: '' },
+])
+
+const weekParityOptions = computed(() => [
+  { id: 'both', label: t.value.weekParityOptions.both, description: '' },
+  { id: 'odd', label: t.value.weekParityOptions.odd, description: '' },
+  { id: 'even', label: t.value.weekParityOptions.even, description: '' },
+])
+
+const subgroupOptions = computed(() => [
+  { id: 0, label: t.value.subgroupOptions.none, description: '' },
+  { id: 1, label: t.value.subgroupOptions.one, description: '' },
+  { id: 2, label: t.value.subgroupOptions.two, description: '' },
+])
 
 const errorMessages = computed(() => Object.values(props.errors))
 
@@ -179,6 +207,11 @@ function fieldError(field: string): string | undefined {
       <AppButton v-if="entry" variant="ghost" @click="emit('clear')">{{ t.clearSelection }}</AppButton>
     </header>
     <StateMessage
+      v-if="readOnly"
+      :title="t.readOnlySchedule"
+      data-testid="entry-read-only-notice"
+    />
+    <StateMessage
       v-if="errorMessages.length > 0"
       tone="error"
       :title="t.validationFailed"
@@ -194,6 +227,7 @@ function fieldError(field: string): string | undefined {
       :model-value="teachingLoadId ?? ''"
       :options="teachingLoadOptions"
       :error="fieldError('teachingLoadIds')"
+      :disabled="readOnly"
       @update:model-value="teachingLoadId = Number($event)"
     />
     <AppSelect
@@ -202,6 +236,7 @@ function fieldError(field: string): string | undefined {
       :model-value="subjectId ?? ''"
       :options="subjectOptions"
       :error="fieldError('subjectId')"
+      :disabled="readOnly"
       @update:model-value="subjectId = Number($event)"
     />
     <AppSelect
@@ -210,6 +245,7 @@ function fieldError(field: string): string | undefined {
       :model-value="teacherId ?? ''"
       :options="teacherOptions"
       :error="fieldError('teacherId')"
+      :disabled="readOnly"
       @update:model-value="teacherId = Number($event)"
     />
     <AppSelect
@@ -218,6 +254,7 @@ function fieldError(field: string): string | undefined {
       :model-value="groupId ?? ''"
       :options="groupOptions"
       :error="fieldError('groupIds')"
+      :disabled="readOnly"
       @update:model-value="groupId = Number($event)"
     />
     <AppSelect
@@ -226,6 +263,7 @@ function fieldError(field: string): string | undefined {
       :model-value="roomId ?? ''"
       :options="roomOptions"
       :error="fieldError('roomId')"
+      :disabled="readOnly"
       @update:model-value="roomId = Number($event)"
     />
     <AppSelect
@@ -234,65 +272,48 @@ function fieldError(field: string): string | undefined {
       :model-value="timeSlotId ?? ''"
       :options="timeSlotOptions"
       :error="fieldError('timeSlotId')"
+      :disabled="readOnly"
       @update:model-value="timeSlotId = Number($event)"
     />
-    <label :class="['field', { 'field--invalid': fieldError('dayOfWeek') }]" for="entry-day">
-      <span class="field__label">{{ t.day }}</span>
-      <select id="entry-day" v-model.number="dayOfWeek" class="field__control">
-        <option v-for="day in scheduleWeekdays" :key="day" :value="day">
-          {{ publicLabels.days[day - 1] ?? day }}
-        </option>
-      </select>
-      <small v-if="fieldError('dayOfWeek')" class="field-error">
-        {{ fieldError('dayOfWeek') }}
-      </small>
-    </label>
-    <label :class="['field', { 'field--invalid': fieldError('lessonType') }]" for="entry-lesson-type">
-      <span class="field__label">{{ t.lessonType }}</span>
-      <select id="entry-lesson-type" v-model="lessonType" class="field__control">
-        <option value="lecture">{{ publicLabels.lessonTypes.lecture }}</option>
-        <option value="laboratory">{{ publicLabels.lessonTypes.laboratory }}</option>
-        <option value="seminar">{{ publicLabels.lessonTypes.seminar }}</option>
-        <option value="practical">{{ publicLabels.lessonTypes.practical }}</option>
-      </select>
-      <small v-if="fieldError('lessonType')" class="field-error">
-        {{ fieldError('lessonType') }}
-      </small>
-    </label>
-    <label :class="['field', { 'field--invalid': fieldError('weekParity') }]" for="entry-week-parity">
-      <span class="field__label">{{ t.weekParity }}</span>
-      <select
-        id="entry-week-parity"
-        v-model="weekParity"
-        class="field__control"
-        data-testid="week-parity-select"
-      >
-        <option value="both">{{ t.weekParityOptions.both }}</option>
-        <option value="odd">{{ t.weekParityOptions.odd }}</option>
-        <option value="even">{{ t.weekParityOptions.even }}</option>
-      </select>
-      <small v-if="fieldError('weekParity')" class="field-error">
-        {{ fieldError('weekParity') }}
-      </small>
-    </label>
-    <label :class="['field', { 'field--invalid': fieldError('subgroup') }]" for="entry-subgroup">
-      <span class="field__label">{{ t.subgroup }}</span>
-      <select
-        id="entry-subgroup"
-        class="field__control"
-        data-testid="subgroup-select"
-        :value="subgroup ?? ''"
-        @change="subgroup = ($event.target as HTMLSelectElement).value === '' ? null : Number(($event.target as HTMLSelectElement).value)"
-      >
-        <option value="">{{ t.subgroupOptions.none }}</option>
-        <option value="1">{{ t.subgroupOptions.one }}</option>
-        <option value="2">{{ t.subgroupOptions.two }}</option>
-      </select>
-      <small v-if="fieldError('subgroup')" class="field-error">
-        {{ fieldError('subgroup') }}
-      </small>
-    </label>
-    <div class="entry-editor__actions">
+    <AppSelect
+      id="entry-day"
+      :label="t.day"
+      :model-value="dayOfWeek"
+      :options="dayOptions"
+      :error="fieldError('dayOfWeek')"
+      :disabled="readOnly"
+      @update:model-value="dayOfWeek = Number($event)"
+    />
+    <AppSelect
+      id="entry-lesson-type"
+      :label="t.lessonType"
+      :model-value="lessonType"
+      :options="lessonTypeOptions"
+      :error="fieldError('lessonType')"
+      :disabled="readOnly"
+      @update:model-value="lessonType = $event as LessonType"
+    />
+    <AppSelect
+      id="entry-week-parity"
+      data-testid="week-parity-select"
+      :label="t.weekParity"
+      :model-value="weekParity"
+      :options="weekParityOptions"
+      :error="fieldError('weekParity')"
+      :disabled="readOnly"
+      @update:model-value="weekParity = $event as WeekParity"
+    />
+    <AppSelect
+      id="entry-subgroup"
+      data-testid="subgroup-select"
+      :label="t.subgroup"
+      :model-value="subgroup ?? 0"
+      :options="subgroupOptions"
+      :error="fieldError('subgroup')"
+      :disabled="readOnly"
+      @update:model-value="subgroup = $event === '0' ? null : Number($event)"
+    />
+    <div v-if="!readOnly" class="entry-editor__actions">
       <AppButton variant="primary" data-testid="save-entry" @click="save">{{
         entry ? t.saveEntry : t.add
       }}</AppButton>
