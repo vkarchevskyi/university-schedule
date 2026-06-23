@@ -32,8 +32,17 @@
       "teacherLastName": "Максимова",
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
-      "subgroup": null
+      "requiredLessonCount": 2,
+      "subgroup": 1
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
     },
     {
       "group": "ІПЗ-25",
@@ -41,7 +50,7 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "lecture",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -50,6 +59,15 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Комп'ютерна графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -59,8 +77,26 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Комп.графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Комп.графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "ІПЗ-25",
@@ -95,8 +131,26 @@
       "teacherLastName": "Книшук",
       "teacherFirstName": "А.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Програмування",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "ІПЗ-25",
+      "subject": "Програмування",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "ІПЗ-25",
@@ -131,7 +185,7 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 2,
+      "requiredLessonCount": 3,
       "subgroup": null
     },
     {
@@ -167,7 +221,7 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 2,
+      "requiredLessonCount": 3,
       "subgroup": null
     },
     {
@@ -176,7 +230,7 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -186,6 +240,15 @@
       "teacherFirstName": "К.Ю.",
       "lessonType": "practical",
       "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "КН-23",
+      "subject": "Безпека життєдільності",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
       "subgroup": null
     },
     {
@@ -208,11 +271,29 @@
     },
     {
       "group": "КН-23",
+      "subject": "Господарське законодавство",
+      "teacherLastName": "Щербина",
+      "teacherFirstName": "О.В.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "КН-23",
       "subject": "Комп'ютерні мережі",
       "teacherLastName": "Баранюк",
       "teacherFirstName": "О.Ф.",
       "lessonType": "lecture",
       "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "КН-23",
+      "subject": "Комп.мережі",
+      "teacherLastName": "Баранюк",
+      "teacherFirstName": "О.Ф.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -230,7 +311,7 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -257,7 +338,7 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 3,
       "subgroup": null
     },
     {
@@ -302,6 +383,24 @@
       "teacherLastName": "Найдьонов",
       "teacherFirstName": "І.В.",
       "lessonType": "seminar",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "КН-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
+    },
+    {
+      "group": "КН-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Протасова",
+      "teacherFirstName": "А.П.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -311,8 +410,8 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 2,
-      "subgroup": null
+      "requiredLessonCount": 1,
+      "subgroup": 1
     },
     {
       "group": "КН-24",
@@ -320,7 +419,7 @@
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -330,7 +429,16 @@
       "teacherFirstName": "К.Ю.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
+    },
+    {
+      "group": "КН-24",
+      "subject": "Веб-технології",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "КН-24",
@@ -347,7 +455,7 @@
       "teacherLastName": "Книшук",
       "teacherFirstName": "А.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 4,
       "subgroup": null
     },
     {
@@ -366,7 +474,7 @@
       "teacherFirstName": "А.В.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "КН-24",
@@ -384,7 +492,16 @@
       "teacherFirstName": "К.Ю.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
+    },
+    {
+      "group": "КН-24",
+      "subject": "Програмування",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "КН-24",
@@ -392,6 +509,15 @@
       "teacherLastName": "Нестеренко",
       "teacherFirstName": "Т.С.",
       "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "КН-24",
+      "subject": "Психологія",
+      "teacherLastName": "Нестеренко",
+      "teacherFirstName": "Т.С.",
+      "lessonType": "seminar",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -419,8 +545,17 @@
       "teacherLastName": "Максимова",
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
-      "subgroup": null
+      "requiredLessonCount": 2,
+      "subgroup": 1
+    },
+    {
+      "group": "КН-25",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
     },
     {
       "group": "КН-25",
@@ -428,7 +563,7 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "lecture",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -437,6 +572,15 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "КН-25",
+      "subject": "Комп'ютерна графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -446,8 +590,26 @@
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
+    },
+    {
+      "group": "КН-25",
+      "subject": "Комп.графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "КН-25",
+      "subject": "Комп.графіка",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "КН-25",
@@ -482,8 +644,26 @@
       "teacherLastName": "Книшук",
       "teacherFirstName": "А.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
+    },
+    {
+      "group": "КН-25",
+      "subject": "Програмування",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "КН-25",
+      "subject": "Програмування",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
     },
     {
       "group": "КН-25",
@@ -523,6 +703,15 @@
     },
     {
       "group": "МД-22",
+      "subject": "Ділова іноземна мова",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МД-22",
       "subject": "Маркетингове ціноутворення",
       "teacherLastName": "Яковенко",
       "teacherFirstName": "Р.В.",
@@ -536,7 +725,7 @@
       "teacherLastName": "Тертиця",
       "teacherFirstName": "О.О.",
       "lessonType": "seminar",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -581,7 +770,7 @@
       "teacherLastName": "Довгенко",
       "teacherFirstName": "Я.О.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": 1
     },
     {
@@ -590,7 +779,7 @@
       "teacherLastName": "Довгенко",
       "teacherFirstName": "Я.О.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": 2
     },
     {
@@ -635,7 +824,7 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": 1
     },
     {
@@ -644,7 +833,7 @@
       "teacherLastName": "Рожкова",
       "teacherFirstName": "Н.Г.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": 2
     },
     {
@@ -689,6 +878,15 @@
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МД-23",
+      "subject": "Менеджмент",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -708,13 +906,40 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
+      "subgroup": 1
+    },
+    {
+      "group": "МД-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
       "subgroup": null
+    },
+    {
+      "group": "МД-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
     },
     {
       "group": "МД-24",
       "subject": "Базова військова підготовка",
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МД-24",
+      "subject": "Бізнес-інформ.",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
@@ -726,7 +951,7 @@
       "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 2
     },
     {
       "group": "МД-24",
@@ -744,6 +969,15 @@
       "teacherFirstName": "О.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МД-24",
+      "subject": "Мікроекономіка",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -775,6 +1009,15 @@
     },
     {
       "group": "МД-24",
+      "subject": "Статистика",
+      "teacherLastName": "Мироненко",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МД-24",
       "subject": "іжнародна економіка",
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
@@ -789,7 +1032,16 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
+    },
+    {
+      "group": "МД-25",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 3,
+      "subgroup": 2
     },
     {
       "group": "МД-25",
@@ -798,6 +1050,33 @@
       "teacherFirstName": "В.І.",
       "lessonType": "practical",
       "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МД-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "МД-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
+    },
+    {
+      "group": "МД-25",
+      "subject": "Безпека життєдільності",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
       "subgroup": null
     },
     {
@@ -824,6 +1103,15 @@
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МД-25",
+      "subject": "Економічна теорія",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "seminar",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -860,7 +1148,7 @@
       "teacherLastName": "Максимова",
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -878,7 +1166,7 @@
       "teacherLastName": "Тертиця",
       "teacherFirstName": "О.О.",
       "lessonType": "practical",
-      "requiredLessonCount": 2,
+      "requiredLessonCount": 4,
       "subgroup": null
     },
     {
@@ -905,7 +1193,7 @@
       "teacherLastName": "Сурков",
       "teacherFirstName": "К.Ю.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -914,7 +1202,7 @@
       "teacherLastName": "Щербина",
       "teacherFirstName": "О.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -923,7 +1211,7 @@
       "teacherLastName": "Заботкін",
       "teacherFirstName": "В.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -950,6 +1238,15 @@
       "teacherLastName": "Яковенко",
       "teacherFirstName": "Р.В.",
       "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МР-22",
+      "subject": "Маркетингова товарна політика",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -967,7 +1264,34 @@
       "subject": "Маркетинг",
       "teacherLastName": "Алексеєва",
       "teacherFirstName": "Л.М.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МР-23",
+      "subject": "Маркетинг",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МР-23",
+      "subject": "Маркетинг",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МР-23",
+      "subject": "Маркетингові дослідження",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -987,13 +1311,40 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
+      "subgroup": 1
+    },
+    {
+      "group": "МР-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
       "subgroup": null
+    },
+    {
+      "group": "МР-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
     },
     {
       "group": "МР-24",
       "subject": "Базова військова підготовка",
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МР-24",
+      "subject": "Бізнес-інформ.",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
@@ -1005,7 +1356,7 @@
       "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 2
     },
     {
       "group": "МР-24",
@@ -1023,6 +1374,15 @@
       "teacherFirstName": "О.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "МР-24",
+      "subject": "Мікроекономіка",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1054,6 +1414,15 @@
     },
     {
       "group": "МР-24",
+      "subject": "Статистика",
+      "teacherLastName": "Мироненко",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МР-24",
       "subject": "іжнародна економіка",
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
@@ -1068,7 +1437,16 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
+    },
+    {
+      "group": "МР-25",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 3,
+      "subgroup": 2
     },
     {
       "group": "МР-25",
@@ -1077,6 +1455,33 @@
       "teacherFirstName": "В.І.",
       "lessonType": "practical",
       "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МР-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "МР-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
+    },
+    {
+      "group": "МР-25",
+      "subject": "Безпека життєдільності",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
       "subgroup": null
     },
     {
@@ -1103,6 +1508,15 @@
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "МР-25",
+      "subject": "Економічна теорія",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "seminar",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1166,7 +1580,7 @@
       "teacherLastName": "Руденко",
       "teacherFirstName": "Т.В.",
       "lessonType": "seminar",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1202,7 +1616,7 @@
       "teacherLastName": "Гаврилюк",
       "teacherFirstName": "Б.О.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1238,7 +1652,7 @@
       "teacherLastName": "Кравцов",
       "teacherFirstName": "А.В.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1247,6 +1661,15 @@
       "teacherLastName": "Гаврилюк",
       "teacherFirstName": "Б.О.",
       "lessonType": "laboratory",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-23",
+      "subject": "Електротехніка",
+      "teacherLastName": "Гаврилюк",
+      "teacherFirstName": "Б.О.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1319,7 +1742,7 @@
       "teacherLastName": "Пузирьов",
       "teacherFirstName": "О.Л.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1328,6 +1751,15 @@
       "teacherLastName": "Пузирьов",
       "teacherFirstName": "О.Л.",
       "lessonType": "laboratory",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-23",
+      "subject": "Різання металів",
+      "teacherLastName": "Пузирьов",
+      "teacherFirstName": "О.Л.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1364,6 +1796,15 @@
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
       "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-24",
+      "subject": "Безпека життєдільності",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1408,7 +1849,25 @@
       "subject": "Опір матеріалів",
       "teacherLastName": "Пирогов",
       "teacherFirstName": "В.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-24",
+      "subject": "Опір матеріалів",
+      "teacherLastName": "Пирогов",
+      "teacherFirstName": "В.В.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-24",
+      "subject": "Опір матеріалів/ Теорія мех та машин",
+      "teacherLastName": "Пирогов",
+      "teacherFirstName": "В.В.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1472,7 +1931,7 @@
       "teacherLastName": "Максимова",
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1481,7 +1940,7 @@
       "teacherLastName": "Сурков",
       "teacherFirstName": "К.Ю.",
       "lessonType": "practical",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1499,7 +1958,7 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "lecture",
-      "requiredLessonCount": 1,
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1508,6 +1967,24 @@
       "teacherLastName": "Бондар",
       "teacherFirstName": "О.П.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-25",
+      "subject": "Нарисна геометрія",
+      "teacherLastName": "Пузирьов",
+      "teacherFirstName": "О.Л.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ПМ-25",
+      "subject": "Основи здорового способу життя",
+      "teacherLastName": "Гавриленко",
+      "teacherFirstName": "М.І.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1552,6 +2029,15 @@
       "subject": "Хімія",
       "teacherLastName": "Бохан",
       "teacherFirstName": "Ю.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-22",
+      "subject": "Інвестування",
+      "teacherLastName": "Василенко",
+      "teacherFirstName": "І.М.",
       "lessonType": "lecture",
       "requiredLessonCount": 1,
       "subgroup": null
@@ -1612,6 +2098,24 @@
     },
     {
       "group": "ФН-22",
+      "subject": "Бюджетна система",
+      "teacherLastName": "Штець",
+      "teacherFirstName": "Т.Ф.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-22",
+      "subject": "Страхування",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-22",
       "subject": "Страхування",
       "teacherLastName": "Фрунза",
       "teacherFirstName": "С.А.",
@@ -1630,6 +2134,15 @@
     },
     {
       "group": "ФН-22",
+      "subject": "Фондовий ринок",
+      "teacherLastName": "Василенко",
+      "teacherFirstName": "І.М.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-22",
       "subject": "Фінансова діяльність суб'єктів господарювання",
       "teacherLastName": "Загреба",
       "teacherFirstName": "І.Л.",
@@ -1642,7 +2155,34 @@
       "subject": "Податкова система",
       "teacherLastName": "Гавриш",
       "teacherFirstName": "Г.О.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-23",
+      "subject": "Податкова система",
+      "teacherLastName": "Гавриш",
+      "teacherFirstName": "Г.О.",
       "lessonType": "seminar",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-23",
+      "subject": "Фінанси",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-23",
+      "subject": "Фінанси",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1680,13 +2220,40 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
+      "subgroup": 1
+    },
+    {
+      "group": "ФН-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
       "subgroup": null
+    },
+    {
+      "group": "ФН-24",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": 2
     },
     {
       "group": "ФН-24",
       "subject": "Базова військова підготовка",
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-24",
+      "subject": "Бізнес-інформ.",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
       "subgroup": null
@@ -1698,7 +2265,7 @@
       "teacherFirstName": "Я.О.",
       "lessonType": "practical",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 2
     },
     {
       "group": "ФН-24",
@@ -1716,6 +2283,15 @@
       "teacherFirstName": "О.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 1,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-24",
+      "subject": "Мікроекономіка",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "lecture",
+      "requiredLessonCount": 2,
       "subgroup": null
     },
     {
@@ -1747,6 +2323,15 @@
     },
     {
       "group": "ФН-24",
+      "subject": "Статистика",
+      "teacherLastName": "Мироненко",
+      "teacherFirstName": "О.В.",
+      "lessonType": "practical",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-24",
       "subject": "іжнародна економіка",
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
@@ -1761,7 +2346,16 @@
       "teacherFirstName": "А.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
+    },
+    {
+      "group": "ФН-25",
+      "subject": "Іноземна мова",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "lessonType": "practical",
+      "requiredLessonCount": 3,
+      "subgroup": 2
     },
     {
       "group": "ФН-25",
@@ -1770,6 +2364,33 @@
       "teacherFirstName": "В.І.",
       "lessonType": "practical",
       "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 1
+    },
+    {
+      "group": "ФН-25",
+      "subject": "Інформатика",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "lessonType": "practical",
+      "requiredLessonCount": 1,
+      "subgroup": 2
+    },
+    {
+      "group": "ФН-25",
+      "subject": "Безпека життєдільності",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "lessonType": "seminar",
+      "requiredLessonCount": 1,
       "subgroup": null
     },
     {
@@ -1796,6 +2417,15 @@
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
+      "requiredLessonCount": 2,
+      "subgroup": null
+    },
+    {
+      "group": "ФН-25",
+      "subject": "Економічна теорія",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "lessonType": "seminar",
       "requiredLessonCount": 1,
       "subgroup": null
     },
@@ -1828,6 +2458,110 @@
     }
   ],
   "entries": [
+    {
+      "groups": [
+        "ПМ-25"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 3",
+      "subgroup": 1
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Мікроекономіка",
+      "lessonType": "lecture",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 6",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-22"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Маркетингова товарна політика",
+      "lessonType": "lecture",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "room": "Ауд. 5",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-24"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Стратегічне управління підприємством",
+      "lessonType": "practical",
+      "teacherLastName": "Тертиця",
+      "teacherFirstName": "О.О.",
+      "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Інформатика",
+      "lessonType": "practical",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 11",
+      "subgroup": 2
+    },
     {
       "groups": [
         "МР-25",
@@ -2144,7 +2878,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Вища математика",
       "lessonType": "lecture",
       "teacherLastName": "Мироненко",
@@ -2158,7 +2892,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Гідравліка",
       "lessonType": "seminar",
       "teacherLastName": "Руденко",
@@ -2172,7 +2906,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування",
       "lessonType": "lecture",
       "teacherLastName": "Сурков",
@@ -2186,7 +2920,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Бізнес-інформатика",
       "lessonType": "practical",
       "teacherLastName": "Довгенко",
@@ -2200,7 +2934,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Ділова іноземна мова",
       "lessonType": "practical",
       "teacherLastName": "Рожкова",
@@ -2214,7 +2948,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Технологічні основи машинобудування",
       "lessonType": "lecture",
       "teacherLastName": "Кравцов",
@@ -2228,7 +2962,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія прийняття рішень",
       "lessonType": "lecture",
       "teacherLastName": "Бондар",
@@ -2242,7 +2976,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Бюджетна система",
       "lessonType": "lecture",
       "teacherLastName": "Штець",
@@ -2256,7 +2990,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Технологічна оснастка",
       "lessonType": "lecture",
       "teacherLastName": "Пузирьов",
@@ -2270,7 +3004,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Паралельні та розподіленні обчислення",
       "lessonType": "practical",
       "teacherLastName": "Паращук",
@@ -2284,7 +3018,7 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Менеджмент організацій",
       "lessonType": "practical",
       "teacherLastName": "Яковенко",
@@ -2298,12 +3032,26 @@
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Маркетинговий менеджмент",
       "lessonType": "practical",
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-25"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 4,
+      "weekParity": "even",
+      "subject": "Управління ризиками",
+      "lessonType": "practical",
+      "teacherLastName": "Яковенко",
+      "teacherFirstName": "Р.В.",
+      "room": "Ауд. 3",
       "subgroup": null
     },
     {
@@ -2406,12 +3154,26 @@
     },
     {
       "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 1,
+      "timeSlotNumber": 6,
+      "weekParity": "both",
+      "subject": "Крос-платформне програмування",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": null
+    },
+    {
+      "groups": [
         "МР-25",
         "МД-25",
         "ФН-25"
       ],
       "dayOfWeek": 2,
-      "timeSlotNumber": 2,
+      "timeSlotNumber": 1,
       "weekParity": "both",
       "subject": "Економічна теорія",
       "lessonType": "lecture",
@@ -2425,8 +3187,122 @@
         "ПМ-25"
       ],
       "dayOfWeek": 2,
-      "timeSlotNumber": 2,
+      "timeSlotNumber": 1,
       "weekParity": "both",
+      "subject": "Інформатика",
+      "lessonType": "practical",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "room": "Бібліотека",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Опір матеріалів",
+      "lessonType": "lecture",
+      "teacherLastName": "Пирогов",
+      "teacherFirstName": "В.В.",
+      "room": "Ауд. 5",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-23"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Маркетинг",
+      "lessonType": "lecture",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ФН-23"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Фінанси",
+      "lessonType": "lecture",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "room": "Ауд. 9",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ФН-22"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Інвестування",
+      "lessonType": "lecture",
+      "teacherLastName": "Василенко",
+      "teacherFirstName": "І.М.",
+      "room": "Ауд. 8",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-25"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Договірне право",
+      "lessonType": "practical",
+      "teacherLastName": "Щербина",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 1,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
+      "subject": "Економічна теорія",
+      "lessonType": "lecture",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 6",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-25"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
       "subject": "Фізика",
       "lessonType": "laboratory",
       "teacherLastName": "Буряк",
@@ -2441,7 +3317,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія алгоритмів",
       "lessonType": "lecture",
       "teacherLastName": "Паращук",
@@ -2455,7 +3331,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Опір матеріалів",
       "lessonType": "seminar",
       "teacherLastName": "Пирогов",
@@ -2469,7 +3345,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Державне управління та регулювання",
       "lessonType": "lecture",
       "teacherLastName": "Яковенко",
@@ -2483,7 +3359,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Маркетинг",
       "lessonType": "seminar",
       "teacherLastName": "Алексеєва",
@@ -2497,7 +3373,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Фінанси",
       "lessonType": "seminar",
       "teacherLastName": "Фрунза",
@@ -2511,7 +3387,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Металообробне обладнання",
       "lessonType": "lecture",
       "teacherLastName": "Пузирьов",
@@ -2525,7 +3401,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Інвестування",
       "lessonType": "seminar",
       "teacherLastName": "Василенко",
@@ -2539,7 +3415,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Договірне право",
       "lessonType": "practical",
       "teacherLastName": "Щербина",
@@ -2553,12 +3429,42 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Стратегічне управління підприємством",
       "lessonType": "practical",
       "teacherLastName": "Тертиця",
       "teacherFirstName": "О.О.",
       "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
+      "subject": "Статистика",
+      "lessonType": "practical",
+      "teacherLastName": "Мироненко",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-25"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Кадровий менеджмент",
+      "lessonType": "practical",
+      "teacherLastName": "Заботкін",
+      "teacherFirstName": "В.В.",
+      "room": "Ауд. 3",
       "subgroup": null
     },
     {
@@ -2569,13 +3475,13 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Іноземна мова",
       "lessonType": "practical",
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 6",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -2583,7 +3489,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Хімія",
       "lessonType": "laboratory",
       "teacherLastName": "Бохан",
@@ -2598,7 +3504,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія алгоритмів",
       "lessonType": "seminar",
       "teacherLastName": "Паращук",
@@ -2614,7 +3520,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Статистика",
       "lessonType": "lecture",
       "teacherLastName": "Мироненко",
@@ -2628,7 +3534,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія механізмів і машин",
       "lessonType": "lecture",
       "teacherLastName": "Пирогов",
@@ -2642,13 +3548,13 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування",
       "lessonType": "practical",
       "teacherLastName": "Сурков",
       "teacherFirstName": "К.Ю.",
       "room": "Ауд. 10",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -2656,7 +3562,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Економічний аналіз",
       "lessonType": "lecture",
       "teacherLastName": "Загреба",
@@ -2670,7 +3576,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Металообробне обладнання",
       "lessonType": "laboratory",
       "teacherLastName": "Пузирьов",
@@ -2684,7 +3590,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Розробка пр.забезпечення",
       "lessonType": "practical",
       "teacherLastName": "Ізвалов",
@@ -2698,7 +3604,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Маркетингове ціноутворення",
       "lessonType": "lecture",
       "teacherLastName": "Яковенко",
@@ -2712,7 +3618,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Інформаційні системи у фінансах",
       "lessonType": "seminar",
       "teacherLastName": "Штець",
@@ -2726,7 +3632,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Кадровий менеджмент",
       "lessonType": "practical",
       "teacherLastName": "Заботкін",
@@ -2740,12 +3646,56 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Маркетинговий менеджмент",
       "lessonType": "practical",
       "teacherLastName": "Павлова",
       "teacherFirstName": "О.В.",
       "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 3,
+      "weekParity": "odd",
+      "subject": "Інформатика",
+      "lessonType": "practical",
+      "teacherLastName": "Беспалий",
+      "teacherFirstName": "В.І.",
+      "room": "Ауд. 16",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 3,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 9",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "МД-22"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 3,
+      "weekParity": "even",
+      "subject": "Рекламний менеджмент",
+      "lessonType": "seminar",
+      "teacherLastName": "Тертиця",
+      "teacherFirstName": "О.О.",
+      "room": "Ауд. 15",
       "subgroup": null
     },
     {
@@ -2791,7 +3741,7 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 6",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -2912,6 +3862,22 @@
         "ФН-24"
       ],
       "dayOfWeek": 2,
+      "timeSlotNumber": 4,
+      "weekParity": "both",
+      "subject": "Бізнес-інформ.",
+      "lessonType": "practical",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
+      "room": "Ауд. 16",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 2,
       "timeSlotNumber": 5,
       "weekParity": "both",
       "subject": "Бізнес-інформ.",
@@ -2933,7 +3899,7 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 6",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -2996,8 +3962,22 @@
         "КН-24"
       ],
       "dayOfWeek": 2,
-      "timeSlotNumber": 6,
+      "timeSlotNumber": 5,
       "weekParity": "both",
+      "subject": "Програмування",
+      "lessonType": "practical",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "room": "Ауд. 10",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 6,
+      "weekParity": "odd",
       "subject": "Організація баз даних",
       "lessonType": "lecture",
       "teacherLastName": "Книшук",
@@ -3011,7 +3991,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Якість програмного забезпечення",
       "lessonType": "seminar",
       "teacherLastName": "Найдьонов",
@@ -3025,7 +4005,7 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Технології машинобудування 2",
       "lessonType": "practical",
       "teacherLastName": "Кравцов",
@@ -3039,12 +4019,157 @@
       ],
       "dayOfWeek": 2,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Віртуальні та доповнена реальність",
       "lessonType": "practical",
       "teacherLastName": "Ізвалов",
       "teacherFirstName": "О.В.",
       "room": "Ауд. 2",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 2,
+      "timeSlotNumber": 6,
+      "weekParity": "even",
+      "subject": "Орг-ція баз даних",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Комп'ютерна графіка",
+      "lessonType": "lecture",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 11",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Мікроекономіка",
+      "lessonType": "lecture",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 6",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-23"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Маркетингові дослідження",
+      "lessonType": "lecture",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ФН-23"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Податкова система",
+      "lessonType": "lecture",
+      "teacherLastName": "Гавриш",
+      "teacherFirstName": "Г.О.",
+      "room": "Ауд. 17",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МД-22"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Ділова іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 1",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-25"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Інформаційні системи в управлінні",
+      "lessonType": "practical",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ММ-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Стратегічне управління підприємством",
+      "lessonType": "practical",
+      "teacherLastName": "Тертиця",
+      "teacherFirstName": "О.О.",
+      "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-25",
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Вища математика",
+      "lessonType": "lecture",
+      "teacherLastName": "Бондар",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 20",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-22"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Технології машинобудування 2",
+      "lessonType": "practical",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 5",
       "subgroup": null
     },
     {
@@ -3093,7 +4218,7 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 3",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3223,6 +4348,22 @@
     },
     {
       "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 2,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 16",
+      "subgroup": 2
+    },
+    {
+      "groups": [
         "МР-25",
         "МД-25",
         "ФН-25"
@@ -3235,7 +4376,7 @@
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 1",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3403,8 +4544,24 @@
         "ФН-25"
       ],
       "dayOfWeek": 3,
-      "timeSlotNumber": 4,
+      "timeSlotNumber": 3,
       "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 3",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 4,
+      "weekParity": "odd",
       "subject": "Вища математика",
       "lessonType": "lecture",
       "teacherLastName": "Мироненко",
@@ -3420,13 +4577,13 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Іноземна мова",
       "lessonType": "practical",
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 3",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3434,13 +4591,13 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Веб-технології",
       "lessonType": "practical",
       "teacherLastName": "Сурков",
       "teacherFirstName": "К.Ю.",
       "room": "Ауд. 10",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3448,7 +4605,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Менеджмент",
       "lessonType": "seminar",
       "teacherLastName": "Павлова",
@@ -3462,7 +4619,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Конструкторське моделювання",
       "lessonType": "practical",
       "teacherLastName": "Кравцов",
@@ -3476,7 +4633,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія прийняття рішень",
       "lessonType": "lecture",
       "teacherLastName": "Бондар",
@@ -3490,7 +4647,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Технологічна оснастка",
       "lessonType": "practical",
       "teacherLastName": "Пузирьов",
@@ -3504,7 +4661,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Паралельні та розподіленні обчислення",
       "lessonType": "practical",
       "teacherLastName": "Паращук",
@@ -3518,12 +4675,56 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 4,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Управління проектами",
       "lessonType": "practical",
       "teacherLastName": "Яковенко",
       "teacherFirstName": "Р.В.",
       "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 4,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 1",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 4,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 11",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "ФН-22"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 4,
+      "weekParity": "even",
+      "subject": "Фондовий ринок",
+      "lessonType": "seminar",
+      "teacherLastName": "Василенко",
+      "teacherFirstName": "І.М.",
+      "room": "Ауд. 8",
       "subgroup": null
     },
     {
@@ -3604,7 +4805,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Орг-ція баз даних",
       "lessonType": "practical",
       "teacherLastName": "Книшук",
@@ -3618,7 +4819,7 @@
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Віртуальні та доповнена реальність",
       "lessonType": "practical",
       "teacherLastName": "Ізвалов",
@@ -3628,13 +4829,171 @@
     },
     {
       "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 6,
+      "weekParity": "odd",
+      "subject": "Комп.мережі",
+      "lessonType": "practical",
+      "teacherLastName": "Баранюк",
+      "teacherFirstName": "О.Ф.",
+      "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 6,
+      "weekParity": "even",
+      "subject": "Комп.мережі",
+      "lessonType": "practical",
+      "teacherLastName": "Баранюк",
+      "teacherFirstName": "О.Ф.",
+      "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 3,
+      "timeSlotNumber": 6,
+      "weekParity": "even",
+      "subject": "Орг-ція баз даних",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Економічна теорія",
+      "lessonType": "seminar",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 6",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Нарисна геометрія",
+      "lessonType": "practical",
+      "teacherLastName": "Пузирьов",
+      "teacherFirstName": "О.Л.",
+      "room": "Ауд. 4",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Комп.графіка",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": 1
+    },
+    {
+      "groups": [
+        "ПМ-24"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Опір матеріалів/ Теорія мех та машин",
+      "lessonType": "practical",
+      "teacherLastName": "Пирогов",
+      "teacherFirstName": "В.В.",
+      "room": "Ауд. 5",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МД-23"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Бізнес-інформатика",
+      "lessonType": "practical",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
+      "room": "Ауд. 16",
+      "subgroup": 1
+    },
+    {
+      "groups": [
+        "ФН-22"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Страхування",
+      "lessonType": "lecture",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "room": "Ауд. 8",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 11",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "МД-23"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Бізнес-інформатика",
+      "lessonType": "practical",
+      "teacherLastName": "Довгенко",
+      "teacherFirstName": "Я.О.",
+      "room": "Ауд. 16",
+      "subgroup": 2
+    },
+    {
+      "groups": [
         "МР-25",
         "МД-25",
         "ФН-25"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Вища математика",
       "lessonType": "seminar",
       "teacherLastName": "Мироненко",
@@ -3644,13 +5003,11 @@
     },
     {
       "groups": [
-        "ПМ-25",
-        "КН-25",
-        "ІПЗ-25"
+        "ПМ-25"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Іноземна мова",
       "lessonType": "practical",
       "teacherLastName": "Максимова",
@@ -3660,13 +5017,28 @@
     },
     {
       "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 3",
+      "subgroup": 1
+    },
+    {
+      "groups": [
         "МР-24",
         "МД-24",
         "ФН-24"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "іжнародна економіка",
       "lessonType": "lecture",
       "teacherLastName": "Павлова",
@@ -3680,7 +5052,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теорія механізмів і машин",
       "lessonType": "seminar",
       "teacherLastName": "Пирогов",
@@ -3694,7 +5066,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Економічний аналіз",
       "lessonType": "seminar",
       "teacherLastName": "Загреба",
@@ -3708,7 +5080,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Конструкторське моделювання",
       "lessonType": "practical",
       "teacherLastName": "Кравцов",
@@ -3722,7 +5094,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "SALES-менеджмент",
       "lessonType": "practical",
       "teacherLastName": "Алексеєва",
@@ -3736,12 +5108,55 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Страхування",
       "lessonType": "seminar",
       "teacherLastName": "Фрунза",
       "teacherFirstName": "С.А.",
       "room": "Ауд. 8",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
+      "subject": "Програмування",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "ПМ-23"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Проектування та виробництво заготовок",
+      "lessonType": "practical",
+      "teacherLastName": "Пузирьов",
+      "teacherFirstName": "О.Л.",
+      "room": "Ауд. 4",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-22"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Програмування мехатронних систем",
+      "lessonType": "seminar",
+      "teacherLastName": "Руденко",
+      "teacherFirstName": "Т.В.",
+      "room": "Ауд. 9",
       "subgroup": null
     },
     {
@@ -3752,13 +5167,13 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Інформатика",
       "lessonType": "practical",
       "teacherLastName": "Беспалий",
       "teacherFirstName": "В.І.",
       "room": "Ауд. 16",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3767,13 +5182,13 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування",
       "lessonType": "practical",
       "teacherLastName": "Книшук",
       "teacherFirstName": "А.В.",
       "room": "Ауд. 10",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3783,7 +5198,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Міжнародна економіка",
       "lessonType": "seminar",
       "teacherLastName": "Павлова",
@@ -3797,7 +5212,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Опір матеріалів",
       "lessonType": "laboratory",
       "teacherLastName": "Пирогов",
@@ -3812,7 +5227,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Господарське законодавство",
       "lessonType": "lecture",
       "teacherLastName": "Щербина",
@@ -3826,7 +5241,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Проектування та виробництво заготовок",
       "lessonType": "practical",
       "teacherLastName": "Пузирьов",
@@ -3840,7 +5255,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "SALES-менеджмент",
       "lessonType": "practical",
       "teacherLastName": "Алексеєва",
@@ -3854,7 +5269,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Фінансова діяльність суб'єктів господарювання",
       "lessonType": "lecture",
       "teacherLastName": "Загреба",
@@ -3868,12 +5283,71 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування мехатронних систем",
       "lessonType": "seminar",
       "teacherLastName": "Руденко",
       "teacherFirstName": "Т.В.",
       "room": "Ауд. 4",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 3,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 6",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 3,
+      "weekParity": "odd",
+      "subject": "Комп.графіка",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "ПМ-25"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 3,
+      "weekParity": "even",
+      "subject": "Основи здорового способу життя",
+      "lessonType": "practical",
+      "teacherLastName": "Гавриленко",
+      "teacherFirstName": "М.І.",
+      "room": "Дистанційно",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 3,
+      "weekParity": "even",
+      "subject": "Психологія",
+      "lessonType": "seminar",
+      "teacherLastName": "Нестеренко",
+      "teacherFirstName": "Т.С.",
+      "room": "Ауд. 3",
       "subgroup": null
     },
     {
@@ -3902,7 +5376,7 @@
       "teacherLastName": "Книшук",
       "teacherFirstName": "А.В.",
       "room": "Ауд. 10",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -3976,11 +5450,41 @@
     },
     {
       "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 4,
+      "weekParity": "both",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 1",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 4,
+      "weekParity": "both",
+      "subject": "Веб-технології",
+      "lessonType": "practical",
+      "teacherLastName": "Сурков",
+      "teacherFirstName": "К.Ю.",
+      "room": "Ауд. 16",
+      "subgroup": 2
+    },
+    {
+      "groups": [
         "ПМ-24"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 5,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Теоретичні основи теплотехніки",
       "lessonType": "seminar",
       "teacherLastName": "Руденко",
@@ -3994,7 +5498,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 5,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Організація баз даних",
       "lessonType": "lecture",
       "teacherLastName": "Книшук",
@@ -4008,7 +5512,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 5,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Математичні методи дослдіження операцій",
       "lessonType": "seminar",
       "teacherLastName": "Мироненко",
@@ -4022,7 +5526,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 5,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Екологія",
       "lessonType": "seminar",
       "teacherLastName": "Не визначено",
@@ -4036,7 +5540,7 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 5,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування веб-додатків LARAVEL",
       "lessonType": "practical",
       "teacherLastName": "Зєнов",
@@ -4046,11 +5550,25 @@
     },
     {
       "groups": [
+        "КН-22"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 5,
+      "weekParity": "even",
+      "subject": "Розробка мобільних додатків",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": null
+    },
+    {
+      "groups": [
         "КН-23"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Розробка пр. забезп.",
       "lessonType": "practical",
       "teacherLastName": "Ізвалов",
@@ -4064,12 +5582,213 @@
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 6,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Програмування веб-додатків LARAVEL",
       "lessonType": "practical",
       "teacherLastName": "Зєнов",
       "teacherFirstName": "Д.О.",
       "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-24"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 6,
+      "weekParity": "odd",
+      "subject": "Орг-ція баз даних",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 4,
+      "timeSlotNumber": 6,
+      "weekParity": "even",
+      "subject": "Розробка пр. забезп.",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Безпека життєдільності",
+      "lessonType": "seminar",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 20",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Статистика",
+      "lessonType": "practical",
+      "teacherLastName": "Мироненко",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 16",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-24",
+        "КН-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Безпека життєдільності",
+      "lessonType": "lecture",
+      "teacherLastName": "Кравцов",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 20",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МД-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Ділова іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Протасова",
+      "teacherFirstName": "А.П.",
+      "room": "Ауд. 1",
+      "subgroup": 1
+    },
+    {
+      "groups": [
+        "МД-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Ділова іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 11",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "ПМ-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Різання металів",
+      "lessonType": "lecture",
+      "teacherLastName": "Пузирьов",
+      "teacherFirstName": "О.Л.",
+      "room": "Ауд. 4",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МД-22"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Ділова іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Максимова",
+      "teacherFirstName": "О.П.",
+      "room": "Ауд. 1",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-22"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Теорія автоматичного керування",
+      "lessonType": "practical",
+      "teacherLastName": "Гаврилюк",
+      "teacherFirstName": "Б.О.",
+      "room": "Ауд. 5",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-22"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "odd",
+      "subject": "Системний аналіз",
+      "lessonType": "practical",
+      "teacherLastName": "Бондар",
+      "teacherFirstName": "О.П.",
+      "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ПМ-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Електротехніка",
+      "lessonType": "practical",
+      "teacherLastName": "Гаврилюк",
+      "teacherFirstName": "Б.О.",
+      "room": "Ауд. 4",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Якість програмного забезпечення",
+      "lessonType": "seminar",
+      "teacherLastName": "Найдьонов",
+      "teacherFirstName": "І.В.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ФН-22"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 1,
+      "weekParity": "even",
+      "subject": "Бюджетна система",
+      "lessonType": "seminar",
+      "teacherLastName": "Штець",
+      "teacherFirstName": "Т.Ф.",
+      "room": "Ауд. 13",
       "subgroup": null
     },
     {
@@ -4080,13 +5799,13 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Іноземна мова",
       "lessonType": "practical",
       "teacherLastName": "Протасова",
       "teacherFirstName": "А.П.",
       "room": "Ауд. 6",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -4094,7 +5813,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Інформатика",
       "lessonType": "practical",
       "teacherLastName": "Сурков",
@@ -4109,7 +5828,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Комп. графіка",
       "lessonType": "practical",
       "teacherLastName": "Ізвалов",
@@ -4124,7 +5843,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Безпека життєдільності",
       "lessonType": "seminar",
       "teacherLastName": "Кравцов",
@@ -4138,7 +5857,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Господарське законодавство",
       "lessonType": "seminar",
       "teacherLastName": "Щербина",
@@ -4152,7 +5871,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Електротехніка",
       "lessonType": "laboratory",
       "teacherLastName": "Гаврилюк",
@@ -4166,7 +5885,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Управління якістю",
       "lessonType": "lecture",
       "teacherLastName": "Яковенко",
@@ -4180,7 +5899,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Фінансова діяльність суб'єктів господарювання",
       "lessonType": "lecture",
       "teacherLastName": "Загреба",
@@ -4194,7 +5913,7 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Технологічна оснастка",
       "lessonType": "practical",
       "teacherLastName": "Пузирьов",
@@ -4208,12 +5927,131 @@
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
-      "weekParity": "both",
+      "weekParity": "odd",
       "subject": "Проектування інформ. систем",
       "lessonType": "practical",
       "teacherLastName": "Неділько",
       "teacherFirstName": "В.М.",
       "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-25",
+        "МД-25",
+        "ФН-25"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "odd",
+      "subject": "Іноземна мова",
+      "lessonType": "practical",
+      "teacherLastName": "Рожкова",
+      "teacherFirstName": "Н.Г.",
+      "room": "Ауд. 20",
+      "subgroup": 2
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Програмування",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-24",
+        "МД-24",
+        "ФН-24",
+        "ПМ-24",
+        "КН-24"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Базова військова підготовка",
+      "lessonType": "practical",
+      "teacherLastName": "Не визначено",
+      "teacherFirstName": "Н.В.",
+      "room": "Дистанційно",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МД-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Менеджмент",
+      "lessonType": "practical",
+      "teacherLastName": "Павлова",
+      "teacherFirstName": "О.В.",
+      "room": "Конференц-зал",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "МР-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Маркетинг",
+      "lessonType": "practical",
+      "teacherLastName": "Алексеєва",
+      "teacherFirstName": "Л.М.",
+      "room": "Ауд. 11",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "ФН-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Фінанси",
+      "lessonType": "practical",
+      "teacherLastName": "Фрунза",
+      "teacherFirstName": "С.А.",
+      "room": "Ауд. 9",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Господарське законодавство",
+      "lessonType": "seminar",
+      "teacherLastName": "Щербина",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-22"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 2,
+      "weekParity": "even",
+      "subject": "Віртуальні та доповнена реальність",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
       "subgroup": null
     },
     {
@@ -4318,6 +6156,50 @@
       "teacherLastName": "Неділько",
       "teacherFirstName": "В.М.",
       "room": "Ауд. 3",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-23"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 3,
+      "weekParity": "both",
+      "subject": "Розробка пр. забезп.",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 4,
+      "weekParity": "odd",
+      "subject": "Програмування",
+      "lessonType": "practical",
+      "teacherLastName": "Книшук",
+      "teacherFirstName": "А.В.",
+      "room": "Ауд. 10",
+      "subgroup": null
+    },
+    {
+      "groups": [
+        "КН-25",
+        "ІПЗ-25"
+      ],
+      "dayOfWeek": 5,
+      "timeSlotNumber": 4,
+      "weekParity": "even",
+      "subject": "Комп. графіка",
+      "lessonType": "practical",
+      "teacherLastName": "Ізвалов",
+      "teacherFirstName": "О.В.",
+      "room": "Ауд. 2",
       "subgroup": null
     }
   ]

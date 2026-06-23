@@ -365,44 +365,133 @@ def build_teaching_loads(entries: list[dict[str, object]]) -> list[dict[str, obj
     return loads
 
 
-def parse_workbook(path: Path) -> dict[str, object]:
-    workbook = xlrd.open_workbook(path)
-    sheet = workbook.sheet_by_name('мал')
-    headers: dict[int, list[str]] = {}
+def build_column_groups(sheet) -> dict[int, list[str]]:
+    groups_by_col: dict[int, list[str]] = {}
+    column_count = sheet.ncols
 
-    for column in range(sheet.ncols):
+    for column in range(column_count):
         header = str(sheet.cell_value(7, column)).strip()
         if header in ('', 'день'):
             continue
-        headers[column] = expand_groups(header)
+
+        groups_by_col[column] = expand_groups(header)
+
+    for column in range(column_count):
+        header = str(sheet.cell_value(7, column)).strip()
+        if header not in ('', 'день'):
+            continue
+
+        previous_header = str(sheet.cell_value(7, column - 1)).strip() if column > 0 else 'BLOCK'
+        if previous_header not in ('', 'день') and (column - 1) in groups_by_col:
+            groups_by_col[column] = groups_by_col[column - 1]
+
+    return groups_by_col
+
+
+def slot_rows_for(sheet, slot_start_row: int) -> list[int]:
+    rows = [slot_start_row]
+
+    for row in range(slot_start_row + 1, sheet.nrows):
+        day_cell = str(sheet.cell_value(row, 0)).strip().lower()
+        if day_cell in DAY_MAP:
+            break
+
+        slot_value = sheet.cell_value(row, 1)
+        if isinstance(slot_value, (int, float)) and 1 <= slot_value <= 6:
+            break
+
+        rows.append(row)
+
+    return rows
+
+
+def row_has_lesson_content(sheet, row: int, groups_by_col: dict[int, list[str]]) -> bool:
+    for column in groups_by_col:
+        if parse_cell(sheet.cell_value(row, column)):
+            return True
+
+    return False
+
+
+def week_parity_for_row(sheet, row: int, slot_rows: list[int], groups_by_col: dict[int, list[str]]) -> str:
+    content_rows = [slot_row for slot_row in slot_rows if row_has_lesson_content(sheet, slot_row, groups_by_col)]
+
+    if len(content_rows) <= 1:
+        return 'both'
+
+    try:
+        index = content_rows.index(row)
+    except ValueError:
+        return 'both'
+
+    return 'odd' if index % 2 == 0 else 'even'
+
+
+def cell_has_lesson_content(sheet, row: int, column: int) -> bool:
+    return bool(parse_cell(sheet.cell_value(row, column)))
+
+
+def apply_row_subgroup(
+    sheet,
+    row: int,
+    column: int,
+    lesson: dict[str, object],
+    groups_by_col: dict[int, list[str]],
+) -> None:
+    if lesson.get('subgroup') is not None:
+        return
+
+    header = str(sheet.cell_value(7, column)).strip()
+    if header in ('', 'день'):
+        if column - 1 in groups_by_col and cell_has_lesson_content(sheet, row, column - 1):
+            lesson['subgroup'] = 2
+        return
+
+    next_column = column + 1
+    next_header = str(sheet.cell_value(7, next_column)).strip() if next_column < sheet.ncols else 'BLOCK'
+    if next_header in ('',) and cell_has_lesson_content(sheet, row, next_column):
+        lesson['subgroup'] = 1
+
+
+def parse_workbook(path: Path) -> dict[str, object]:
+    workbook = xlrd.open_workbook(path)
+    sheet = workbook.sheet_by_name('мал')
+    groups_by_col = build_column_groups(sheet)
 
     entries: list[dict[str, object]] = []
     current_day: int | None = None
+    current_slot: int | None = None
+    slot_rows: list[int] = []
 
     for row in range(8, sheet.nrows):
         day_cell = str(sheet.cell_value(row, 0)).strip().lower()
         if day_cell in DAY_MAP:
             current_day = DAY_MAP[day_cell]
-            continue
 
         slot_value = sheet.cell_value(row, 1)
-        if not isinstance(slot_value, (int, float)) or not 1 <= slot_value <= 6:
-            continue
-        if current_day is None:
+        if isinstance(slot_value, (int, float)) and 1 <= slot_value <= 6:
+            current_slot = int(slot_value)
+            slot_rows = slot_rows_for(sheet, row)
+
+        if current_day is None or current_slot is None or not slot_rows:
             continue
 
-        slot = int(slot_value)
-        for column, groups in headers.items():
+        week_parity = week_parity_for_row(sheet, row, slot_rows, groups_by_col)
+        row_entries: list[dict[str, object]] = []
+        for column, groups in groups_by_col.items():
             for lesson in parse_cell(sheet.cell_value(row, column)):
-                entries.append(
+                apply_row_subgroup(sheet, row, column, lesson, groups_by_col)
+                row_entries.append(
                     {
                         'groups': groups,
                         'dayOfWeek': current_day,
-                        'timeSlotNumber': slot,
-                        'weekParity': 'both',
+                        'timeSlotNumber': current_slot,
+                        'weekParity': week_parity,
                         **lesson,
                     }
                 )
+
+        entries.extend(row_entries)
 
     fill_missing_rooms(entries)
     entries = merge_entries(entries)
