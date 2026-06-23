@@ -66,6 +66,7 @@ const {
   duplicateEntry,
   validate,
   publish,
+  duplicateToDraft,
   clearActionError,
   generationJob,
   isGenerating,
@@ -99,6 +100,19 @@ const subjectFilterOptions = computed(() => [
   { id: 0, label: t.value.allSubjects, description: '' },
   ...subjectOptions.value,
 ])
+const lessonTypeFilterOptions = computed(() => [
+  { id: 'all', label: t.value.allLessonTypes, description: '' },
+  { id: 'lecture', label: t.value.lessonTypes.lecture, description: '' },
+  { id: 'laboratory', label: t.value.lessonTypes.laboratory, description: '' },
+  { id: 'seminar', label: t.value.lessonTypes.seminar, description: '' },
+  { id: 'practical', label: t.value.lessonTypes.practical, description: '' },
+])
+const cardSortOptions = computed(() => [
+  { id: 'remaining', label: t.value.cardOrder.remaining, description: '' },
+  { id: 'subject', label: t.value.cardOrder.subject, description: '' },
+  { id: 'group', label: t.value.cardOrder.group, description: '' },
+  { id: 'teacher', label: t.value.cardOrder.teacher, description: '' },
+])
 
 function selectGroup(value: string): void {
   const nextValue = Number(value)
@@ -115,6 +129,14 @@ function selectSubject(value: string): void {
   const nextValue = Number(value)
   selectedSubjectId.value = nextValue === 0 ? null : nextValue
 }
+
+function selectLessonType(value: string): void {
+  selectedLessonType.value = value
+}
+
+function selectCardSort(value: string): void {
+  cardSort.value = value as 'remaining' | 'subject' | 'group' | 'teacher'
+}
 </script>
 
 <template>
@@ -128,6 +150,14 @@ function selectSubject(value: string): void {
           <p>{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
         </div>
         <div class="schedule-editor-page__controls">
+          <AppButton
+            v-if="isReadOnly"
+            variant="primary"
+            data-testid="duplicate-schedule"
+            @click="duplicateToDraft"
+          >
+            {{ t.duplicateSchedule }}
+          </AppButton>
           <AppButton
             v-if="!isReadOnly && remainingLessonCount > 0"
             variant="secondary"
@@ -222,25 +252,20 @@ function selectSubject(value: string): void {
               :options="subjectFilterOptions"
               @update:model-value="selectSubject"
             />
-            <label class="field">
-              <span class="field__label">{{ t.lessonType }}</span>
-              <select v-model="selectedLessonType" class="field__control">
-                <option value="">{{ t.allLessonTypes }}</option>
-                <option value="lecture">{{ t.lessonTypes.lecture }}</option>
-                <option value="laboratory">{{ t.lessonTypes.laboratory }}</option>
-                <option value="seminar">{{ t.lessonTypes.seminar }}</option>
-                <option value="practical">{{ t.lessonTypes.practical }}</option>
-              </select>
-            </label>
-            <label class="field">
-              <span class="field__label">{{ t.orderBy }}</span>
-              <select v-model="cardSort" class="field__control">
-                <option value="remaining">{{ t.cardOrder.remaining }}</option>
-                <option value="subject">{{ t.cardOrder.subject }}</option>
-                <option value="group">{{ t.cardOrder.group }}</option>
-                <option value="teacher">{{ t.cardOrder.teacher }}</option>
-              </select>
-            </label>
+            <AppSelect
+              id="schedule-lesson-type-filter"
+              :label="t.lessonType"
+              :model-value="selectedLessonType"
+              :options="lessonTypeFilterOptions"
+              @update:model-value="selectLessonType"
+            />
+            <AppSelect
+              id="schedule-card-sort"
+              :label="t.orderBy"
+              :model-value="cardSort"
+              :options="cardSortOptions"
+              @update:model-value="selectCardSort"
+            />
             <label class="inline-toggle">
               <input v-model="requiresComputerRoomOnly" type="checkbox" />
               <span>{{ t.computerRoomOnly }}</span>
@@ -305,6 +330,7 @@ function selectSubject(value: string): void {
             :teachers="teachers"
             :time-slots="timeSlots"
             :errors="entryErrors"
+            :read-only="isReadOnly"
             @create="createEntry"
             @save="saveEntry"
             @delete="removeEntry"

@@ -19,6 +19,7 @@ defineProps<{
   modelValue: string | number
   options: Array<{ id: string | number; label: string; description?: string }>
   placeholder?: string
+  disabled?: boolean
   class?: HTMLAttributes['class']
 }>()
 
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 <template>
   <SelectRoot
     :model-value="String(modelValue)"
+    :disabled="disabled"
     @update:model-value="emit('update:modelValue', String($event))"
   >
     <SelectTrigger
@@ -52,7 +54,7 @@ const emit = defineEmits<{
           )
         "
       >
-        <SelectViewport class="p-1">
+        <SelectViewport class="max-h-60 overflow-y-auto p-1">
           <SelectItem
             v-for="option in options"
             :key="option.id"

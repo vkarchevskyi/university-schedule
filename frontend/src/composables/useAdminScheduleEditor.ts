@@ -1,8 +1,10 @@
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import {
   createScheduleEntry,
   deleteScheduleEntry,
+  duplicateSchedule,
   getSchedule,
   listGroups,
   listLessonCards,
@@ -43,6 +45,7 @@ interface PendingPlacement {
 type LessonCardSort = 'remaining' | 'subject' | 'group' | 'teacher'
 
 export function useAdminScheduleEditor(scheduleId: number) {
+  const router = useRouter()
   const { t } = useAdminI18n()
   const schedule = ref<AdminSchedule | null>(null)
   const cards = ref<LessonCard[]>([])
@@ -54,7 +57,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   const selectedGroupId = ref<number | null>(null)
   const selectedTeacherId = ref<number | null>(null)
   const selectedSubjectId = ref<number | null>(null)
-  const selectedLessonType = ref('')
+  const selectedLessonType = ref('all')
   const cardSort = ref<LessonCardSort>('remaining')
   const cardsSearch = ref('')
   const hideCompletedCards = ref(true)
@@ -132,7 +135,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       .filter((card) => selectedGroupId.value === null || card.group.id === selectedGroupId.value)
       .filter((card) => selectedTeacherId.value === null || card.teacher.id === selectedTeacherId.value)
       .filter((card) => selectedSubjectId.value === null || card.subject.id === selectedSubjectId.value)
-      .filter((card) => selectedLessonType.value === '' || card.lessonType === selectedLessonType.value)
+      .filter((card) => selectedLessonType.value === 'all' || card.lessonType === selectedLessonType.value)
       .filter((card) => !hideCompletedCards.value || card.remainingLessonCount > 0)
       .filter((card) => !requiresComputerRoomOnly.value || card.requiresComputerRoom)
       .filter((card) => {
@@ -284,8 +287,17 @@ export function useAdminScheduleEditor(scheduleId: number) {
     pendingPlacement.value = null
   }
 
+  function guardWritable(): boolean {
+    if (isReadOnly.value) {
+      showActionError(t.value.readOnlySchedule)
+      return false
+    }
+
+    return true
+  }
+
   async function saveEntry(payload: Partial<ScheduleEntryPayload>): Promise<void> {
-    if (selectedEntry.value === null || isReadOnly.value) {
+    if (selectedEntry.value === null || !guardWritable()) {
       return
     }
 
@@ -302,7 +314,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function createEntry(payload: ScheduleEntryPayload): Promise<void> {
-    if (isReadOnly.value) {
+    if (!guardWritable()) {
       return
     }
 
@@ -364,7 +376,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
   }
 
   async function removeEntry(): Promise<void> {
-    if (selectedEntry.value === null || isReadOnly.value) {
+    if (selectedEntry.value === null || !guardWritable()) {
       return
     }
 
@@ -404,6 +416,17 @@ export function useAdminScheduleEditor(scheduleId: number) {
 
       schedule.value = await publishSchedule(scheduleId)
       message.value = t.value.published
+    } catch (exception) {
+      handleActionError(exception)
+    }
+  }
+
+  async function duplicateToDraft(): Promise<void> {
+    clearActionError()
+
+    try {
+      const draft = await duplicateSchedule(scheduleId)
+      await router.push({ name: 'admin-schedule-editor', params: { id: draft.id } })
     } catch (exception) {
       handleActionError(exception)
     }
@@ -672,6 +695,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     duplicateEntry,
     validate,
     publish,
+    duplicateToDraft,
     clearActionError,
     generationJob,
     isGenerating,

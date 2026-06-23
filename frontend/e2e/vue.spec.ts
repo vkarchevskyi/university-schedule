@@ -316,7 +316,8 @@ test('places, edits, validates, and deletes a schedule entry', async ({ page }) 
   await expect(page.getByTestId('lesson-card-remaining')).toHaveText('6')
 
   await page.getByTestId('schedule-entry-select').click()
-  await page.getByTestId('week-parity-select').selectOption('odd')
+  await page.getByTestId('week-parity-select').getByRole('combobox').click()
+  await page.getByRole('option', { name: 'Непарний' }).click()
   await page.getByTestId('save-entry').click()
 
   await expect(page.getByTestId('lesson-card-scheduled')).toHaveText('1')
@@ -514,6 +515,49 @@ test('disables drag and drop editing for published schedules', async ({ page }) 
   await expect(page.getByTestId('room-selection-modal')).toHaveCount(0)
 })
 
+test('duplicates a published schedule into an editable draft', async ({ page }) => {
+  const sourceEntry = adminScheduleEntry()
+  await mockSchedule(page)
+  await mockSuccessfulAuth(page)
+  await mockAdminScheduleManagement(page, {
+    initialEntries: [sourceEntry],
+    published: true,
+  })
+  await page.addInitScript(() => {
+    window.localStorage.setItem('university-schedule.user-token', 'jwt-token')
+  })
+
+  await page.route(/\/api\/admin\/schedules\/12\/duplicate$/, async (route) => {
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...adminSchedule(13, [sourceEntry]),
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+  })
+
+  await page.route(/\/api\/admin\/schedules\/13$/, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...adminSchedule(13, [sourceEntry]),
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+  })
+
+  await page.goto('/admin/schedules/12')
+  await page.getByTestId('duplicate-schedule').click()
+
+  await expect(page).toHaveURL(/\/admin\/schedules\/13$/)
+  await expect(page.getByTestId('save-entry')).toBeVisible()
+  await expect(page.getByTestId('entry-read-only-notice')).toHaveCount(0)
+})
+
 test('highlights an entry when schedule entry update validation fails', async ({ page }) => {
   await mockSchedule(page)
   await mockSuccessfulAuth(page)
@@ -529,7 +573,8 @@ test('highlights an entry when schedule entry update validation fails', async ({
   await placeLessonCardInFirstCell(page)
 
   await page.getByTestId('schedule-entry-select').click()
-  await page.getByTestId('week-parity-select').selectOption('odd')
+  await page.getByTestId('week-parity-select').getByRole('combobox').click()
+  await page.getByRole('option', { name: 'Непарний' }).click()
   await page.getByTestId('save-entry').click()
 
   await expect(page.getByTestId('entry-validation-summary')).toContainText(

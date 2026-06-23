@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import type { LookupOption } from '@/types/publicSchedule'
+export interface SelectOption {
+  id: string | number
+  label: string
+  description?: string
+}
 
 defineProps<{
   id: string
   label: string
   modelValue: string | number
-  options: LookupOption[]
+  options: SelectOption[]
   error?: string
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -23,6 +28,7 @@ const emit = defineEmits<{
       :id="id"
       :model-value="modelValue"
       :options="options"
+      :disabled="disabled"
       @update:model-value="emit('update:modelValue', $event)"
     />
     <small v-if="error" class="field-error">{{ error }}</small>

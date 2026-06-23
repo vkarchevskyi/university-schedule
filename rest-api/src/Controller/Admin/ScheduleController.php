@@ -10,6 +10,7 @@ use App\Dto\Admin\ScheduleQueryDto;
 use App\Dto\Admin\ScheduleRequestDto;
 use App\Service\LessonCard\ListLessonCardsService;
 use App\Service\Schedule\CreateScheduleService;
+use App\Service\Schedule\DuplicateScheduleService;
 use App\Service\Schedule\GetScheduleService;
 use App\Service\Schedule\ListSchedulesService;
 use App\Service\Schedule\PublishScheduleService;
@@ -79,6 +80,12 @@ final class ScheduleController extends AbstractAdminController
     public function validate(int $id, ValidateScheduleService $schedules): JsonResponse
     {
         return $this->respond(fn() => $schedules->handle($id));
+    }
+
+    #[Route('/{id}/duplicate', methods: ['POST'])]
+    public function duplicate(int $id, DuplicateScheduleService $schedules): JsonResponse
+    {
+        return $this->respond(fn() => $schedules->handle($id), Response::HTTP_CREATED);
     }
 
     #[Route('/{id}/publish', methods: ['POST'])]

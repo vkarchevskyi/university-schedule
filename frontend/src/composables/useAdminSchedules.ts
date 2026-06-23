@@ -1,7 +1,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { createSchedule, listSchedules, listSemesters } from '@/api/adminSchedule'
+import { createSchedule, duplicateSchedule, listSchedules, listSemesters } from '@/api/adminSchedule'
 import { useAdminI18n } from '@/composables/useI18n'
 import { useScheduleGenerationJob } from '@/composables/useScheduleGenerationJob'
 import type { AdminSchedule, AdminSemester } from '@/types/adminSchedule'
@@ -74,6 +74,11 @@ export function useAdminSchedules() {
     await router.push({ name: 'admin-schedule-editor', params: { id } })
   }
 
+  async function duplicateToDraft(scheduleId: number): Promise<void> {
+    const draft = await duplicateSchedule(scheduleId)
+    await router.push({ name: 'admin-schedule-editor', params: { id: draft.id } })
+  }
+
   return {
     schedules,
     selectedSemesterId,
@@ -84,5 +89,6 @@ export function useAdminSchedules() {
     createDraft,
     startGeneration,
     openSchedule,
+    duplicateToDraft,
   }
 }

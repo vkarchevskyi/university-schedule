@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 
+defineOptions({ inheritAttrs: false })
+
 withDefaults(
   defineProps<{
     type?: 'button' | 'submit'
@@ -16,7 +18,12 @@ withDefaults(
 </script>
 
 <template>
-  <Button :type="type" :variant="variant === 'primary' ? 'default' : variant" :disabled="disabled">
+  <Button
+    v-bind="$attrs"
+    :type="type"
+    :variant="variant === 'primary' ? 'default' : variant"
+    :disabled="disabled"
+  >
     <slot />
   </Button>
 </template>

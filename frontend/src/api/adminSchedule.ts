@@ -108,6 +108,13 @@ export function publishSchedule(scheduleId: number): Promise<AdminSchedule> {
   })
 }
 
+export function duplicateSchedule(scheduleId: number): Promise<AdminSchedule> {
+  return requestJson(`/api/admin/schedules/${scheduleId}/duplicate`, {
+    method: 'POST',
+    authenticated: true,
+  })
+}
+
 export function generateSchedule(
   semesterId: number,
   scheduleId?: number,
