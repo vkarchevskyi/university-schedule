@@ -14,10 +14,11 @@ import ScheduleEntryEditor from '@/components/organisms/ScheduleEntryEditor.vue'
 import ScheduleEntryGrid from '@/components/organisms/ScheduleEntryGrid.vue'
 import { useAdminScheduleEditor } from '@/composables/useAdminScheduleEditor'
 import { useAdminI18n } from '@/composables/useI18n'
+import { translateScheduleConflict } from '@/utils/scheduleConflicts'
 
 const route = useRoute()
 const scheduleId = Number(route.params.id)
-const { t } = useAdminI18n()
+const { t, locale } = useAdminI18n()
 const {
   schedule,
   cards,
@@ -81,8 +82,9 @@ const conflictMessagesByEntry = computed(() => {
   const messages: Record<number, string[]> = {}
 
   for (const conflict of conflicts.value) {
+    const text = translateScheduleConflict(conflict.type, conflict.message, locale.locale)
     for (const id of conflict.entryIds) {
-      messages[id] = [...(messages[id] ?? []), conflict.message]
+      messages[id] = [...(messages[id] ?? []), text]
     }
   }
 

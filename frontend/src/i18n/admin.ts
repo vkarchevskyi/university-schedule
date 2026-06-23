@@ -534,3 +534,5 @@ export const adminLabels = {
     } as Record<string, string>,
   },
 }
+
+export type AdminLocale = keyof typeof adminLabels

@@ -18,6 +18,7 @@ import {
 } from '@/api/adminSchedule'
 import { ApiError } from '@/api/http'
 import { useAdminI18n } from '@/composables/useI18n'
+import { translateApiValidationMessage } from '@/utils/scheduleConflicts'
 import { useScheduleGenerationJob } from '@/composables/useScheduleGenerationJob'
 import type {
   AdminRoom,
@@ -46,7 +47,7 @@ type LessonCardSort = 'remaining' | 'subject' | 'group' | 'teacher'
 
 export function useAdminScheduleEditor(scheduleId: number) {
   const router = useRouter()
-  const { t } = useAdminI18n()
+  const { t, locale } = useAdminI18n()
   const schedule = ref<AdminSchedule | null>(null)
   const cards = ref<LessonCard[]>([])
   const rooms = ref<AdminRoom[]>([])
@@ -544,13 +545,18 @@ export function useAdminScheduleEditor(scheduleId: number) {
       if (actionViolations.length > 0) {
         showActionError(
           exception.message,
-          actionViolations.map((violation) => violation.message),
+          actionViolations.map((violation) =>
+            translateApiValidationMessage(violation.message, locale.locale),
+          ),
         )
         return
       }
 
       entryErrors.value = Object.fromEntries(
-        fieldViolations.map((violation) => [violation.propertyPath, violation.message]),
+        fieldViolations.map((violation) => [
+          violation.propertyPath,
+          translateApiValidationMessage(violation.message, locale.locale),
+        ]),
       )
       errorEntryIds.value = entryIds
       error.value = null
@@ -564,7 +570,9 @@ export function useAdminScheduleEditor(scheduleId: number) {
     if (exception instanceof ApiError && exception.violations.length > 0) {
       showActionError(
         exception.message,
-        exception.violations.map((violation) => violation.message),
+        exception.violations.map((violation) =>
+          translateApiValidationMessage(violation.message, locale.locale),
+        ),
       )
       return
     }

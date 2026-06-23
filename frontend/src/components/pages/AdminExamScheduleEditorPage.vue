@@ -10,11 +10,12 @@ import ConflictPanel from '@/components/molecules/ConflictPanel.vue'
 import AdminLayout from '@/components/organisms/AdminLayout.vue'
 import { useAdminExamScheduleEditor } from '@/composables/useAdminExamScheduleEditor'
 import { useAdminI18n } from '@/composables/useI18n'
+import { translateScheduleConflict } from '@/utils/scheduleConflicts'
 import type { ExamScheduleEntryPayload } from '@/types/adminExamSchedule'
 
 const route = useRoute()
 const scheduleId = Number(route.params.id)
-const { t } = useAdminI18n()
+const { t, locale } = useAdminI18n()
 const { schedule, lookups, selectedEntry, conflicts, message, error, isLoading, save, remove, validate } =
   useAdminExamScheduleEditor(scheduleId)
 const selectedGroupId = ref(0)
@@ -38,8 +39,9 @@ const conflictMessagesByEntry = computed(() => {
   const messages: Record<number, string[]> = {}
 
   for (const conflict of conflicts.value) {
+    const text = translateScheduleConflict(conflict.type, conflict.message, locale.locale, 'exam')
     for (const id of conflict.entryIds) {
-      messages[id] = [...(messages[id] ?? []), conflict.message]
+      messages[id] = [...(messages[id] ?? []), text]
     }
   }
 
@@ -123,7 +125,7 @@ function nameById<T extends { id: number; name?: string; firstName?: string; las
 
       <StateMessage v-if="message" :title="message" data-testid="exam-validation-result">
       </StateMessage>
-      <ConflictPanel :conflicts="conflicts" />
+      <ConflictPanel :conflicts="conflicts" context="exam" />
 
       <section class="schedule-summary-bar">
         <article>
