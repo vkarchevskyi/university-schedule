@@ -40,7 +40,7 @@ func TestGeneratorCreatesValidSchedule(t *testing.T) {
 	}
 }
 
-func TestGeneratorAvoidsOverlappingDifferentTimeSlots(t *testing.T) {
+func TestGeneratorAllowsSameTeacherForDisjointGroupsAtSameTime(t *testing.T) {
 	generator := NewGenerator(validation.NewValidator())
 
 	entries, _, _, err := generator.Generate(Input{
@@ -61,11 +61,6 @@ func TestGeneratorAvoidsOverlappingDifferentTimeSlots(t *testing.T) {
 	}
 	if len(entries) != 2 {
 		t.Fatalf("len(entries) = %d, want 2", len(entries))
-	}
-	firstStart, firstEnd := mustParseRange(t, entries[0])
-	secondStart, secondEnd := mustParseRange(t, entries[1])
-	if entries[0].DayOfWeek == entries[1].DayOfWeek && validation.TimeRangesOverlap(firstStart, firstEnd, secondStart, secondEnd) {
-		t.Fatalf("generated entries overlap: %#v and %#v", entries[0], entries[1])
 	}
 }
 
@@ -350,6 +345,33 @@ func TestGeneratorFailsWhenSeedBlocksAllRemainingPlacements(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("Generate() error = nil, want placement failure")
+	}
+}
+
+func TestConflictsAllowDisjointGroupsAtSameTime(t *testing.T) {
+	left := CandidateEntry{GroupID: 1, TeacherID: 10, RoomID: 20, DayOfWeek: 1, WeekParity: 1, Subgroup: 1}
+	right := CandidateEntry{GroupID: 2, TeacherID: 10, RoomID: 20, DayOfWeek: 1, WeekParity: 1, Subgroup: 1}
+
+	if conflicts(left, []CandidateEntry{right}) {
+		t.Fatal("expected disjoint groups not to conflict")
+	}
+}
+
+func TestConflictsDetectDisjointSubgroupsForSameGroup(t *testing.T) {
+	left := CandidateEntry{GroupID: 1, DayOfWeek: 1, WeekParity: 1, Subgroup: 1}
+	right := CandidateEntry{GroupID: 1, DayOfWeek: 1, WeekParity: 1, Subgroup: 2}
+
+	if conflicts(left, []CandidateEntry{right}) {
+		t.Fatal("expected disjoint subgroups not to conflict")
+	}
+}
+
+func TestConflictsDetectSameGroupAtSameTime(t *testing.T) {
+	left := CandidateEntry{GroupID: 1, DayOfWeek: 1, WeekParity: 1, Subgroup: 1}
+	right := CandidateEntry{GroupID: 1, DayOfWeek: 1, WeekParity: 1, Subgroup: 1}
+
+	if !conflicts(left, []CandidateEntry{right}) {
+		t.Fatal("expected same group and subgroup to conflict")
 	}
 }
 

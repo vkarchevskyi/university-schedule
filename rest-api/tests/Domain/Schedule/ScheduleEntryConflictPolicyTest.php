@@ -115,6 +115,27 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
         self::assertSame('groupIds', $conflict->field);
     }
 
+    public function testDisjointGroupsDoNotConflictForTeacherOrRoom(): void
+    {
+        $fixtures = $this->fixtures(WeekParity::Both);
+        $otherGroup = new StudentGroup('PM-22', 'Mechanics', 4, 24);
+        $this->setEntityId($otherGroup, 11);
+
+        $conflict = $this->policy->conflict($fixtures->schedule, new ScheduleEntryData(
+            $fixtures->subject,
+            $fixtures->teacher,
+            LessonType::Laboratory,
+            $fixtures->room,
+            $fixtures->timeSlot,
+            1,
+            WeekParity::Both,
+            [$otherGroup],
+            [],
+        ));
+
+        self::assertNull($conflict);
+    }
+
     public function testDifferentWeekParityDoesNotConflict(): void
     {
         $fixtures = $this->fixtures(WeekParity::Odd);

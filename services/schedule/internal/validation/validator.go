@@ -130,6 +130,11 @@ func validateEntryConflicts(entries []ScheduleEntry) []Conflict {
 			}
 
 			entryIDs := []int64{left.ID, right.ID}
+			groupsOverlap := hasInt64Overlap(left.GroupIDs, right.GroupIDs) && SubgroupsOverlap(left.Subgroup, right.Subgroup)
+
+			if !groupsOverlap {
+				continue
+			}
 
 			if left.TeacherID == right.TeacherID {
 				conflicts = append(conflicts, Conflict{"teacher_conflict", "Teacher is already assigned at this time.", entryIDs})
@@ -139,9 +144,7 @@ func validateEntryConflicts(entries []ScheduleEntry) []Conflict {
 				conflicts = append(conflicts, Conflict{"room_conflict", "Room is already assigned at this time.", entryIDs})
 			}
 
-			if hasInt64Overlap(left.GroupIDs, right.GroupIDs) && SubgroupsOverlap(left.Subgroup, right.Subgroup) {
-				conflicts = append(conflicts, Conflict{"group_conflict", "Group is already assigned at this time.", entryIDs})
-			}
+			conflicts = append(conflicts, Conflict{"group_conflict", "Group is already assigned at this time.", entryIDs})
 		}
 	}
 

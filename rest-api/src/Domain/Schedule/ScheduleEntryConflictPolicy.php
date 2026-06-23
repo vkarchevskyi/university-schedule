@@ -28,6 +28,10 @@ final readonly class ScheduleEntryConflictPolicy
                 continue;
             }
 
+            if (!$this->subgroupsOverlap($entry->getSubgroup(), $data->subgroup) || !$this->hasGroupOverlap($entry, $data->groups)) {
+                continue;
+            }
+
             if ($entry->getTeacher() === $data->teacher) {
                 return new ScheduleEntryConflict('teacherId', 'Teacher is already assigned at this time.');
             }
@@ -36,9 +40,7 @@ final readonly class ScheduleEntryConflictPolicy
                 return new ScheduleEntryConflict('roomId', 'Room is already assigned at this time.');
             }
 
-            if ($this->subgroupsOverlap($entry->getSubgroup(), $data->subgroup) && $this->hasGroupOverlap($entry, $data->groups)) {
-                return new ScheduleEntryConflict('groupIds', 'Group is already assigned at this time.');
-            }
+            return new ScheduleEntryConflict('groupIds', 'Group is already assigned at this time.');
         }
 
         return null;

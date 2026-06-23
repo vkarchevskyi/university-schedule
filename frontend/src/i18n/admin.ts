@@ -33,6 +33,11 @@ export const adminLabels = {
       odd: 'Непарний',
       even: 'Парний',
     },
+    weekParityShort: {
+      both: '2 тиж.',
+      odd: 'чис.',
+      even: 'знам.',
+    },
     subgroup: 'Підгрупа',
     subgroupOptions: {
       none: 'Уся група',
@@ -294,6 +299,11 @@ export const adminLabels = {
       both: 'Both weeks',
       odd: 'Odd week',
       even: 'Even week',
+    },
+    weekParityShort: {
+      both: '2w',
+      odd: 'odd',
+      even: 'even',
     },
     subgroup: 'Subgroup',
     subgroupOptions: {

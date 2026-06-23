@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { usePublicScheduleI18n } from '@/composables/useI18n'
+import { useAdminI18n, usePublicScheduleI18n } from '@/composables/useI18n'
 import { scheduleWeekdays } from '@/utils/date'
 import type {
   AdminScheduleEntry,
@@ -33,6 +33,7 @@ const emit = defineEmits<{
   select: [entry: AdminScheduleEntry]
 }>()
 
+const { t: adminLabels } = useAdminI18n()
 const { t: publicLabels } = usePublicScheduleI18n()
 
 const entriesByCell = computed(() => {
@@ -134,7 +135,7 @@ function lessonTypeMarker(type: LessonType): string {
 }
 
 function weekParityLabel(entry: AdminScheduleEntry): string {
-  return entry.weekParity === 'both' ? '2w' : entry.weekParity
+  return adminLabels.value.weekParityShort[entry.weekParity]
 }
 
 function subgroupLabel(entry: AdminScheduleEntry): string | null {

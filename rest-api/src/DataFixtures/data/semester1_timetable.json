@@ -816,7 +816,7 @@
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "МД-23",
@@ -1725,7 +1725,7 @@
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-23",
@@ -1734,7 +1734,7 @@
       "teacherFirstName": "О.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-23",
@@ -1806,7 +1806,7 @@
       "teacherFirstName": "Н.В.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-24",
@@ -1815,7 +1815,7 @@
       "teacherFirstName": "А.В.",
       "lessonType": "lecture",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-24",
@@ -1824,7 +1824,7 @@
       "teacherFirstName": "А.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 1,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-24",
@@ -1887,7 +1887,7 @@
       "teacherFirstName": "О.В.",
       "lessonType": "lecture",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-24",
@@ -1896,7 +1896,7 @@
       "teacherFirstName": "О.В.",
       "lessonType": "seminar",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-24",
@@ -1941,7 +1941,7 @@
       "teacherFirstName": "О.П.",
       "lessonType": "practical",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-25",
@@ -1968,7 +1968,7 @@
       "teacherFirstName": "О.П.",
       "lessonType": "lecture",
       "requiredLessonCount": 3,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-25",
@@ -1977,7 +1977,7 @@
       "teacherFirstName": "О.П.",
       "lessonType": "seminar",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-25",
@@ -2004,7 +2004,7 @@
       "teacherFirstName": "Н.А.",
       "lessonType": "seminar",
       "requiredLessonCount": 2,
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "group": "ПМ-25",
@@ -2460,20 +2460,7 @@
   "entries": [
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 1,
-      "timeSlotNumber": 1,
-      "weekParity": "both",
-      "subject": "Іноземна мова",
-      "lessonType": "practical",
-      "teacherLastName": "Максимова",
-      "teacherFirstName": "О.П.",
-      "room": "Ауд. 3",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -2568,7 +2555,9 @@
         "МД-25",
         "ФН-25",
         "КН-25",
-        "ІПЗ-25"
+        "ІПЗ-25",
+        "ПМ-24",
+        "ПМ-23"
       ],
       "dayOfWeek": 1,
       "timeSlotNumber": 2,
@@ -2609,21 +2598,6 @@
       "teacherFirstName": "О.В.",
       "room": "Ауд. 6",
       "subgroup": 1
-    },
-    {
-      "groups": [
-        "ПМ-24",
-        "ПМ-23"
-      ],
-      "dayOfWeek": 1,
-      "timeSlotNumber": 2,
-      "weekParity": "both",
-      "subject": "Правознавство",
-      "lessonType": "lecture",
-      "teacherLastName": "Щербина",
-      "teacherFirstName": "О.В.",
-      "room": "Ауд. 20",
-      "subgroup": null
     },
     {
       "groups": [
@@ -2727,20 +2701,7 @@
     },
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 1,
-      "timeSlotNumber": 3,
-      "weekParity": "both",
-      "subject": "Вища математика",
-      "lessonType": "lecture",
-      "teacherLastName": "Бондар",
-      "teacherFirstName": "О.П.",
-      "room": "Ауд. 20",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -4170,20 +4131,7 @@
     },
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 3,
-      "timeSlotNumber": 1,
-      "weekParity": "even",
-      "subject": "Вища математика",
-      "lessonType": "lecture",
-      "teacherLastName": "Бондар",
-      "teacherFirstName": "О.П.",
-      "room": "Ауд. 20",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -4229,20 +4177,7 @@
     },
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 3,
-      "timeSlotNumber": 2,
-      "weekParity": "both",
-      "subject": "Вища математика",
-      "lessonType": "seminar",
-      "teacherLastName": "Бондар",
-      "teacherFirstName": "О.П.",
-      "room": "Ауд. 20",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -4447,7 +4382,9 @@
     {
       "groups": [
         "КН-25",
-        "ІПЗ-25"
+        "ІПЗ-25",
+        "ПМ-24",
+        "ПМ-23"
       ],
       "dayOfWeek": 3,
       "timeSlotNumber": 3,
@@ -4474,21 +4411,6 @@
       "teacherFirstName": "Т.С.",
       "room": "Ауд. 11",
       "subgroup": 1
-    },
-    {
-      "groups": [
-        "ПМ-24",
-        "ПМ-23"
-      ],
-      "dayOfWeek": 3,
-      "timeSlotNumber": 3,
-      "weekParity": "both",
-      "subject": "Правознавство",
-      "lessonType": "seminar",
-      "teacherLastName": "Щербина",
-      "teacherFirstName": "О.В.",
-      "room": "Ауд. 20",
-      "subgroup": null
     },
     {
       "groups": [
@@ -5068,20 +4990,7 @@
     },
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 4,
-      "timeSlotNumber": 2,
-      "weekParity": "odd",
-      "subject": "Іноземна мова",
-      "lessonType": "practical",
-      "teacherLastName": "Максимова",
-      "teacherFirstName": "О.П.",
-      "room": "Ауд. 3",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -5287,7 +5196,8 @@
     },
     {
       "groups": [
-        "МД-23"
+        "МД-23",
+        "КН-23"
       ],
       "dayOfWeek": 4,
       "timeSlotNumber": 3,
@@ -5297,7 +5207,7 @@
       "teacherLastName": "Щербина",
       "teacherFirstName": "О.В.",
       "room": "Ауд. 20",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -5312,20 +5222,6 @@
       "teacherFirstName": "О.Л.",
       "room": "Ауд. 5",
       "subgroup": null
-    },
-    {
-      "groups": [
-        "КН-23"
-      ],
-      "dayOfWeek": 4,
-      "timeSlotNumber": 3,
-      "weekParity": "odd",
-      "subject": "Господарське законодавство",
-      "lessonType": "lecture",
-      "teacherLastName": "Щербина",
-      "teacherFirstName": "О.В.",
-      "room": "Ауд. 20",
-      "subgroup": 1
     },
     {
       "groups": [
@@ -5730,7 +5626,8 @@
     },
     {
       "groups": [
-        "ПМ-24"
+        "ПМ-24",
+        "КН-23"
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 1,
@@ -5740,7 +5637,7 @@
       "teacherLastName": "Кравцов",
       "teacherFirstName": "А.В.",
       "room": "Ауд. 20",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -5783,20 +5680,6 @@
       "teacherFirstName": "О.Л.",
       "room": "Ауд. 4",
       "subgroup": null
-    },
-    {
-      "groups": [
-        "КН-23"
-      ],
-      "dayOfWeek": 5,
-      "timeSlotNumber": 1,
-      "weekParity": "odd",
-      "subject": "Безпека життєдільності",
-      "lessonType": "lecture",
-      "teacherLastName": "Кравцов",
-      "teacherFirstName": "А.В.",
-      "room": "Ауд. 20",
-      "subgroup": 1
     },
     {
       "groups": [
@@ -5929,7 +5812,8 @@
     },
     {
       "groups": [
-        "ПМ-24"
+        "ПМ-24",
+        "КН-23"
       ],
       "dayOfWeek": 5,
       "timeSlotNumber": 2,
@@ -5939,7 +5823,7 @@
       "teacherLastName": "Кравцов",
       "teacherFirstName": "А.В.",
       "room": "Ауд. 3",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -5968,20 +5852,6 @@
       "teacherFirstName": "Б.О.",
       "room": "Ауд. 4",
       "subgroup": null
-    },
-    {
-      "groups": [
-        "КН-23"
-      ],
-      "dayOfWeek": 5,
-      "timeSlotNumber": 2,
-      "weekParity": "odd",
-      "subject": "Безпека життєдільності",
-      "lessonType": "seminar",
-      "teacherLastName": "Кравцов",
-      "teacherFirstName": "А.В.",
-      "room": "Ауд. 3",
-      "subgroup": 1
     },
     {
       "groups": [
@@ -6075,20 +5945,7 @@
         "МР-24",
         "МД-24",
         "ФН-24",
-        "КН-24"
-      ],
-      "dayOfWeek": 5,
-      "timeSlotNumber": 2,
-      "weekParity": "even",
-      "subject": "Базова військова підготовка",
-      "lessonType": "practical",
-      "teacherLastName": "Не визначено",
-      "teacherFirstName": "Н.В.",
-      "room": "Дистанційно",
-      "subgroup": 1
-    },
-    {
-      "groups": [
+        "КН-24",
         "ПМ-24"
       ],
       "dayOfWeek": 5,
@@ -6099,7 +5956,7 @@
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
       "room": "Дистанційно",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [
@@ -6173,20 +6030,7 @@
     },
     {
       "groups": [
-        "ПМ-25"
-      ],
-      "dayOfWeek": 5,
-      "timeSlotNumber": 3,
-      "weekParity": "both",
-      "subject": "Українська мова за професійним спрямуванням",
-      "lessonType": "seminar",
-      "teacherLastName": "Дідковська",
-      "teacherFirstName": "Н.А.",
-      "room": "Ауд. 20",
-      "subgroup": null
-    },
-    {
-      "groups": [
+        "ПМ-25",
         "КН-25",
         "ІПЗ-25"
       ],
@@ -6205,20 +6049,7 @@
         "МР-24",
         "МД-24",
         "ФН-24",
-        "КН-24"
-      ],
-      "dayOfWeek": 5,
-      "timeSlotNumber": 3,
-      "weekParity": "both",
-      "subject": "Базова військова підготовка",
-      "lessonType": "practical",
-      "teacherLastName": "Не визначено",
-      "teacherFirstName": "Н.В.",
-      "room": "Дистанційно",
-      "subgroup": 1
-    },
-    {
-      "groups": [
+        "КН-24",
         "ПМ-24"
       ],
       "dayOfWeek": 5,
@@ -6229,7 +6060,7 @@
       "teacherLastName": "Не визначено",
       "teacherFirstName": "Н.В.",
       "room": "Дистанційно",
-      "subgroup": null
+      "subgroup": 1
     },
     {
       "groups": [

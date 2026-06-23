@@ -290,15 +290,17 @@ func roomMatchesRequirement(room Room, requiresComputerRoom bool) bool {
 	return !requiresComputerRoom || room.Type == "computer"
 }
 
+func candidateGroupsOverlap(left CandidateEntry, right CandidateEntry) bool {
+	return left.GroupID == right.GroupID && subgroupsOverlap(left.Subgroup, right.Subgroup)
+}
+
 func conflicts(candidate CandidateEntry, entries []CandidateEntry) bool {
 	for _, entry := range entries {
 		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
-		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID {
-			return true
-		}
-		if candidate.GroupID == entry.GroupID && subgroupsOverlap(candidate.Subgroup, entry.Subgroup) {
+
+		if candidateGroupsOverlap(candidate, entry) {
 			return true
 		}
 	}
@@ -314,10 +316,8 @@ func conflictsWithOthers(candidate CandidateEntry, entries []CandidateEntry, can
 		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
-		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID {
-			return true
-		}
-		if candidate.GroupID == entry.GroupID && subgroupsOverlap(candidate.Subgroup, entry.Subgroup) {
+
+		if candidateGroupsOverlap(candidate, entry) {
 			return true
 		}
 	}

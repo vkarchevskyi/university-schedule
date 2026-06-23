@@ -125,6 +125,11 @@ final class SemesterOneTimetableFixtures extends Fixture implements DependentFix
                 $entry->addTeachingLoad(new ScheduleEntryTeachingLoad($entry, $teachingLoad));
             }
 
+            $inferredSubgroup = $this->inferSubgroup($entryTeachingLoads);
+            if ($entry->getSubgroup() === null && $inferredSubgroup !== null) {
+                $entry->setSubgroup($inferredSubgroup);
+            }
+
             $manager->persist($entry);
             ++$created;
         }
@@ -255,6 +260,28 @@ final class SemesterOneTimetableFixtures extends Fixture implements DependentFix
             LessonType::Seminar => 'seminar',
             LessonType::Practical => 'practical',
         };
+    }
+
+    /** @param list<TeachingLoad> $teachingLoads */
+    private function inferSubgroup(array $teachingLoads): ?int
+    {
+        $subgroups = [];
+
+        foreach ($teachingLoads as $teachingLoad) {
+            $subgroup = $teachingLoad->getSubgroup();
+
+            if ($subgroup === null) {
+                continue;
+            }
+
+            $subgroups[$subgroup] = true;
+        }
+
+        if (count($subgroups) !== 1) {
+            return null;
+        }
+
+        return (int) array_key_first($subgroups);
     }
 
     private function weekParity(string $parity): WeekParity

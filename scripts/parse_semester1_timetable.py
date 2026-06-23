@@ -287,6 +287,67 @@ def merge_entries(entries: list[dict[str, object]]) -> list[dict[str, object]]:
     return list(merged.values())
 
 
+def resolve_merged_subgroup(subgroups: list[object]) -> object:
+    non_null = [subgroup for subgroup in subgroups if subgroup is not None]
+
+    if not non_null:
+        return None
+
+    if len(set(non_null)) > 1:
+        return 'conflict'
+
+    return non_null[0]
+
+
+def merge_parallel_column_entries(entries: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Merge the same lesson split across parallel XLS columns into one entry."""
+    buckets: dict[tuple[object, ...], list[dict[str, object]]] = defaultdict(list)
+
+    for entry in entries:
+        buckets[
+            (
+                entry['dayOfWeek'],
+                entry['timeSlotNumber'],
+                entry['weekParity'],
+                entry['subject'],
+                entry['lessonType'],
+                entry['teacherLastName'],
+                normalize_initials(str(entry['teacherFirstName'])),
+                entry['room'],
+            )
+        ].append(entry)
+
+    merged: list[dict[str, object]] = []
+
+    for group in buckets.values():
+        if len(group) == 1:
+            merged.append(group[0])
+            continue
+
+        group_sets = [set(entry['groups']) for entry in group]
+        if any(group_sets[left] & group_sets[right] for left in range(len(group)) for right in range(left + 1, len(group))):
+            merged.extend(group)
+            continue
+
+        subgroup = resolve_merged_subgroup([entry.get('subgroup') for entry in group])
+        if subgroup == 'conflict':
+            merged.extend(group)
+            continue
+
+        combined = dict(group[0])
+        combined_groups: list[str] = []
+        for entry in group:
+            for name in entry['groups']:
+                if name not in combined_groups:
+                    combined_groups.append(name)
+
+        combined['groups'] = combined_groups
+        combined['subgroup'] = subgroup
+        merged.append(combined)
+
+    return merged
+
+
 def fill_missing_rooms(entries: list[dict[str, object]]) -> None:
     for entry in entries:
         if entry['room']:
@@ -524,6 +585,7 @@ def parse_workbook(path: Path) -> dict[str, object]:
 
     fill_missing_rooms(entries)
     entries = merge_entries(entries)
+    entries = merge_parallel_column_entries(entries)
 
     return {
         'groups': EXTRA_GROUPS,

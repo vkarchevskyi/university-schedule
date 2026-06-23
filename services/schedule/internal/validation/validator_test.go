@@ -196,7 +196,7 @@ func TestValidatorRejectsWeekendEntries(t *testing.T) {
 	assertConflictType(t, result, "invalid_day_of_week")
 }
 
-func TestValidatorDetectsOverlappingTimeRanges(t *testing.T) {
+func TestValidatorAllowsSameTeacherForDisjointGroups(t *testing.T) {
 	validator := NewValidator()
 
 	result := validator.Validate(Schedule{
@@ -241,7 +241,9 @@ func TestValidatorDetectsOverlappingTimeRanges(t *testing.T) {
 		TeacherSubjectAssignments: []TeacherSubject{{TeacherID: 20, SubjectID: 10}},
 	})
 
-	assertConflictType(t, result, "teacher_conflict")
+	if !result.Valid {
+		t.Fatalf("expected disjoint groups not to conflict, got %#v", result.Conflicts)
+	}
 }
 
 func TestValidatorDetectsTeachingLoadMismatch(t *testing.T) {
