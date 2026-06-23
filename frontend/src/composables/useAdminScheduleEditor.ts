@@ -13,6 +13,7 @@ import {
   listTeachers,
   listTimeSlots,
   publishSchedule,
+  updateSchedule,
   updateScheduleEntry,
   validateSchedule,
 } from '@/api/adminSchedule'
@@ -422,6 +423,20 @@ export function useAdminScheduleEditor(scheduleId: number) {
     }
   }
 
+  async function updateValidFrom(validFrom: string): Promise<void> {
+    if (isReadOnly.value || schedule.value === null || schedule.value.validFrom === validFrom) {
+      return
+    }
+
+    clearActionError()
+
+    try {
+      schedule.value = await updateSchedule(scheduleId, { validFrom })
+    } catch (exception) {
+      handleActionError(exception)
+    }
+  }
+
   async function duplicateToDraft(): Promise<void> {
     clearActionError()
 
@@ -703,6 +718,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
     duplicateEntry,
     validate,
     publish,
+    updateValidFrom,
     duplicateToDraft,
     clearActionError,
     generationJob,

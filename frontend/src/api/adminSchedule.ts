@@ -60,6 +60,17 @@ export function getSchedule(id: number): Promise<AdminSchedule> {
   return requestJson(`/api/admin/schedules/${id}`, { authenticated: true })
 }
 
+export function updateSchedule(
+  scheduleId: number,
+  payload: { validFrom: string },
+): Promise<AdminSchedule> {
+  return requestJson(`/api/admin/schedules/${scheduleId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+    authenticated: true,
+  })
+}
+
 export function listLessonCards(scheduleId: number): Promise<ResourceCollection<LessonCard>> {
   return requestJson(`/api/admin/schedules/${scheduleId}/lesson-cards`, { authenticated: true })
 }

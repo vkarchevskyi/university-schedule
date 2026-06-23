@@ -8,12 +8,14 @@ use App\Dto\Admin\ScheduleEntryRequestDto;
 use App\Dto\Admin\ScheduleGenerationRequestDto;
 use App\Dto\Admin\ScheduleQueryDto;
 use App\Dto\Admin\ScheduleRequestDto;
+use App\Dto\Admin\ScheduleUpdateRequestDto;
 use App\Service\LessonCard\ListLessonCardsService;
 use App\Service\Schedule\CreateScheduleService;
 use App\Service\Schedule\DuplicateScheduleService;
 use App\Service\Schedule\GetScheduleService;
 use App\Service\Schedule\ListSchedulesService;
 use App\Service\Schedule\PublishScheduleService;
+use App\Service\Schedule\UpdateScheduleService;
 use App\Service\ScheduleGeneration\CreateScheduleGenerationJobService;
 use App\Service\ScheduleEntry\CreateScheduleEntryService;
 use App\Service\ScheduleEntry\DeleteScheduleEntryService;
@@ -50,6 +52,12 @@ final class ScheduleController extends AbstractAdminController
     public function get(int $id, GetScheduleService $schedules): JsonResponse
     {
         return $this->respond(fn() => $schedules->get($id));
+    }
+
+    #[Route('/{id}', methods: ['PATCH'])]
+    public function update(int $id, #[MapRequestPayload(acceptFormat: 'json', validationGroups: ['update'])] ScheduleUpdateRequestDto $request, UpdateScheduleService $schedules): JsonResponse
+    {
+        return $this->respond(fn() => $schedules->handle($id, $request));
     }
 
     #[Route('/{id}/entries', methods: ['POST'])]

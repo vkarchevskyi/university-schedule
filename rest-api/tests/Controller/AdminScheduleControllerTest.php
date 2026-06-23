@@ -273,6 +273,42 @@ final class AdminScheduleControllerTest extends WebTestCase
         self::assertArrayHasKey('validFrom', $this->objectValue($result, 'errors'));
     }
 
+    public function testAdminCanUpdateDraftScheduleValidFrom(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->requestJson('POST', '/api/admin/schedules', [
+            'semesterId' => $fixtures->semesterId,
+            'validFrom' => '2026-09-01',
+            'validTo' => '2026-12-31',
+        ], 201);
+
+        $updated = $this->requestJson('PATCH', sprintf('/api/admin/schedules/%d', $this->intValue($schedule, 'id')), [
+            'validFrom' => '2026-10-01',
+        ]);
+
+        self::assertSame('2026-10-01', $this->stringValue($updated, 'validFrom'));
+        self::assertSame('2026-12-31', $this->stringValue($updated, 'validTo'));
+
+        $logs = $this->entityManager->getRepository(ActionLog::class)->findBy(['action' => 'schedule.updated']);
+        self::assertCount(1, $logs);
+        self::assertSame('2026-09-01', $logs[0]->getBeforePayload()['validFrom'] ?? null);
+        self::assertSame('2026-10-01', $logs[0]->getAfterPayload()['validFrom'] ?? null);
+    }
+
+    public function testPublishedScheduleValidFromCannotBeUpdated(): void
+    {
+        $fixtures = $this->createScheduleFixtures();
+        $schedule = $this->createDraftScheduleWithEntry($fixtures);
+
+        $this->requestJson('POST', sprintf('/api/admin/schedules/%d/publish', $this->intValue($schedule, 'id')));
+
+        $result = $this->requestJson('PATCH', sprintf('/api/admin/schedules/%d', $this->intValue($schedule, 'id')), [
+            'validFrom' => '2026-10-01',
+        ], 422);
+
+        self::assertArrayHasKey('schedule', $this->objectValue($result, 'errors'));
+    }
+
     public function testConflictingDraftEntryIsRejected(): void
     {
         $fixtures = $this->createScheduleFixtures();

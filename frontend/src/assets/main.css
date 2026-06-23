@@ -688,6 +688,17 @@ select {
   color: #60717c;
 }
 
+.schedule-editor-page__valid-from {
+  margin-top: 8px;
+  max-width: 280px;
+}
+
+.schedule-editor-page__valid-from-hint {
+  margin: 4px 0 0;
+  color: #60717c;
+  font-size: 0.875rem;
+}
+
 .schedule-editor-layout {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr) 280px;

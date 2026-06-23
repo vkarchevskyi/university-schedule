@@ -67,6 +67,7 @@ const {
   duplicateEntry,
   validate,
   publish,
+  updateValidFrom,
   duplicateToDraft,
   clearActionError,
   generationJob,
@@ -149,7 +150,19 @@ function selectCardSort(value: string): void {
       <header class="schedule-editor-page__header">
         <div>
           <h1>{{ t.scheduleEditor }} #{{ schedule.id }}</h1>
-          <p>{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
+          <p v-if="isReadOnly">{{ schedule.validFrom }} - {{ schedule.validTo }}</p>
+          <div v-else class="field schedule-editor-page__valid-from">
+            <label class="field__label" for="schedule-valid-from">{{ t.validFrom }}</label>
+            <input
+              id="schedule-valid-from"
+              class="field__control"
+              type="date"
+              data-testid="schedule-valid-from"
+              :value="schedule.validFrom"
+              @change="updateValidFrom(($event.target as HTMLInputElement).value)"
+            />
+            <p class="schedule-editor-page__valid-from-hint">{{ t.validFromHint }} {{ t.validTo }}: {{ schedule.validTo }}.</p>
+          </div>
         </div>
         <div class="schedule-editor-page__controls">
           <AppButton

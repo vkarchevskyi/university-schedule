@@ -93,6 +93,18 @@ final readonly class ScheduleAuditLoggerService
         );
     }
 
+    /** @param array<string, mixed> $beforePayload */
+    public function logScheduleUpdated(Schedule $schedule, array $beforePayload): void
+    {
+        $this->persist(
+            'schedule.updated',
+            'schedule',
+            $this->scheduleId($schedule),
+            $beforePayload,
+            $this->schedulePayload($schedule),
+        );
+    }
+
     /** @return array<string, mixed> */
     public function schedulePayload(Schedule $schedule): array
     {

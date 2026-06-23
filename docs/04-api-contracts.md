@@ -272,6 +272,20 @@ Response:
 
 Returns schedule details.
 
+### PATCH `/api/admin/schedules/{id}`
+
+Updates a draft schedule. Only `validFrom` can be changed.
+
+Request:
+
+```json
+{
+  "validFrom": "2026-10-01"
+}
+```
+
+The start date must stay within the semester and must not be after `validTo`.
+
 ### POST `/api/admin/schedules/{id}/entries`
 
 Creates a schedule entry.
