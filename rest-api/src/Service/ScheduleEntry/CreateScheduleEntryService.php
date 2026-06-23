@@ -44,6 +44,7 @@ final class CreateScheduleEntryService extends AbstractEntityService
             $resolved->timeSlot,
             $resolved->dayOfWeek,
             $resolved->weekParity,
+            $resolved->subgroup,
         );
         $schedule->addEntry($entry);
         $this->attachRelations($entry, $resolved);

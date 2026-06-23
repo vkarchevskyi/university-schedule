@@ -105,6 +105,7 @@ describe('App', () => {
       dayOfWeek: 1,
       weekParity: 'both',
       groupIds: [9],
+      subgroup: null,
     })
     await deleteScheduleEntry(12, 99)
 

@@ -96,7 +96,8 @@ func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (
 			to_char(ts.starts_at, 'HH24:MI:SS'),
 			to_char(ts.ends_at, 'HH24:MI:SS'),
 			se.day_of_week,
-			se.week_parity
+			se.week_parity,
+			COALESCE(se.subgroup, 0)
 		FROM schedule_entries se
 		INNER JOIN rooms r ON r.id = se.room_id
 		INNER JOIN time_slots ts ON ts.id = se.time_slot_id
@@ -128,6 +129,7 @@ func (store *PostgresStore) loadEntries(ctx context.Context, scheduleID int64) (
 			&entry.TimeSlotEndsAt,
 			&entry.DayOfWeek,
 			&weekParity,
+			&entry.Subgroup,
 		); err != nil {
 			return nil, fmt.Errorf("scan schedule entry: %w", err)
 		}
@@ -207,7 +209,7 @@ func (store *PostgresStore) attachTeachingLoadIDs(ctx context.Context, scheduleI
 
 func (store *PostgresStore) loadTeachingLoads(ctx context.Context, scheduleID int64) ([]TeachingLoad, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room
+		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room, COALESCE(tl.subgroup, 0)
 		FROM teaching_loads tl
 		INNER JOIN schedules s ON s.semester_id = tl.semester_id
 		WHERE s.id = $1 AND tl.deleted_at IS NULL
@@ -232,6 +234,7 @@ func (store *PostgresStore) loadTeachingLoads(ctx context.Context, scheduleID in
 			&lessonType,
 			&teachingLoad.RequiredLessonCount,
 			&teachingLoad.RequiresComputerRoom,
+			&teachingLoad.Subgroup,
 		); err != nil {
 			return nil, fmt.Errorf("scan teaching load: %w", err)
 		}

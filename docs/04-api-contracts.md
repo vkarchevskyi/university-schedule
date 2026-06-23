@@ -107,7 +107,8 @@ Request:
   "teacherId": 7,
   "lessonType": "laboratory",
   "requiredLessonCount": 8,
-  "requiresComputerRoom": true
+  "requiresComputerRoom": true,
+  "subgroup": 1
 }
 ```
 
@@ -122,11 +123,12 @@ Response:
   "teacherId": 7,
   "lessonType": "laboratory",
   "requiredLessonCount": 8,
-  "requiresComputerRoom": true
+  "requiresComputerRoom": true,
+  "subgroup": 1
 }
 ```
 
-`requiresComputerRoom` defaults to `false` when omitted. Room `type` values are `lecture` and `computer`.
+`requiresComputerRoom` defaults to `false` when omitted. Room `type` values are `lecture` and `computer`. `subgroup` is optional (`1` or `2`); omit it or send `null` for a whole-group load.
 
 Teaching-load endpoints should also support list, update, and soft delete/archive behavior.
 
@@ -183,11 +185,14 @@ Response:
         }
       ],
       "isCancelled": false,
-      "isOverride": false
+      "isOverride": false,
+      "subgroup": 1
     }
   ]
 }
 ```
+
+`subgroup` is `1`, `2`, or `null` (whole group). Subgroup lessons for the same group can appear in the same time slot in parallel.
 
 Only published schedules are returned. If multiple published schedules overlap the requested week, the newest schedule by `publishedAt` is used. If no published schedule exists for the requested week, the response contains an empty `items` array.
 
@@ -285,7 +290,8 @@ Request:
   "timeSlotId": 2,
   "dayOfWeek": 1,
   "weekParity": "both",
-  "groupIds": [1]
+  "groupIds": [1],
+  "subgroup": 1
 }
 ```
 
@@ -303,9 +309,12 @@ Response:
   "dayOfWeek": 1,
   "weekParity": "both",
   "groupIds": [1],
-  "teachingLoadIds": [41]
+  "teachingLoadIds": [41],
+  "subgroup": 1
 }
 ```
+
+`subgroup` is optional (`1` or `2`); omit it or send `null` for a whole-group entry. Entries that share a group at the same day/time/parity only conflict when their subgroups overlap (`null` overlaps everything; `1` and `2` are disjoint). All linked teaching loads must share the entry's subgroup.
 
 ### PATCH `/api/admin/schedules/{id}/entries/{entryId}`
 
@@ -367,7 +376,8 @@ Response:
       "requiredLessonCount": 8,
       "requiresComputerRoom": true,
       "scheduledLessonCount": 4,
-      "remainingLessonCount": 4
+      "remainingLessonCount": 4,
+      "subgroup": 1
     }
   ]
 }

@@ -37,6 +37,7 @@ final readonly class ScheduleEntryResourceMapper
             strtolower($entry->getWeekParity()->name),
             $groupIds,
             $teachingLoadIds,
+            $entry->getSubgroup(),
         );
     }
 

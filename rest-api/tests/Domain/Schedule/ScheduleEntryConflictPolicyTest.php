@@ -73,6 +73,48 @@ final class ScheduleEntryConflictPolicyTest extends TestCase
         self::assertSame('groupIds', $conflict->field);
     }
 
+    public function testDisjointSubgroupsDoNotConflict(): void
+    {
+        $fixtures = $this->fixtures(WeekParity::Both);
+        $fixtures->entry->setSubgroup(1);
+
+        $conflict = $this->policy->conflict($fixtures->schedule, new ScheduleEntryData(
+            $fixtures->subject,
+            new Teacher('Grace', 'Hopper', 'Computer Science'),
+            LessonType::Laboratory,
+            new Room('Lab 2', RoomType::Computer, 20),
+            $fixtures->timeSlot,
+            1,
+            WeekParity::Both,
+            [$fixtures->group],
+            [],
+            2,
+        ));
+
+        self::assertNull($conflict);
+    }
+
+    public function testWholeGroupConflictsWithSubgroup(): void
+    {
+        $fixtures = $this->fixtures(WeekParity::Both);
+
+        $conflict = $this->policy->conflict($fixtures->schedule, new ScheduleEntryData(
+            $fixtures->subject,
+            new Teacher('Grace', 'Hopper', 'Computer Science'),
+            LessonType::Laboratory,
+            new Room('Lab 2', RoomType::Computer, 20),
+            $fixtures->timeSlot,
+            1,
+            WeekParity::Both,
+            [$fixtures->group],
+            [],
+            1,
+        ));
+
+        self::assertNotNull($conflict);
+        self::assertSame('groupIds', $conflict->field);
+    }
+
     public function testDifferentWeekParityDoesNotConflict(): void
     {
         $fixtures = $this->fixtures(WeekParity::Odd);

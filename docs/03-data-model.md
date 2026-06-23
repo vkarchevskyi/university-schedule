@@ -179,6 +179,7 @@ Fields:
 - lessonType
 - requiredLessonCount
 - requiresComputerRoom
+- subgroup (nullable smallint, `1` or `2`; `NULL` means the whole group)
 - createdAt
 - updatedAt
 - deletedAt, if soft deletes are implemented through nullable timestamp
@@ -189,6 +190,7 @@ Notes:
 - A card in the UI can represent unscheduled or partially scheduled teaching load.
 - The card itself does not need to be persisted as a separate table for the first release unless the UI needs saved planning-board state.
 - If combined lectures for multiple groups are required, represent one teaching-load row per group and allow one scheduled entry to satisfy multiple teaching-load rows through a join table.
+- A group that splits into parallel halves (for example English and informatics taught simultaneously) uses one teaching-load row per subgroup, distinguished by the `subgroup` value.
 
 ### ScheduleEntryTeachingLoad
 
@@ -272,12 +274,20 @@ Fields:
 - timeSlot
 - dayOfWeek (1-5, Monday-Friday)
 - weekParity
+- subgroup (nullable smallint, `1` or `2`; `NULL` means the whole group)
 
 Relationships:
 
 - has one or more groups through `ScheduleEntryGroup`
 - satisfies one or more teaching-load rows through `ScheduleEntryTeachingLoad`
 - can generate dated lessons
+
+Subgroup conflict rule:
+
+- Two entries that share a group at the same day/time/parity conflict only if their subgroups overlap.
+- `NULL` (whole group) overlaps any subgroup; equal non-null values overlap; distinct non-null values (`1` vs `2`) are disjoint and may run in parallel.
+- Subgroup entries count as half the group (`ceil(studentCount / 2)`) for room-capacity checks.
+- All teaching-load rows linked to a schedule entry must share the entry's subgroup value.
 
 Editing and read-model note:
 

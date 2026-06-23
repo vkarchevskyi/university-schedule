@@ -35,5 +35,7 @@ final class TeachingLoadRequestDto extends AbstractRequestDto
         public readonly ?int $requiredLessonCount = null,
         #[Assert\Type('bool', groups: ['create', 'update'])]
         public readonly ?bool $requiresComputerRoom = null,
+        #[Assert\Choice(choices: [1, 2], groups: ['create', 'update'])]
+        public readonly ?int $subgroup = null,
     ) {}
 }

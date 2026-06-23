@@ -22,5 +22,6 @@ final readonly class ScheduleEntryResource
         public string $weekParity,
         public array $groupIds,
         public array $teachingLoadIds,
+        public ?int $subgroup = null,
     ) {}
 }

@@ -56,5 +56,7 @@ final class ScheduleEntryRequestDto extends AbstractRequestDto
             new Assert\Positive(),
         ], groups: ['create', 'update'])]
         public readonly ?array $groupIds = null,
+        #[Assert\Choice(choices: [1, 2], groups: ['create', 'update'])]
+        public readonly ?int $subgroup = null,
     ) {}
 }

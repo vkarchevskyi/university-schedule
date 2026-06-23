@@ -2,7 +2,7 @@
 import { Badge } from '@/components/ui/badge'
 
 defineProps<{
-  tone: 'warning' | 'info'
+  tone: 'warning' | 'info' | 'secondary'
 }>()
 </script>
 

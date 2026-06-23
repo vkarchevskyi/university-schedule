@@ -44,6 +44,8 @@ final class CreateTeachingLoadService extends AbstractEntityService
             $data->requiresComputerRoom ?? false,
             $now,
             $now,
+            null,
+            $data->subgroup,
         );
         $this->save($teachingLoad);
 

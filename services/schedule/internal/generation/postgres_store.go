@@ -317,10 +317,10 @@ func (store *PostgresStore) appendScheduleEntries(ctx context.Context, tx *sql.T
 func (store *PostgresStore) insertScheduleEntry(ctx context.Context, tx *sql.Tx, scheduleID int64, entry CandidateEntry) error {
 	var entryID int64
 	if err := tx.QueryRowContext(ctx, `
-		INSERT INTO schedule_entries (schedule_id, subject_id, teacher_id, lesson_type, room_id, time_slot_id, day_of_week, week_parity)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO schedule_entries (schedule_id, subject_id, teacher_id, lesson_type, room_id, time_slot_id, day_of_week, week_parity, subgroup)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULLIF($9, 0))
 		RETURNING id
-	`, scheduleID, entry.SubjectID, entry.TeacherID, entry.LessonType, entry.RoomID, entry.TimeSlotID, entry.DayOfWeek, entry.WeekParity).Scan(&entryID); err != nil {
+	`, scheduleID, entry.SubjectID, entry.TeacherID, entry.LessonType, entry.RoomID, entry.TimeSlotID, entry.DayOfWeek, entry.WeekParity, entry.Subgroup).Scan(&entryID); err != nil {
 		return fmt.Errorf("insert schedule entry: %w", err)
 	}
 
@@ -356,7 +356,7 @@ func (store *PostgresStore) loadSemester(ctx context.Context, semesterID int64) 
 
 func (store *PostgresStore) loadTeachingLoads(ctx context.Context, semesterID int64) ([]TeachingLoad, error) {
 	rows, err := store.db.QueryContext(ctx, `
-		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room, g.student_count
+		SELECT tl.id, tl.group_id, tl.subject_id, tl.teacher_id, tl.lesson_type, tl.required_lesson_count, tl.requires_computer_room, g.student_count, COALESCE(tl.subgroup, 0)
 		FROM teaching_loads tl
 		INNER JOIN groups g ON g.id = tl.group_id
 		WHERE tl.semester_id = $1 AND tl.deleted_at IS NULL
@@ -370,7 +370,7 @@ func (store *PostgresStore) loadTeachingLoads(ctx context.Context, semesterID in
 	loads := make([]TeachingLoad, 0)
 	for rows.Next() {
 		var load TeachingLoad
-		if err := rows.Scan(&load.ID, &load.GroupID, &load.SubjectID, &load.TeacherID, &load.LessonType, &load.RequiredLessonCount, &load.RequiresComputerRoom, &load.StudentCount); err != nil {
+		if err := rows.Scan(&load.ID, &load.GroupID, &load.SubjectID, &load.TeacherID, &load.LessonType, &load.RequiredLessonCount, &load.RequiresComputerRoom, &load.StudentCount, &load.Subgroup); err != nil {
 			return nil, fmt.Errorf("scan teaching load: %w", err)
 		}
 
@@ -494,7 +494,8 @@ func (store *PostgresStore) loadSeedEntries(ctx context.Context, scheduleID int6
 			se.day_of_week,
 			se.week_parity,
 			g.student_count,
-			tl.requires_computer_room
+			tl.requires_computer_room,
+			COALESCE(se.subgroup, 0)
 		FROM schedule_entries se
 		INNER JOIN schedule_entry_teaching_loads setl ON setl.schedule_entry_id = se.id
 		INNER JOIN teaching_loads tl ON tl.id = setl.teaching_load_id
@@ -530,6 +531,7 @@ func (store *PostgresStore) loadSeedEntries(ctx context.Context, scheduleID int6
 			&entry.WeekParity,
 			&entry.StudentCount,
 			&entry.RequiresComputerRoom,
+			&entry.Subgroup,
 		); err != nil {
 			return nil, fmt.Errorf("scan seed schedule entry: %w", err)
 		}

@@ -21,5 +21,6 @@ final readonly class ScheduleItemResource
         public array $groups,
         public bool $isCancelled,
         public bool $isOverride,
+        public ?int $subgroup = null,
     ) {}
 }

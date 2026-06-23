@@ -50,6 +50,9 @@ class ScheduleEntry
     #[ORM\Column(name: 'week_parity', type: Types::SMALLINT, enumType: WeekParity::class)]
     private WeekParity $weekParity;
 
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $subgroup;
+
     /** @var Collection<int, ScheduleEntryGroup> */
     #[ORM\OneToMany(targetEntity: ScheduleEntryGroup::class, mappedBy: 'scheduleEntry', cascade: ['persist', 'remove'])]
     private Collection $groups;
@@ -71,6 +74,7 @@ class ScheduleEntry
         TimeSlot $timeSlot,
         int $dayOfWeek,
         WeekParity $weekParity,
+        ?int $subgroup = null,
     ) {
         $this->schedule = $schedule;
         $this->subject = $subject;
@@ -80,6 +84,7 @@ class ScheduleEntry
         $this->timeSlot = $timeSlot;
         $this->dayOfWeek = $dayOfWeek;
         $this->weekParity = $weekParity;
+        $this->subgroup = $subgroup;
         $this->groups = new ArrayCollection();
         $this->lessons = new ArrayCollection();
         $this->teachingLoads = new ArrayCollection();
@@ -118,6 +123,7 @@ class ScheduleEntry
         TimeSlot $timeSlot,
         int $dayOfWeek,
         WeekParity $weekParity,
+        ?int $subgroup = null,
     ): void {
         $this->subject = $subject;
         $this->teacher = $teacher;
@@ -126,6 +132,7 @@ class ScheduleEntry
         $this->timeSlot = $timeSlot;
         $this->dayOfWeek = $dayOfWeek;
         $this->weekParity = $weekParity;
+        $this->subgroup = $subgroup;
     }
 
     public function getTeacher(): Teacher
@@ -186,6 +193,16 @@ class ScheduleEntry
     public function setWeekParity(WeekParity $weekParity): void
     {
         $this->weekParity = $weekParity;
+    }
+
+    public function getSubgroup(): ?int
+    {
+        return $this->subgroup;
+    }
+
+    public function setSubgroup(?int $subgroup): void
+    {
+        $this->subgroup = $subgroup;
     }
 
     /** @return Collection<int, ScheduleEntryGroup> */

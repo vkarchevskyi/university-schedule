@@ -16,5 +16,6 @@ final readonly class LessonCardResource
         public bool $requiresComputerRoom,
         public int $scheduledLessonCount,
         public int $remainingLessonCount,
+        public ?int $subgroup = null,
     ) {}
 }

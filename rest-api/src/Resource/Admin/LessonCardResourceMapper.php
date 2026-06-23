@@ -26,6 +26,7 @@ final readonly class LessonCardResourceMapper
             $teachingLoad->requiresComputerRoom(),
             $scheduledLessonCount,
             max($teachingLoad->getRequiredLessonCount() - $scheduledLessonCount, 0),
+            $teachingLoad->getSubgroup(),
         );
     }
 }

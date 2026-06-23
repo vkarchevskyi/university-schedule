@@ -20,6 +20,7 @@ final readonly class TeachingLoadResourceMapper
             $teachingLoad->getRequiredLessonCount(),
             $teachingLoad->requiresComputerRoom(),
             $teachingLoad->getDeletedAt()?->format(\DateTimeInterface::ATOM),
+            $teachingLoad->getSubgroup(),
         );
     }
 }

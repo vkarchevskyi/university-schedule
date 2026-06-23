@@ -174,7 +174,7 @@ func feasibleCandidates(request placementRequest, entries []CandidateEntry, inpu
 	for day := firstScheduleDay; day <= lastScheduleDay; day++ {
 		for _, slot := range input.TimeSlots {
 			for _, room := range input.Rooms {
-				if room.Capacity < request.load.StudentCount {
+				if room.Capacity < effectiveStudentCount(request.load.StudentCount, request.load.Subgroup) {
 					continue
 				}
 				if !roomMatchesRequirement(room, request.load.RequiresComputerRoom) {
@@ -198,6 +198,7 @@ func feasibleCandidates(request placementRequest, entries []CandidateEntry, inpu
 					WeekParity:           request.weekParity,
 					StudentCount:         request.load.StudentCount,
 					RequiresComputerRoom: request.load.RequiresComputerRoom,
+					Subgroup:             request.load.Subgroup,
 				}
 				if !conflicts(entry, entries) && !violatesTeacherUnavailability(entry, input.Unavailable) {
 					candidates = append(candidates, entry)
@@ -244,7 +245,7 @@ func bestNeighbor(entries []CandidateEntry, seedEntries []CandidateEntry, input 
 		for day := firstScheduleDay; day <= lastScheduleDay; day++ {
 			for _, slot := range input.TimeSlots {
 				for _, room := range input.Rooms {
-					if room.Capacity < entry.StudentCount {
+					if room.Capacity < effectiveStudentCount(entry.StudentCount, entry.Subgroup) {
 						continue
 					}
 					if !roomMatchesRequirement(room, entry.RequiresComputerRoom) {
@@ -294,7 +295,10 @@ func conflicts(candidate CandidateEntry, entries []CandidateEntry) bool {
 		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
-		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID || candidate.GroupID == entry.GroupID {
+		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID {
+			return true
+		}
+		if candidate.GroupID == entry.GroupID && subgroupsOverlap(candidate.Subgroup, entry.Subgroup) {
 			return true
 		}
 	}
@@ -310,7 +314,10 @@ func conflictsWithOthers(candidate CandidateEntry, entries []CandidateEntry, can
 		if candidate.DayOfWeek != entry.DayOfWeek || !candidateTimeRangesOverlap(candidate, entry) || !weekParityOverlaps(candidate.WeekParity, entry.WeekParity) {
 			continue
 		}
-		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID || candidate.GroupID == entry.GroupID {
+		if candidate.TeacherID == entry.TeacherID || candidate.RoomID == entry.RoomID {
+			return true
+		}
+		if candidate.GroupID == entry.GroupID && subgroupsOverlap(candidate.Subgroup, entry.Subgroup) {
 			return true
 		}
 	}
@@ -362,6 +369,18 @@ func weekParityOverlaps(left int, right int) bool {
 	return validation.WeekParityOverlapsInt(left, right)
 }
 
+func subgroupsOverlap(left int, right int) bool {
+	return validation.SubgroupsOverlap(left, right)
+}
+
+func effectiveStudentCount(studentCount int, subgroup int) int {
+	if subgroup == 0 {
+		return studentCount
+	}
+
+	return (studentCount + 1) / 2
+}
+
 func qualityScore(entries []CandidateEntry) int {
 	if len(entries) == 0 {
 		return 0
@@ -401,6 +420,7 @@ func validationEntries(entries []CandidateEntry) []validation.ScheduleEntry {
 			GroupIDs:         []int64{entry.GroupID},
 			StudentCount:     entry.StudentCount,
 			TeachingLoadIDs:  []int64{entry.TeachingLoadID},
+			Subgroup:         entry.Subgroup,
 		})
 	}
 
@@ -418,6 +438,7 @@ func validationTeachingLoads(loads []TeachingLoad) []validation.TeachingLoad {
 			LessonType:           lessonTypeName(load.LessonType),
 			RequiredLessonCount:  load.RequiredLessonCount,
 			RequiresComputerRoom: load.RequiresComputerRoom,
+			Subgroup:             load.Subgroup,
 		})
 	}
 

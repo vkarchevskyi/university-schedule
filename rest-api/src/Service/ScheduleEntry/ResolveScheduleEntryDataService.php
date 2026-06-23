@@ -39,8 +39,9 @@ final class ResolveScheduleEntryDataService extends AbstractEntityService
         $weekParity = $data->weekParity === null ? $this->currentWeekParity($currentEntry) : $this->weekParity($data->weekParity);
         $groups = $data->groupIds === null ? $this->currentGroups($currentEntry) : $this->groups($data->groupIds);
         $teachingLoads = $data->teachingLoadIds === null ? $this->currentTeachingLoads($currentEntry) : $this->teachingLoads($data->teachingLoadIds);
+        $subgroup = $data->subgroup ?? $currentEntry?->getSubgroup();
 
-        $resolved = new ScheduleEntryData($subject, $teacher, $lessonType, $room, $timeSlot, $dayOfWeek, $weekParity, $groups, $teachingLoads);
+        $resolved = new ScheduleEntryData($subject, $teacher, $lessonType, $room, $timeSlot, $dayOfWeek, $weekParity, $groups, $teachingLoads, $subgroup);
         $this->validateTeachingLoads($schedule, $resolved);
 
         return $resolved;
@@ -189,6 +190,10 @@ final class ResolveScheduleEntryDataService extends AbstractEntityService
 
             if ($teachingLoad->getSubject() !== $data->subject || $teachingLoad->getTeacher() !== $data->teacher || $teachingLoad->getLessonType() !== $data->lessonType) {
                 throw ApiException::validation(['teachingLoadIds' => 'Teaching load must match subject, teacher, and lesson type.']);
+            }
+
+            if ($teachingLoad->getSubgroup() !== $data->subgroup) {
+                throw ApiException::validation(['subgroup' => 'Teaching load must match the entry subgroup.']);
             }
 
             if ($teachingLoad->requiresComputerRoom() && $data->room->getType() !== RoomType::Computer) {

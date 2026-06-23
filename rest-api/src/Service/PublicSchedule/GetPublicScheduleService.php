@@ -152,6 +152,7 @@ final readonly class GetPublicScheduleService
             $groups,
             $lesson?->isCancelled() ?? false,
             $lesson?->isOverride() ?? false,
+            $entry->getSubgroup(),
         );
     }
 

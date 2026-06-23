@@ -45,6 +45,7 @@ final class UpdateScheduleEntryService extends AbstractEntityService
             $resolved->timeSlot,
             $resolved->dayOfWeek,
             $resolved->weekParity,
+            $resolved->subgroup,
         );
         if ($data->groupIds !== null) {
             $this->replaceGroups($entry, $resolved);

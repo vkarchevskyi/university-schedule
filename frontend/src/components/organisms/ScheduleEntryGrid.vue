@@ -137,6 +137,14 @@ function weekParityLabel(entry: AdminScheduleEntry): string {
   return entry.weekParity === 'both' ? '2w' : entry.weekParity
 }
 
+function subgroupLabel(entry: AdminScheduleEntry): string | null {
+  if (!entry.subgroup) {
+    return null
+  }
+
+  return `${publicLabels.value.subgroup} ${entry.subgroup === 1 ? 'I' : 'II'}`
+}
+
 function cellKey(dayOfWeek: number, timeSlotId: number): string {
   return `${dayOfWeek}-${timeSlotId}`
 }
@@ -183,7 +191,7 @@ function cellKey(dayOfWeek: number, timeSlotId: number): string {
                 @click="emit('select', entry)"
               >
                 <strong>{{ entryTitleWithMarker(entry) }}</strong>
-                <em>{{ groupNames(entry) }}</em>
+                <em>{{ groupNames(entry) }}<template v-if="subgroupLabel(entry)"> · {{ subgroupLabel(entry) }}</template></em>
                 <span>{{ teacherName(entry.teacherId) }}</span>
                 <small>{{ roomName(entry.roomId) }} · {{ weekParityLabel(entry) }}</small>
                 <b v-if="hasConflict(entry)" class="editor-entry__conflict">

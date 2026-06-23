@@ -28,10 +28,10 @@ The scheduling engine creates or validates schedules using deterministic rules. 
 
 A schedule is invalid if any hard constraint is violated.
 
-- A group cannot have two classes at the same day, time slot, and applicable week parity.
+- A group cannot have two classes at the same day, time slot, and applicable week parity, unless the classes belong to disjoint subgroups. A whole-group lesson (`subgroup = NULL`/`0`) overlaps any subgroup; subgroup `1` and subgroup `2` may run in parallel.
 - A teacher cannot teach two classes at the same day, time slot, and applicable week parity.
 - A room cannot host two classes at the same day, time slot, and applicable week parity.
-- Room capacity must fit the total number of students in all assigned groups.
+- Room capacity must fit the number of students in the assigned groups. Subgroup entries count as half the group (`ceil(studentCount / 2)`).
 - Teacher must be linked to the subject they are assigned to teach.
 - Teacher cannot be assigned during unavailable ranges.
 - Schedule entries must belong to the selected semester and valid schedule period.

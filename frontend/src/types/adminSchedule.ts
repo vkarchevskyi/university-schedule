@@ -68,6 +68,7 @@ export interface AdminScheduleEntry {
   weekParity: WeekParity
   groupIds: number[]
   teachingLoadIds: number[]
+  subgroup: number | null
 }
 
 export interface AdminSchedule {
@@ -92,6 +93,7 @@ export interface LessonCard {
   requiresComputerRoom: boolean
   scheduledLessonCount: number
   remainingLessonCount: number
+  subgroup: number | null
 }
 
 export interface ScheduleValidationConflict {
@@ -136,4 +138,5 @@ export interface ScheduleEntryPayload {
   dayOfWeek: number
   weekParity: WeekParity
   groupIds: number[]
+  subgroup: number | null
 }

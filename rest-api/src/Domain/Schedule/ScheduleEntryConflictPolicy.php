@@ -36,7 +36,7 @@ final readonly class ScheduleEntryConflictPolicy
                 return new ScheduleEntryConflict('roomId', 'Room is already assigned at this time.');
             }
 
-            if ($this->hasGroupOverlap($entry, $data->groups)) {
+            if ($this->subgroupsOverlap($entry->getSubgroup(), $data->subgroup) && $this->hasGroupOverlap($entry, $data->groups)) {
                 return new ScheduleEntryConflict('groupIds', 'Group is already assigned at this time.');
             }
         }
@@ -47,6 +47,11 @@ final readonly class ScheduleEntryConflictPolicy
     private function weekParityOverlaps(WeekParity $left, WeekParity $right): bool
     {
         return $left === WeekParity::Both || $right === WeekParity::Both || $left === $right;
+    }
+
+    private function subgroupsOverlap(?int $left, ?int $right): bool
+    {
+        return $left === null || $right === null || $left === $right;
     }
 
     private function timeRangesOverlap(TimeSlot $left, TimeSlot $right): bool

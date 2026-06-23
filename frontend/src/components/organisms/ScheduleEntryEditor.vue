@@ -52,6 +52,7 @@ const lessonType = ref<LessonType>('lecture')
 const weekParity = ref<WeekParity>('both')
 const groupId = ref<number | null>(null)
 const teachingLoadId = ref<number | null>(null)
+const subgroup = ref<number | null>(null)
 
 const roomOptions = computed<LookupOption[]>(() =>
   props.rooms.map((room) => ({
@@ -111,6 +112,7 @@ watch(
     weekParity.value = entry?.weekParity ?? 'both'
     groupId.value = entry?.groupIds[0] ?? null
     teachingLoadId.value = entry?.teachingLoadIds[0] ?? props.lessonCards[0]?.teachingLoadId ?? null
+    subgroup.value = entry?.subgroup ?? null
   },
   { immediate: true },
 )
@@ -129,6 +131,7 @@ watch(teachingLoadId, (id) => {
   teacherId.value = card.teacher.id
   groupId.value = card.group.id
   lessonType.value = card.lessonType
+  subgroup.value = card.subgroup
 })
 
 function save(): void {
@@ -153,6 +156,7 @@ function save(): void {
     dayOfWeek: dayOfWeek.value,
     weekParity: weekParity.value,
     groupIds: [groupId.value],
+    subgroup: subgroup.value,
   }
 
   if (props.entry === null) {
@@ -269,6 +273,23 @@ function fieldError(field: string): string | undefined {
       </select>
       <small v-if="fieldError('weekParity')" class="field-error">
         {{ fieldError('weekParity') }}
+      </small>
+    </label>
+    <label :class="['field', { 'field--invalid': fieldError('subgroup') }]" for="entry-subgroup">
+      <span class="field__label">{{ t.subgroup }}</span>
+      <select
+        id="entry-subgroup"
+        class="field__control"
+        data-testid="subgroup-select"
+        :value="subgroup ?? ''"
+        @change="subgroup = ($event.target as HTMLSelectElement).value === '' ? null : Number(($event.target as HTMLSelectElement).value)"
+      >
+        <option value="">{{ t.subgroupOptions.none }}</option>
+        <option value="1">{{ t.subgroupOptions.one }}</option>
+        <option value="2">{{ t.subgroupOptions.two }}</option>
+      </select>
+      <small v-if="fieldError('subgroup')" class="field-error">
+        {{ fieldError('subgroup') }}
       </small>
     </label>
     <div class="entry-editor__actions">

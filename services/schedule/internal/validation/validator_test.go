@@ -275,6 +275,118 @@ func TestValidatorDetectsTeachingLoadMismatch(t *testing.T) {
 	assertConflictType(t, result, "teaching_load_mismatch")
 }
 
+func TestValidatorAcceptsDisjointSubgroupsAtSameTime(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID:               1,
+				SubjectID:        10,
+				TeacherID:        20,
+				LessonType:       "practical",
+				RoomID:           30,
+				RoomCapacity:     20,
+				TimeSlotID:       40,
+				TimeSlotStartsAt: "08:30:00",
+				TimeSlotEndsAt:   "09:50:00",
+				DayOfWeek:        1,
+				WeekParity:       "both",
+				GroupIDs:         []int64{50},
+				StudentCount:     24,
+				TeachingLoadIDs:  []int64{60},
+				Subgroup:         1,
+			},
+			{
+				ID:               2,
+				SubjectID:        11,
+				TeacherID:        21,
+				LessonType:       "practical",
+				RoomID:           31,
+				RoomCapacity:     20,
+				TimeSlotID:       40,
+				TimeSlotStartsAt: "08:30:00",
+				TimeSlotEndsAt:   "09:50:00",
+				DayOfWeek:        1,
+				WeekParity:       "both",
+				GroupIDs:         []int64{50},
+				StudentCount:     24,
+				TeachingLoadIDs:  []int64{61},
+				Subgroup:         2,
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 10, TeacherID: 20, LessonType: "practical", RequiredLessonCount: 2, Subgroup: 1},
+			{ID: 61, GroupID: 50, SubjectID: 11, TeacherID: 21, LessonType: "practical", RequiredLessonCount: 2, Subgroup: 2},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{
+			{TeacherID: 20, SubjectID: 10},
+			{TeacherID: 21, SubjectID: 11},
+		},
+	})
+
+	if !result.Valid {
+		t.Fatalf("expected disjoint subgroups to be valid, got %#v", result.Conflicts)
+	}
+}
+
+func TestValidatorDetectsWholeGroupConflictWithSubgroup(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID: 1, SubjectID: 10, TeacherID: 20, LessonType: "practical",
+				RoomID: 30, RoomCapacity: 30, TimeSlotID: 40,
+				TimeSlotStartsAt: "08:30:00", TimeSlotEndsAt: "09:50:00",
+				DayOfWeek: 1, WeekParity: "both", GroupIDs: []int64{50},
+				StudentCount: 24, TeachingLoadIDs: []int64{60}, Subgroup: 0,
+			},
+			{
+				ID: 2, SubjectID: 11, TeacherID: 21, LessonType: "practical",
+				RoomID: 31, RoomCapacity: 30, TimeSlotID: 40,
+				TimeSlotStartsAt: "08:30:00", TimeSlotEndsAt: "09:50:00",
+				DayOfWeek: 1, WeekParity: "both", GroupIDs: []int64{50},
+				StudentCount: 24, TeachingLoadIDs: []int64{61}, Subgroup: 1,
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 10, TeacherID: 20, LessonType: "practical", RequiredLessonCount: 2, Subgroup: 0},
+			{ID: 61, GroupID: 50, SubjectID: 11, TeacherID: 21, LessonType: "practical", RequiredLessonCount: 2, Subgroup: 1},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{
+			{TeacherID: 20, SubjectID: 10},
+			{TeacherID: 21, SubjectID: 11},
+		},
+	})
+
+	assertConflictType(t, result, "group_conflict")
+}
+
+func TestValidatorHalvesCapacityForSubgroup(t *testing.T) {
+	validator := NewValidator()
+
+	result := validator.Validate(Schedule{
+		Entries: []ScheduleEntry{
+			{
+				ID: 1, SubjectID: 10, TeacherID: 20, LessonType: "practical",
+				RoomID: 30, RoomCapacity: 13, TimeSlotID: 40,
+				TimeSlotStartsAt: "08:30:00", TimeSlotEndsAt: "09:50:00",
+				DayOfWeek: 1, WeekParity: "both", GroupIDs: []int64{50},
+				StudentCount: 25, TeachingLoadIDs: []int64{60}, Subgroup: 1,
+			},
+		},
+		TeachingLoads: []TeachingLoad{
+			{ID: 60, GroupID: 50, SubjectID: 10, TeacherID: 20, LessonType: "practical", RequiredLessonCount: 2, Subgroup: 1},
+		},
+		TeacherSubjectAssignments: []TeacherSubject{{TeacherID: 20, SubjectID: 10}},
+	})
+
+	if !result.Valid {
+		t.Fatalf("expected halved subgroup (13) to fit room capacity 13, got %#v", result.Conflicts)
+	}
+}
+
 func TestValidatorDetectsSchedulePeriodOutsideSemester(t *testing.T) {
 	validator := NewValidator()
 

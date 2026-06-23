@@ -68,6 +68,7 @@ export interface ScheduleItem {
   groups: ScheduleGroup[]
   isCancelled: boolean
   isOverride: boolean
+  subgroup: number | null
 }
 
 export interface PublicSchedule {

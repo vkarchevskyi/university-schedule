@@ -118,6 +118,7 @@ final readonly class ScheduleAuditLoggerService
             'timeSlotId' => $entry->getTimeSlot()->getId(),
             'dayOfWeek' => $entry->getDayOfWeek(),
             'weekParity' => strtolower($entry->getWeekParity()->name),
+            'subgroup' => $entry->getSubgroup(),
             'groupIds' => $groupIds,
             'teachingLoadIds' => $teachingLoadIds,
         ];

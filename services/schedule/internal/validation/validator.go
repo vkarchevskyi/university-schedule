@@ -39,6 +39,7 @@ type ScheduleEntry struct {
 	GroupIDs         []int64 `json:"groupIds"`
 	StudentCount     int     `json:"studentCount"`
 	TeachingLoadIDs  []int64 `json:"teachingLoadIds"`
+	Subgroup         int     `json:"subgroup"`
 }
 
 type TeachingLoad struct {
@@ -49,6 +50,7 @@ type TeachingLoad struct {
 	LessonType           string `json:"lessonType"`
 	RequiredLessonCount  int    `json:"requiredLessonCount"`
 	RequiresComputerRoom bool   `json:"requiresComputerRoom"`
+	Subgroup             int    `json:"subgroup"`
 }
 
 type TeacherSubject struct {
@@ -137,7 +139,7 @@ func validateEntryConflicts(entries []ScheduleEntry) []Conflict {
 				conflicts = append(conflicts, Conflict{"room_conflict", "Room is already assigned at this time.", entryIDs})
 			}
 
-			if hasInt64Overlap(left.GroupIDs, right.GroupIDs) {
+			if hasInt64Overlap(left.GroupIDs, right.GroupIDs) && SubgroupsOverlap(left.Subgroup, right.Subgroup) {
 				conflicts = append(conflicts, Conflict{"group_conflict", "Group is already assigned at this time.", entryIDs})
 			}
 		}
@@ -160,10 +162,11 @@ func validateCapacity(entries []ScheduleEntry) []Conflict {
 	conflicts := make([]Conflict, 0)
 
 	for _, entry := range entries {
-		if entry.StudentCount > entry.RoomCapacity {
+		studentCount := effectiveStudentCount(entry.StudentCount, entry.Subgroup)
+		if studentCount > entry.RoomCapacity {
 			conflicts = append(conflicts, Conflict{
 				Type:     "room_capacity_conflict",
-				Message:  fmt.Sprintf("Room capacity is %d, but scheduled groups contain %d students.", entry.RoomCapacity, entry.StudentCount),
+				Message:  fmt.Sprintf("Room capacity is %d, but scheduled groups contain %d students.", entry.RoomCapacity, studentCount),
 				EntryIDs: []int64{entry.ID},
 			})
 		}
@@ -330,6 +333,7 @@ func entryMatchesTeachingLoad(entry ScheduleEntry, teachingLoad TeachingLoad) bo
 	return entry.SubjectID == teachingLoad.SubjectID &&
 		entry.TeacherID == teachingLoad.TeacherID &&
 		entry.LessonType == teachingLoad.LessonType &&
+		entry.Subgroup == teachingLoad.Subgroup &&
 		slices.Contains(entry.GroupIDs, teachingLoad.GroupID)
 }
 

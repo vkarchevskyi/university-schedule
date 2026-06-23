@@ -29,5 +29,6 @@ final readonly class ScheduleEntryData
         public WeekParity $weekParity,
         public array $groups,
         public array $teachingLoads,
+        public ?int $subgroup = null,
     ) {}
 }

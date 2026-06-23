@@ -327,6 +327,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       dayOfWeek: entry.dayOfWeek,
       weekParity: entry.weekParity,
       groupIds: entry.groupIds,
+      subgroup: entry.subgroup,
     })
   }
 
@@ -424,6 +425,7 @@ export function useAdminScheduleEditor(scheduleId: number) {
       dayOfWeek,
       weekParity: 'both',
       groupIds: [card.group.id],
+      subgroup: card.subgroup,
     }
   }
 

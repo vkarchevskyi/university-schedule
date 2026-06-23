@@ -18,6 +18,10 @@ function lessonTypeLabel(type: string): string {
 
   return lessonTypes[type] ?? type
 }
+
+function subgroupLabel(subgroup: number): string {
+  return `${labels.value.subgroup} ${subgroup === 1 ? 'I' : 'II'}`
+}
 </script>
 
 <template>
@@ -25,6 +29,7 @@ function lessonTypeLabel(type: string): string {
     <div class="schedule-card__header">
       <strong>{{ item.subject.name }}</strong>
       <StatusBadge tone="info">{{ lessonTypeLabel(item.lessonType) }}</StatusBadge>
+      <StatusBadge v-if="item.subgroup" tone="secondary">{{ subgroupLabel(item.subgroup) }}</StatusBadge>
     </div>
     <dl class="schedule-card__details">
       <div>

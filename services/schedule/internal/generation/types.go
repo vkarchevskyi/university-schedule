@@ -44,6 +44,7 @@ type TeachingLoad struct {
 	RequiredLessonCount  int
 	RequiresComputerRoom bool
 	StudentCount         int
+	Subgroup             int
 }
 
 type Room struct {
@@ -76,4 +77,5 @@ type CandidateEntry struct {
 	WeekParity           int
 	StudentCount         int
 	RequiresComputerRoom bool
+	Subgroup             int
 }

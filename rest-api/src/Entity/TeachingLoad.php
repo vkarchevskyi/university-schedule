@@ -45,6 +45,9 @@ class TeachingLoad
     #[ORM\Column(name: 'requires_computer_room', type: Types::BOOLEAN, options: ['default' => false])]
     private bool $requiresComputerRoom;
 
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $subgroup;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -69,6 +72,7 @@ class TeachingLoad
         \DateTimeImmutable $createdAt,
         \DateTimeImmutable $updatedAt,
         ?\DateTimeImmutable $deletedAt = null,
+        ?int $subgroup = null,
     ) {
         $this->semester = $semester;
         $this->group = $group;
@@ -77,6 +81,7 @@ class TeachingLoad
         $this->lessonType = $lessonType;
         $this->requiredLessonCount = $requiredLessonCount;
         $this->requiresComputerRoom = $requiresComputerRoom;
+        $this->subgroup = $subgroup;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
         $this->deletedAt = $deletedAt;
@@ -156,6 +161,16 @@ class TeachingLoad
     public function setRequiresComputerRoom(bool $requiresComputerRoom): void
     {
         $this->requiresComputerRoom = $requiresComputerRoom;
+    }
+
+    public function getSubgroup(): ?int
+    {
+        return $this->subgroup;
+    }
+
+    public function setSubgroup(?int $subgroup): void
+    {
+        $this->subgroup = $subgroup;
     }
 
     public function getCreatedAt(): \DateTimeImmutable
